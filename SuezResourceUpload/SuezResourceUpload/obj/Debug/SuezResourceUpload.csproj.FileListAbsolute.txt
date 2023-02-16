@@ -1,0 +1,6 @@
+D:\NJS Projects\SuezResourceUpload\SuezResourceUpload\bin\Debug\SuezResourceUpload.exe.config
+D:\NJS Projects\SuezResourceUpload\SuezResourceUpload\bin\Debug\SuezResourceUpload.exe
+D:\NJS Projects\SuezResourceUpload\SuezResourceUpload\bin\Debug\SuezResourceUpload.pdb
+D:\NJS Projects\SuezResourceUpload\SuezResourceUpload\obj\Debug\SuezResourceUpload.csproj.CoreCompileInputs.cache
+D:\NJS Projects\SuezResourceUpload\SuezResourceUpload\obj\Debug\SuezResourceUpload.exe
+D:\NJS Projects\SuezResourceUpload\SuezResourceUpload\obj\Debug\SuezResourceUpload.pdb

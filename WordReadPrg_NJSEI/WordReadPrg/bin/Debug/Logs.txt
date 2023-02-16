@@ -1,0 +1,5 @@
+9/22/2020 12:51:10 PM       Read program started...
+error occurred ;9/22/2020 12:51:12 PM :---   at Microsoft.Office.Interop.Word.Documents.Open(Object& FileName, Object& ConfirmConversions, Object& ReadOnly, Object& AddToRecentFiles, Object& PasswordDocument, Object& PasswordTemplate, Object& Revert, Object& WritePasswordDocument, Object& WritePasswordTemplate, Object& Format, Object& Encoding, Object& Visible, Object& OpenAndRepair, Object& DocumentDirection, Object& NoEncodingDialog, Object& XMLTransform)
+   at WordReadPrg.Program.Main(String[] args) in D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\Program.cs:line 118
+5/31/2022 6:53:52 PM       Read program started...
+error occurred ;5/31/2022 6:54:16 PM :---This file could not be found. (D:\Migration\...\637896200356251011.docx)

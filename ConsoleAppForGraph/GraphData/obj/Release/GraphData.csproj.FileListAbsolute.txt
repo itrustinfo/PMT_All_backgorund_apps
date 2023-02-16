@@ -1,0 +1,7 @@
+D:\Migration\Others\ConsoleAppForGraph\GraphData\bin\Release\GraphData.exe.config
+D:\Migration\Others\ConsoleAppForGraph\GraphData\bin\Release\GraphData.exe
+D:\Migration\Others\ConsoleAppForGraph\GraphData\bin\Release\GraphData.pdb
+D:\Migration\Others\ConsoleAppForGraph\GraphData\obj\Release\GraphData.csprojAssemblyReference.cache
+D:\Migration\Others\ConsoleAppForGraph\GraphData\obj\Release\GraphData.csproj.CoreCompileInputs.cache
+D:\Migration\Others\ConsoleAppForGraph\GraphData\obj\Release\GraphData.exe
+D:\Migration\Others\ConsoleAppForGraph\GraphData\obj\Release\GraphData.pdb

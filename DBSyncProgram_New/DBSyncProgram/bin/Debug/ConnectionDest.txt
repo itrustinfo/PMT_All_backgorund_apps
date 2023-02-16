@@ -1,0 +1,1 @@
+Data Source=ZUBERPC\SQLEXPRESS;Initial Catalog=LNT_Database;Integrated Security=false;User ID=sa;Password=itrust@123

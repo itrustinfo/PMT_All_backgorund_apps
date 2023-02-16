@@ -1,0 +1,7 @@
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\obj\Debug\WordReadPrg.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\obj\Debug\WordReadPrg.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\bin\Debug\WordReadPrg.exe.config
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\bin\Debug\WordReadPrg.exe
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\bin\Debug\WordReadPrg.pdb
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\obj\Debug\WordReadPrg.exe
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\obj\Debug\WordReadPrg.pdb

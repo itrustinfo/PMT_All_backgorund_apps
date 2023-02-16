@@ -1,0 +1,7 @@
+D:\Projects\NJS_Prj_New\MeasurementUpdateConsole\MeasurementUpdateConsole\bin\Debug\MeasurementUpdateConsole.exe.config
+D:\Projects\NJS_Prj_New\MeasurementUpdateConsole\MeasurementUpdateConsole\bin\Debug\MeasurementUpdateConsole.exe
+D:\Projects\NJS_Prj_New\MeasurementUpdateConsole\MeasurementUpdateConsole\bin\Debug\MeasurementUpdateConsole.pdb
+D:\Projects\NJS_Prj_New\MeasurementUpdateConsole\MeasurementUpdateConsole\obj\Debug\MeasurementUpdateConsole.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\MeasurementUpdateConsole\MeasurementUpdateConsole\obj\Debug\MeasurementUpdateConsole.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\MeasurementUpdateConsole\MeasurementUpdateConsole\obj\Debug\MeasurementUpdateConsole.exe
+D:\Projects\NJS_Prj_New\MeasurementUpdateConsole\MeasurementUpdateConsole\obj\Debug\MeasurementUpdateConsole.pdb

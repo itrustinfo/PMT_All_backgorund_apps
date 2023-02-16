@@ -1,0 +1,21 @@
+C:\Users\SAJI AUGUSTIN\source\repos\GraphData\obj\Debug\GraphData.csproj.CoreCompileInputs.cache
+C:\Users\SAJI AUGUSTIN\source\repos\GraphData\bin\Debug\GraphData.exe.config
+C:\Users\SAJI AUGUSTIN\source\repos\GraphData\bin\Debug\GraphData.exe
+C:\Users\SAJI AUGUSTIN\source\repos\GraphData\bin\Debug\GraphData.pdb
+C:\Users\SAJI AUGUSTIN\source\repos\GraphData\obj\Debug\GraphData.exe
+C:\Users\SAJI AUGUSTIN\source\repos\GraphData\obj\Debug\GraphData.pdb
+C:\Users\SAJI AUGUSTIN\source\repos\GraphData\obj\Debug\GraphData.csproj.AssemblyReference.cache
+D:\Migration\Integration_changes\2022-12-24_ONTB\saji_24_12_2022\ConsoleAppForGraph\GraphData\bin\Debug\GraphData.exe.config
+D:\Migration\Integration_changes\2022-12-24_ONTB\saji_24_12_2022\ConsoleAppForGraph\GraphData\bin\Debug\GraphData.exe
+D:\Migration\Integration_changes\2022-12-24_ONTB\saji_24_12_2022\ConsoleAppForGraph\GraphData\bin\Debug\GraphData.pdb
+D:\Migration\Integration_changes\2022-12-24_ONTB\saji_24_12_2022\ConsoleAppForGraph\GraphData\obj\Debug\GraphData.csprojAssemblyReference.cache
+D:\Migration\Integration_changes\2022-12-24_ONTB\saji_24_12_2022\ConsoleAppForGraph\GraphData\obj\Debug\GraphData.csproj.CoreCompileInputs.cache
+D:\Migration\Integration_changes\2022-12-24_ONTB\saji_24_12_2022\ConsoleAppForGraph\GraphData\obj\Debug\GraphData.exe
+D:\Migration\Integration_changes\2022-12-24_ONTB\saji_24_12_2022\ConsoleAppForGraph\GraphData\obj\Debug\GraphData.pdb
+D:\Migration\Others\ConsoleAppForGraph\GraphData\bin\Debug\GraphData.exe.config
+D:\Migration\Others\ConsoleAppForGraph\GraphData\bin\Debug\GraphData.exe
+D:\Migration\Others\ConsoleAppForGraph\GraphData\bin\Debug\GraphData.pdb
+D:\Migration\Others\ConsoleAppForGraph\GraphData\obj\Debug\GraphData.csprojAssemblyReference.cache
+D:\Migration\Others\ConsoleAppForGraph\GraphData\obj\Debug\GraphData.csproj.CoreCompileInputs.cache
+D:\Migration\Others\ConsoleAppForGraph\GraphData\obj\Debug\GraphData.exe
+D:\Migration\Others\ConsoleAppForGraph\GraphData\obj\Debug\GraphData.pdb

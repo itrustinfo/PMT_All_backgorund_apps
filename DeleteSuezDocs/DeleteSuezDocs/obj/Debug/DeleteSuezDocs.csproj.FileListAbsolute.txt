@@ -1,0 +1,7 @@
+D:\NJS Projects\DeleteSuezDocs\DeleteSuezDocs\bin\Debug\DeleteSuezDocs.exe.config
+D:\NJS Projects\DeleteSuezDocs\DeleteSuezDocs\bin\Debug\DeleteSuezDocs.exe
+D:\NJS Projects\DeleteSuezDocs\DeleteSuezDocs\bin\Debug\DeleteSuezDocs.pdb
+D:\NJS Projects\DeleteSuezDocs\DeleteSuezDocs\obj\Debug\DeleteSuezDocs.csprojAssemblyReference.cache
+D:\NJS Projects\DeleteSuezDocs\DeleteSuezDocs\obj\Debug\DeleteSuezDocs.csproj.CoreCompileInputs.cache
+D:\NJS Projects\DeleteSuezDocs\DeleteSuezDocs\obj\Debug\DeleteSuezDocs.exe
+D:\NJS Projects\DeleteSuezDocs\DeleteSuezDocs\obj\Debug\DeleteSuezDocs.pdb

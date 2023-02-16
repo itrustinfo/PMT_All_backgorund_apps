@@ -1,0 +1,7 @@
+D:\Projects\NJS_Prj_New\WkpgMasterDataSendMail\WkpgMasterDataSendMail\bin\Release\WkpgMasterDataSendMail.exe.config
+D:\Projects\NJS_Prj_New\WkpgMasterDataSendMail\WkpgMasterDataSendMail\bin\Release\WkpgMasterDataSendMail.exe
+D:\Projects\NJS_Prj_New\WkpgMasterDataSendMail\WkpgMasterDataSendMail\bin\Release\WkpgMasterDataSendMail.pdb
+D:\Projects\NJS_Prj_New\WkpgMasterDataSendMail\WkpgMasterDataSendMail\obj\Release\WkpgMasterDataSendMail.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\WkpgMasterDataSendMail\WkpgMasterDataSendMail\obj\Release\WkpgMasterDataSendMail.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\WkpgMasterDataSendMail\WkpgMasterDataSendMail\obj\Release\WkpgMasterDataSendMail.exe
+D:\Projects\NJS_Prj_New\WkpgMasterDataSendMail\WkpgMasterDataSendMail\obj\Release\WkpgMasterDataSendMail.pdb

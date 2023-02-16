@@ -1,0 +1,5 @@
+BOQ_CP27_Hemmigepura-STP  --- processed(Done)
+BOQ_CP27_Somapura  --- processed(Done)
+BOQ_CP27_Nagasandra -- processed(Done)
+BOQ_CP27_KARIHOBANAHALLI -- processed(Done)
+BOQ_CP27_HEROHALLI-STP --- processed

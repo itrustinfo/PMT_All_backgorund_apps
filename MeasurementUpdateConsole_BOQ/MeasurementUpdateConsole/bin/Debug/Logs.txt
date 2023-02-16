@@ -1,0 +1,25 @@
+======================..
+2/3/2022 12:54:10 PMStoring Measurement updates for TaskUIDd20e551e-bb77-491d-8071-fdb192c4bfcf
+2/3/2022 12:54:10 PMresult-1 : UID:bcde86e4-178d-4dbb-8417-0da885ecfde5,TaskUID:d20e551e-bb77-491d-8071-fdb192c4bfcf,UnitforProgress:RMQuantity : 0,Description:,CreatedByUID:77b0ae68-9955-4bca-8834-282a2f1166ca,Remarks=,Achieved Date2/3/2022 12:54:10 PM
+======================..
+2/3/2022 12:54:37 PMStoring Measurement updates for TaskUIDd20e551e-bb77-491d-8071-fdb192c4bfcf
+2/3/2022 12:54:37 PMresult-1 : UID:76d51a17-e677-44a7-92cf-9ade63e50cdc,TaskUID:d20e551e-bb77-491d-8071-fdb192c4bfcf,UnitforProgress:RMQuantity : 0,Description:,CreatedByUID:77b0ae68-9955-4bca-8834-282a2f1166ca,Remarks=,Achieved Date2/3/2022 12:54:37 PM
+======================..
+2/3/2022 2:32:02 PMStoring Measurement updates for TaskUID :-d20e551e-bb77-491d-8071-fdb192c4bfcf
+2/3/2022 2:32:02 PMresult :- -1 : UID:e4eb70dc-45f2-4b5e-bc00-bad07d2764a1,TaskUID:d20e551e-bb77-491d-8071-fdb192c4bfcf,UnitforProgress:RMQuantity : 0,Description:,CreatedByUID:77b0ae68-9955-4bca-8834-282a2f1166ca,Remarks=,Achieved Date2/3/2022 2:32:02 PM
+======================..
+4/25/2022 2:53:16 PMStoring Measurement updates for TaskUID :-d20e551e-bb77-491d-8071-fdb192c4bfcf
+result :-136 : UID:1c918c7d-63cd-402e-acd8-ebcd6e49c235,TaskUID:d20e551e-bb77-491d-8071-fdb192c4bfcf,UnitforProgress:RMQuantity : 0,Description:,CreatedByUID:419d71bd-fdd4-4a92-898c-a044bfa7803d,Remarks=,Achieved Date4/25/2022 2:54:21 PM
+======================..
+4/25/2022 2:54:55 PMStoring Measurement updates for TaskUID :-d20e551e-bb77-491d-8071-fdb192c4bfcf
+result :-135 : UID:e69977d9-45d2-4e8e-afbe-ee619274fad1,TaskUID:d20e551e-bb77-491d-8071-fdb192c4bfcf,UnitforProgress:RMQuantity : 0,Description:,CreatedByUID:419d71bd-fdd4-4a92-898c-a044bfa7803d,Remarks=,Achieved Date4/25/2022 2:54:56 PM
+======================..
+4/25/2022 2:55:21 PMStoring Measurement updates for TaskUID :-d20e551e-bb77-491d-8071-fdb192c4bfcf
+result :-135 : UID:660d4b90-954e-4241-a827-65158bfb860c,TaskUID:d20e551e-bb77-491d-8071-fdb192c4bfcf,UnitforProgress:RMQuantity : 0,Description:,CreatedByUID:419d71bd-fdd4-4a92-898c-a044bfa7803d,Remarks=,Achieved Date4/25/2022 2:55:22 PM
+======================..
+4/25/2022 2:55:37 PMStoring Measurement updates for TaskUID :-d20e551e-bb77-491d-8071-fdb192c4bfcf
+result :-135 : UID:5c28d734-c9a1-49a7-8275-9b65ae453d81,TaskUID:d20e551e-bb77-491d-8071-fdb192c4bfcf,UnitforProgress:RMQuantity : 0,Description:,CreatedByUID:419d71bd-fdd4-4a92-898c-a044bfa7803d,Remarks=,Achieved Date4/25/2022 2:55:48 PM
+======================..
+4/25/2022 2:56:54 PMStoring Measurement updates for TaskUID :-d20e551e-bb77-491d-8071-fdb192c4bfcf
+result :-135 : UID:631e2b48-6f00-4e34-a236-82e8819cdc10,TaskUID:d20e551e-bb77-491d-8071-fdb192c4bfcf,UnitforProgress:RMQuantity : 0,Description:,CreatedByUID:419d71bd-fdd4-4a92-898c-a044bfa7803d,Remarks=,Achieved Date4/25/2022 2:56:57 PM
+======================..

@@ -1,0 +1,6 @@
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\bin\Release\ExtoSyncDateUpdate.exe.config
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\bin\Release\ExtoSyncDateUpdate.exe
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\bin\Release\ExtoSyncDateUpdate.pdb
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\obj\Release\ExtoSyncDateUpdate.csproj.CoreCompileInputs.cache
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\obj\Release\ExtoSyncDateUpdate.exe
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\obj\Release\ExtoSyncDateUpdate.pdb

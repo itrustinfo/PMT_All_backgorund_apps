@@ -1,0 +1,66 @@
+// added on 04/06/2021
+WorkPackageUID	uniqueidentifier	Checked
+added to BOQDetails
+
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE proc [dbo].[usp_InsertBOQDetails_New]
+@uid as uniqueidentifier,
+@itemNo nvarchar(50),
+@description nvarchar(max),
+@quantity nvarchar(10),
+@unit nvarchar(10),
+@inrRate nvarchar(20),
+@jpyRate nvarchar(20),
+@usdRate nvarchar(20),
+@inrAmount nvarchar(20),
+@jpyAmount nvarchar(20),
+@usdAmount nvarchar(20),
+@parentId nvarchar(200),
+@projectuid uniqueidentifier,
+@typeOfBOQ nvarchar(50),
+@WorkPackageUID as uniqueidentifier,
+@sOrder as int
+as
+begin
+if not exists(select * from [dbo].[BOQDetails] where projectuid=@projectuid and Item_Number=@itemNo and Description=@description and WorkPackageUID=@WorkPackageUID) 
+begin
+if @typeOfBOQ = 'Grand Summary'
+insert into [dbo].[BOQDetails] (
+BOQDetailsUID,
+Item_Number,
+[Description],
+Quantity,
+[INR-Rate],
+Unit,
+Currency,
+ParentBOQUID,
+CreatedDate,
+[JPY-Rate],
+[USD-Rate],
+[ActualValue],
+[JPY-Amount],
+[USD-Amount],projectuid,WorkPackageUID,Orderby) values(@uid,@itemNo,@description,@quantity,@inrRate,@unit,'INR',@parentId,
+GETDATE(),@jpyRate,@usdRate,@inrAmount,@jpyAmount,@usdAmount,@projectuid,@WorkPackageUID,@sOrder)
+else
+insert into [dbo].[BOQDetails] (
+BOQDetailsUID,
+Item_Number,
+[Description],
+Quantity,
+[INR-Rate],
+Unit,
+Currency,
+ParentBOQUID,
+CreatedDate,
+[JPY-Rate],
+[USD-Rate],
+[INR-Amount],
+[JPY-Amount],
+[USD-Amount],projectuid,WorkPackageUID,Orderby) values(@uid,@itemNo,@description,@quantity,@inrRate,@unit,'INR',@parentId,
+GETDATE(),@jpyRate,@usdRate,@inrAmount,@jpyAmount,@usdAmount,@projectuid,@WorkPackageUID,@sOrder)
+end
+end

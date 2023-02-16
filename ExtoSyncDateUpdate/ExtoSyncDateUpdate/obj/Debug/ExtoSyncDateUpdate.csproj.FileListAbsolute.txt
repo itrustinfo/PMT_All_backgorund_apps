@@ -1,0 +1,7 @@
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\bin\Debug\ExtoSyncDateUpdate.exe.config
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\bin\Debug\ExtoSyncDateUpdate.exe
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\bin\Debug\ExtoSyncDateUpdate.pdb
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\obj\Debug\ExtoSyncDateUpdate.csprojAssemblyReference.cache
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\obj\Debug\ExtoSyncDateUpdate.csproj.CoreCompileInputs.cache
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\obj\Debug\ExtoSyncDateUpdate.exe
+D:\NJS Projects\ExtoSyncDateUpdate\ExtoSyncDateUpdate\obj\Debug\ExtoSyncDateUpdate.pdb

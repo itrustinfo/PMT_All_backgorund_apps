@@ -1,0 +1,97 @@
+D:\Work\ProjectManagement\02 March 2021\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Work\ProjectManagement\02 March 2021\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Work\ProjectManagement\02 March 2021\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Work\ProjectManagement\02 March 2021\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Work\ProjectManagement\02 March 2021\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Work\ProjectManagement\02 March 2021\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Work\ProjectManagement\02 March 2021\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Arun\2021\03\venkat_backup\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Arun\2021\03\venkat_backup\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Arun\2021\03\venkat_backup\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Arun\2021\03\venkat_backup\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Arun\2021\03\venkat_backup\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Arun\2021\03\venkat_backup\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Arun\2021\03\venkat_backup\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQProcessor\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP08\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor_CP08\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP08\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP08\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP08\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP08\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP08\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP07\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor_CP07\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP07\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP07\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP07\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP07\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP07\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13_1_Lingedernahalli\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13_1_Lingedernahalli\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13_1_Lingedernahalli\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13_1_Lingedernahalli\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13_1_Lingedernahalli\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13_1_Lingedernahalli\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP13_1_Lingedernahalli\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP25_1_Jakkur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor_CP25_1_Jakkur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP25_1_Jakkur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP25_1_Jakkur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP25_1_Jakkur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP25_1_Jakkur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_1_Varthur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_1_Varthur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_1_Varthur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_1_Varthur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_1_Varthur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_1_Varthur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_1_Varthur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_2_pillaganahalli\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_2_pillaganahalli\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_2_pillaganahalli\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_2_pillaganahalli\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_2_pillaganahalli\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_2_pillaganahalli\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_STP_2_pillaganahalli\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQ_CP_26_Processor\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQ_CP_26_Processor\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQ_CP_26_Processor\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQ_CP_26_Processor\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQ_CP_26_Processor\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQ_CP_26_Processor\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQ_CP_26_Processor\BOQProcessor_CP26_ISPS_1_Hagdur\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\Projects\NJS_Prj_New\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\Projects\NJS_Prj_New\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\Projects\NJS_Prj_New\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb
+D:\NJS Projects\BOQ_Processor\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe.config
+D:\NJS Projects\BOQ_Processor\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.exe
+D:\NJS Projects\BOQ_Processor\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\bin\Debug\BOQProcessor.pdb
+D:\NJS Projects\BOQ_Processor\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csprojAssemblyReference.cache
+D:\NJS Projects\BOQ_Processor\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.csproj.CoreCompileInputs.cache
+D:\NJS Projects\BOQ_Processor\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.exe
+D:\NJS Projects\BOQ_Processor\BOQ_CP27_Processor\BOQProcessor_CP27_STP1_Somapura\BOQProcessor\BOQProcessor\obj\Debug\BOQProcessor.pdb

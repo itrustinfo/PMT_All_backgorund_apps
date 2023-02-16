@@ -1,0 +1,51 @@
+USE [iPIMS-DM-ONTB]
+GO
+/****** Object:  StoredProcedure [dbo].[InsertPhysicalProgressGraphValues]    Script Date: 1/11/2023 12:38:26 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[InsertPhysicalProgressGraphValues]
+@GraphPhysicalProgressUID as uniqueidentifier,
+@ProjectUID as uniqueidentifier,
+@WorkPackageUID as uniqueidentifier,
+@CreatedDate as Datetime,
+@ValuesString as nvarchar(max)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if not exists (select GraphPhysicalProgressUID from GraphPhysicalProgress where WorkPackageUID=@WorkPackageUID)
+	begin
+		INSERT INTO [dbo].[GraphPhysicalProgress]
+			   ([GraphPhysicalProgressUID]
+			   ,[ProjectUID]
+			   ,[WorkPackageUID]
+			   ,[CreatedDate]
+			   ,[ValuesString])
+		 VALUES
+			   (@GraphPhysicalProgressUID
+			   ,@ProjectUID
+			   ,@WorkPackageUID
+			   ,@CreatedDate
+			   ,@ValuesString)
+      end
+	  Else
+	  Begin
+	  Update [dbo].[GraphPhysicalProgress]
+	  set ValuesString=@ValuesString,CreatedDate=GETDATE()
+	  where WorkPackageUID=@WorkPackageUID
+
+
+	  End
+END
+
+--------------------------------------

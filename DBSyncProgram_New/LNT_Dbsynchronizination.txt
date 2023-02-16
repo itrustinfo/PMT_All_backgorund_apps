@@ -1,0 +1,2990 @@
+----- db changes for synchrinizing the databases-------
+
+ServerCopiedAdd	varchar(1)	Checked
+CopiedAddDate	datetime	Checked
+ServerCopiedUpdate	varchar(1)	Checked
+CopiedUpdateDate	datetime	Checked
+
+to Documents
+
+---
+ServerCopiedAdd	varchar(1)	Checked
+CopiedAddDate	datetime	Checked
+ServerCopiedUpdate	varchar(1)	Checked
+CopiedUpdateDate	datetime	Checked
+
+to ActualDocuments
+
+-------
+declare @sql nvarchar(max) = ''
+
+select @sql = @sql + 'alter table ' + name + ' add ServerCopiedAdd	varchar(1) null DEFAULT ''N'' WITH VALUES,CopiedAddDate datetime null,
+ServerCopiedUpdate	varchar(1) null,CopiedUpdateDate datetime null;' 
+    from sys.tables where type ='U'
+
+exec sp_executesql @sql
+
+--------
+declare @sql nvarchar(max) = ''
+
+select @sql = @sql + 'Update ' + name + ' set ServerCopiedAdd=''Y'''
+    from sys.tables where type ='U'
+
+exec sp_executesql @sql
+
+--------------
+--- added on 07/07/2021
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER TRIGGER tr_LastUpdatedData
+ON Documents
+   AFTER Update
+AS 
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	Declare @DocUID as uniqueidentifier;
+	Declare @laststatus as varchar(1);
+	Declare @currentstatus as varchar(1);
+	set @laststatus =(select ServerCopiedUpdate from deleted)
+	set @currentstatus =(select ServerCopiedUpdate from inserted)
+	Set @DocUID =(Select DocumentUID From inserted)
+    -- Insert statements for trigger here
+	if (@laststatus = 'N' and @currentstatus ='Y')
+	Begin
+	 Update Documents
+	Set ServerCopiedUpdate=@currentstatus
+	Where DocumentUID=@DocUID
+	End
+	Else
+	Begin
+	Update Documents
+	Set ServerCopiedUpdate='N'
+	Where DocumentUID=@DocUID
+	End
+
+END
+GO
+
+
+
+
+
+
+
+---- added on 09/07/2021
+
+/****** Object:  Table [dbo].[Dbsync_logs]    Script Date: 7/9/2021 3:35:37 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Dbsync_logs](
+	[ID] [bigint] NOT NULL,
+	[UID] [uniqueidentifier] NULL,
+	[Type] [varchar](50) NULL,
+	[Result] [varchar](50) NULL,
+	[CreatedDate] [datetime] NULL,
+ CONSTRAINT [PK_Dbsync_logs] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
+--------------------------------- added on 13/07/2021--------
+select tbl.table_schema, 
+       tbl.table_name
+from information_schema.tables tbl
+where table_type = 'BASE TABLE'
+  and table_schema not in ('pg_catalog', 'information_schema')
+  and not exists (select 1 
+                  from information_schema.key_column_usage kcu
+                  where kcu.table_name = tbl.table_name 
+                    and kcu.table_schema = tbl.table_schema)
+
+					select schema_name(tab.schema_id) as [schema_name], 
+    tab.[name] as table_name, 
+    pk.[name] as pk_name,
+    substring(column_names, 1, len(column_names)-1) as [columns]
+from sys.tables tab
+    left outer join sys.indexes pk
+        on tab.object_id = pk.object_id 
+        and pk.is_primary_key = 1
+   cross apply (select col.[name] + ', '
+                    from sys.index_columns ic
+                        inner join sys.columns col
+                            on ic.object_id = col.object_id
+                            and ic.column_id = col.column_id
+                    where ic.object_id = tab.object_id 
+                        and ic.index_id = pk.index_id
+                            order by col.column_id
+                            for xml path ('') ) D (column_names)
+order by schema_name(tab.schema_id),
+    tab.[name]
+
+usp_GetRAbillPresentTotalAmount_by_RABill_UID
+
+
+USE [testdb]
+GO
+/****** Object:  Trigger [dbo].[tr_LastUpdatedData_UserProjects]    Script Date: 7/16/2021 10:57:52 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER TRIGGER [dbo].[tr_LastUpdatedData_UserProjects]  ON [dbo].[UserProjects] 
+AFTER Update AS BEGIN SET NOCOUNT ON; 
+Declare @DocUID as uniqueidentifier; 
+Declare @laststatus as varchar(1); 
+Declare @currentstatus as varchar(1); 
+DECLARE cursor_db CURSOR
+FOR
+Select AssignID From inserted;
+OPEN cursor_db;
+FETCH NEXT FROM cursor_db INTO 
+   @DocUID;
+WHILE @@FETCH_STATUS = 0
+BEGIN
+set @laststatus = (select ServerCopiedUpdate from deleted Where AssignID=@DocUID) 
+set @currentstatus = (select ServerCopiedUpdate from inserted Where AssignID=@DocUID) 
+--Set @DocUID = (Select AssignID From inserted) 
+if (@laststatus = 'N' and @currentstatus = 'Y') 
+Begin 
+Update UserProjects Set ServerCopiedUpdate = @currentstatus  
+Where AssignID = @DocUID End 
+Else Begin 
+Update UserProjects Set ServerCopiedUpdate = 'N' Where AssignID = @DocUID 
+End 
+FETCH NEXT FROM cursor_db INTO 
+   @DocUID;
+END
+
+CLOSE cursor_db;
+
+DEALLOCATE cursor_db;
+END
+
+
+
+---- add primary key to tables without the key----------------
+Alter table [dbo].[ReviewAttendies] alter column 
+[ReviewAttendiesUID] uniqueidentifier not null
+ALTER TABLE [dbo].[ReviewAttendies]
+ADD PRIMARY KEY ([ReviewAttendiesUID]);
+
+Alter table [dbo].[ActivityRewiseDates] alter column 
+[RewiseDateUID] uniqueidentifier not null
+ALTER TABLE [dbo].[ActivityRewiseDates]
+ADD PRIMARY KEY ([RewiseDateUID]);
+
+Alter table [dbo].[Alerts] alter column 
+[Alert_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[Alerts]
+ADD PRIMARY KEY ([Alert_UID]);
+
+Alter table [dbo].[BankDocuments] alter column 
+[BankDoc_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[BankDocuments]
+ADD PRIMARY KEY ([BankDoc_UID]);
+
+Alter table [dbo].[BankGuarantee] alter column 
+[Bank_GuaranteeUID] uniqueidentifier not null
+ALTER TABLE [dbo].[BankGuarantee]
+ADD PRIMARY KEY ([Bank_GuaranteeUID]);
+
+Alter table [dbo].[ConsMonthActivity] alter column 
+[uid] uniqueidentifier not null
+ALTER TABLE [dbo].[ConsMonthActivity]
+ADD PRIMARY KEY ([uid]);
+
+Alter table [dbo].[CPDetailedSummary] alter column 
+[Uid] uniqueidentifier not null
+ALTER TABLE [dbo].[CPDetailedSummary]
+ADD PRIMARY KEY ([Uid]);
+
+Alter table [dbo].[DeductionsMaster] alter column 
+[UID] uniqueidentifier not null
+ALTER TABLE [dbo].[DeductionsMaster]
+ADD PRIMARY KEY ([UID]);
+
+Alter table [dbo].[Dependencies] alter column 
+[Dependency_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[Dependencies]
+ADD PRIMARY KEY ([Dependency_UID]);
+
+Alter table [dbo].[DocumentDateSchedules] alter column 
+[DocScheduleUID] uniqueidentifier not null
+ALTER TABLE [dbo].[DocumentDateSchedules]
+ADD PRIMARY KEY ([DocScheduleUID]);
+
+Alter table [dbo].[DocumentVesrion] alter column 
+[DocVersion_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[DocumentVesrion]
+ADD PRIMARY KEY ([DocVersion_UID]);
+
+Alter table [dbo].[GoodsReceived] alter column 
+[GoodsRecevied_Guid] uniqueidentifier not null
+ALTER TABLE [dbo].[GoodsReceived]
+ADD PRIMARY KEY ([GoodsRecevied_Guid]);
+
+Alter table [dbo].[Insurance] alter column 
+[InsuranceUID] uniqueidentifier not null
+ALTER TABLE [dbo].[Insurance]
+ADD PRIMARY KEY ([InsuranceUID]);
+
+Alter table [dbo].[InsuranceDocuments] alter column 
+[InsuranceDoc_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[InsuranceDocuments]
+ADD PRIMARY KEY ([InsuranceDoc_UID]);
+
+Alter table [dbo].[Invoice_Abstract] alter column 
+[InvoiceUId] uniqueidentifier not null
+ALTER TABLE [dbo].[Invoice_Abstract]
+ADD PRIMARY KEY ([InvoiceUId]);
+
+Alter table [dbo].[Invoice_Details] alter column 
+[InvoiceUId] uniqueidentifier not null
+ALTER TABLE [dbo].[Invoice_Details]
+ADD PRIMARY KEY ([InvoiceUId]);
+
+Alter table [dbo].[Invoice_Master] alter column 
+[InvoiceUid] uniqueidentifier not null
+ALTER TABLE [dbo].[Invoice_Master]
+ADD PRIMARY KEY ([InvoiceUid]);
+
+Alter table [dbo].[Invoice_Recoveries] alter column 
+[RecoverUId] uniqueidentifier not null
+ALTER TABLE [dbo].[Invoice_Recoveries]
+ADD PRIMARY KEY ([RecoverUId]);
+
+Alter table [dbo].[Issues] alter column 
+[Issue_Uid] uniqueidentifier not null
+ALTER TABLE [dbo].[Issues]
+ADD PRIMARY KEY ([Issue_Uid] );
+
+Alter table [dbo].[IssueTransactionItems] alter column 
+[UID] uniqueidentifier not null
+ALTER TABLE [dbo].[IssueTransactionItems]
+ADD PRIMARY KEY ([UID]);
+
+Alter table [dbo].[LoggedInUsersLog] alter column 
+[UID] uniqueidentifier not null
+ALTER TABLE [dbo].[LoggedInUsersLog]
+ADD PRIMARY KEY ([UID]);
+
+Alter table [dbo].[MailCredentials] alter column 
+[Mail_ID] varchar(50) not null
+ALTER TABLE [dbo].[MailCredentials]
+ADD PRIMARY KEY ([Mail_ID]);
+
+Alter table [dbo].[MailQueue] alter column 
+[MailUID] varchar(50) not null
+ALTER TABLE [dbo].[MailQueue]
+ADD PRIMARY KEY ([MailUID]);
+
+Alter table [dbo].[MailQueue_Sent] alter column 
+[MailUID] varchar(50) not null
+ALTER TABLE [dbo].[MailQueue_Sent]
+ADD PRIMARY KEY ([MailUID]);
+
+Alter table [dbo].[MileStonePayments] alter column 
+MileStonePaymentUID uniqueidentifier not null
+ALTER TABLE [dbo].[MileStonePayments]
+ADD PRIMARY KEY (MileStonePaymentUID);
+
+Alter table [dbo].[PO_Order_Details] alter column 
+[PO_OrderID] uniqueidentifier not null
+ALTER TABLE [dbo].[PO_Order_Details]
+ADD PRIMARY KEY ([PO_OrderID]);
+
+Alter table [dbo].[RABill_Abstract] alter column 
+[RABillUid] uniqueidentifier not null
+ALTER TABLE [dbo].[RABill_Abstract]
+ADD PRIMARY KEY ([RABillUid]);
+
+------------------------------
+Alter table [dbo].[RABills] alter column 
+[itemUId] uniqueidentifier not null
+ALTER TABLE [dbo].[RABills]
+ADD PRIMARY KEY ([itemUId]);
+
+Msg 1505, Level 16, State 1, Line 3
+The CREATE UNIQUE INDEX statement terminated because a duplicate key was found for the object name 'dbo.RABills' and the index name 'PK__RABills__56220B767DD4D003'. The duplicate key value is (317decf6-5870-4d1c-89be-000d3bb4a751).
+Msg 1750, Level 16, State 1, Line 3
+Could not create constraint or index. See previous errors.
+The statement has been terminated.
+------------------------------------------------------------------------
+
+Alter table [dbo].[ResourceCostTypeMaster] alter column 
+[ResourceCostType_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[ResourceCostTypeMaster]
+ADD PRIMARY KEY ([ResourceCostType_UID]);
+
+
+Alter table [dbo].[ResourceDeployment] alter column 
+[ReourceDeploymentUID] uniqueidentifier not null
+ALTER TABLE [dbo].[ResourceDeployment]
+ADD PRIMARY KEY ([ReourceDeploymentUID]);
+
+Alter table [dbo].[ResourceProperties] alter column 
+[Property_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[ResourceProperties]
+ADD PRIMARY KEY ([Property_UID]);
+
+Alter table  [dbo].[ResourcePropertySkills] alter column 
+[PropertySkillUID] uniqueidentifier not null
+ALTER TABLE [dbo].[ResourcePropertySkills]
+ADD PRIMARY KEY ([PropertySkillUID]);
+
+Alter table [dbo].[ResourceTypeMaster] alter column 
+[ResourceType_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[ResourceTypeMaster]
+ADD PRIMARY KEY ([ResourceType_UID]);
+
+Alter table [dbo].[ReviewRecordActions] alter column 
+[ReviewRecordAction_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[ReviewRecordActions]
+ADD PRIMARY KEY ([ReviewRecordAction_UID]);
+
+Alter table [dbo].[ReviewRecordActionUpdates] alter column 
+[UpdateRecordActionUID] uniqueidentifier not null
+ALTER TABLE [dbo].[ReviewRecordActionUpdates]
+ADD PRIMARY KEY ([UpdateRecordActionUID]);
+
+Alter table [dbo].[ReviewRecordAttendies] alter column 
+[ReviewRecord_AttendiesUID] uniqueidentifier not null
+ALTER TABLE [dbo].[ReviewRecordAttendies]
+ADD PRIMARY KEY ([ReviewRecord_AttendiesUID]);
+
+Alter table [dbo].[ReviewRecords] alter column 
+[Review_RecordUID] uniqueidentifier not null
+ALTER TABLE [dbo].[ReviewRecords]
+ADD PRIMARY KEY ([Review_RecordUID]);
+
+Alter table [dbo].[Reviews] alter column 
+[Reviews_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[Reviews]
+ADD PRIMARY KEY ([Reviews_UID]);
+
+Alter table [dbo].[ReviewTasks] alter column 
+[ReviewTask_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[ReviewTasks]
+ADD PRIMARY KEY ([ReviewTask_UID]);
+
+Alter table [dbo].[Skills_Master] alter column 
+[Skill_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[Skills_Master]
+ADD PRIMARY KEY ([Skill_UID]);
+
+Alter table [dbo].[Software_Engineer] alter column 
+[SoftwareEngineer_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[Software_Engineer]
+ADD PRIMARY KEY ([SoftwareEngineer_UID]);
+
+Alter table [dbo].[Tasks_Status_Update] alter column 
+[UID] uniqueidentifier not null
+ALTER TABLE [dbo].[Tasks_Status_Update]
+ADD PRIMARY KEY ([UID]);
+
+Alter table [dbo].[Unit_Master] alter column 
+[Unit_UID] uniqueidentifier not null
+ALTER TABLE [dbo].[Unit_Master]
+ADD PRIMARY KEY ([Unit_UID]);
+
+Alter table [dbo].[UserTasks] alter column 
+[UserTaskUID] uniqueidentifier not null
+ALTER TABLE [dbo].[UserTasks]
+ADD PRIMARY KEY ([UserTaskUID]);
+
+
+table without primary key
+UserTypeStatus
+AlertLevel
+
+//added on 20/07/2021
+
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[dbsync_InsertOrUpdateDocuments]
+	-- Add the parameters for the stored procedure here
+@DocumentUID uniqueidentifier,
+@WorkPackageUID uniqueidentifier,
+@ProjectUID uniqueidentifier,
+@TaskUID uniqueidentifier,
+@DocName varchar(100),
+@Doc_Category varchar(50),
+@Doc_RefNumber varchar(50),
+@Doc_Type varchar(50),
+@Doc_Budget float,
+@FlowUID uniqueidentifier,
+@Flow_StartDate datetime,
+@CreatedDate as datetime,
+@FlowStep1_UserUID uniqueidentifier,
+@FlowStep1_TargetDate datetime,
+@FlowStep2_UserUID uniqueidentifier =NULL,
+@FlowStep2_TargetDate datetime =NULL,
+@FlowStep3_UserUID uniqueidentifier =NULL,
+@FlowStep3_TargetDate datetime=NULL,
+@FlowStep4_UserUID uniqueidentifier=NULL,
+@FlowStep4_TargetDate datetime=NULL,
+@FlowStep5_UserUID uniqueidentifier=NULL,
+@FlowStep5_TargetDate datetime=NULL,
+@EstimatedDocuments as int,
+@Remarks as varchar(250),
+@DocumentSearchType as varchar(50),
+@DeletedFlag as varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+If NOT Exists(Select * From Documents Where DocumentUID=@DocumentUID)
+Begin
+    -- Insert statements for procedure here
+	INSERT INTO [dbo].[Documents]
+           ([DocumentUID]
+           ,[WorkPackageUID]
+           ,[ProjectUID]
+           ,[TaskUID]
+           ,[DocName]
+           ,[Doc_Category]
+           ,[Doc_RefNumber]
+           ,[Doc_Type]
+           ,[Doc_Budget]
+           ,[FlowUID]
+           ,[Flow_StartDate]
+           ,[Delete_Flag]
+           ,[CreatedDate]
+           ,[FlowStep1_UserUID]
+           ,[FlowStep1_TargetDate]
+           ,[FlowStep2_UserUID]
+           ,[FlowStep2_TargetDate]
+           ,[FlowStep3_UserUID]
+           ,[FlowStep3_TargetDate]
+           ,[FlowStep4_UserUID]
+           ,[FlowStep4_TargetDate]
+           ,[FlowStep5_UserUID]
+           ,[FlowStep5_TargetDate]
+           ,[DocumentSearchType]
+           ,[EstimatedDocuments]
+           ,[Remarks]
+		   ,[ServerCopiedAdd])
+     VALUES
+           (@DocumentUID
+           ,@WorkPackageUID
+           ,@ProjectUID
+           ,@TaskUID
+           ,@DocName
+           ,@Doc_Category
+           ,@Doc_RefNumber
+           ,@Doc_Type
+           ,@Doc_Budget
+           ,@FlowUID
+           ,@Flow_StartDate
+           ,@DeletedFlag
+           ,@CreatedDate
+           ,@FlowStep1_UserUID
+           ,@FlowStep1_TargetDate
+           ,@FlowStep2_UserUID
+           ,@FlowStep2_TargetDate
+           ,@FlowStep3_UserUID
+           ,@FlowStep3_TargetDate
+           ,@FlowStep4_UserUID
+           ,@FlowStep4_TargetDate
+           ,@FlowStep5_UserUID
+           ,@FlowStep5_TargetDate
+           ,@DocumentSearchType
+           ,@EstimatedDocuments
+           ,@Remarks
+		   ,'Y')
+
+		 
+END
+ELSE
+Begin
+update Documents set TaskUID=@TaskUID,WorkPackageUID=@WorkPackageUID,DocName=@DocName,Doc_Category=@Doc_Category,Doc_RefNumber=@Doc_RefNumber,FlowUID=@FlowUID,
+	Flow_StartDate=@Flow_StartDate,FlowStep1_UserUID=@FlowStep1_UserUID,FlowStep1_TargetDate=@FlowStep1_TargetDate,
+	FlowStep2_UserUID=@FlowStep2_UserUID,FlowStep2_TargetDate=@FlowStep2_TargetDate,FlowStep3_UserUID=@FlowStep3_UserUID,FlowStep3_TargetDate=@FlowStep3_TargetDate,
+	FlowStep4_UserUID=@FlowStep4_UserUID,FlowStep4_TargetDate=@FlowStep4_TargetDate,FlowStep5_UserUID=@FlowStep5_UserUID,FlowStep5_TargetDate=@FlowStep5_TargetDate,EstimatedDocuments=@EstimatedDocuments,Remarks=@Remarks,DocumentSearchType=@DocumentSearchType,
+	Delete_Flag=@DeletedFlag
+    
+	where DocumentUID=@DocumentUID;
+
+
+	 Update Documents set ServerCopiedUpdate='Y'
+    
+	where DocumentUID=@DocumentUID
+
+END
+
+END
+
+----
+USE [LNT_Database]
+GO
+/****** Object:  StoredProcedure [dbo].[dbsync_InsertorUpdate_DocumentVersion]    Script Date: 8/10/2021 2:01:54 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbsync_InsertorUpdate_DocumentVersion] 
+	-- Add the parameters for the stored procedure here
+@DocVersion_UID as uniqueidentifier,
+@DocStatus_UID as uniqueidentifier,
+@DocumentUID as uniqueidentifier,
+@Doc_Version as int,
+@Doc_Type as nvarchar(20),
+@Doc_FileName as varchar(max),
+@Doc_CoverLetter as varchar(350),
+@Doc_Status nvarchar(25),
+@Doc_StatusDate datetime,
+@Doc_Comments varchar(1000)=NULL,
+@Delete_Flag varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	 -- Insert statements for procedure here
+	if not exists (select * from DocumentVesrion where DocVersion_UID=@DocVersion_UID)
+begin
+    -- Insert statements for procedure here
+	INSERT INTO [dbo].[DocumentVesrion]
+           ([DocVersion_UID]
+           ,[DocStatus_UID]
+           ,[DocumentUID]
+           ,[Doc_Version]
+           ,[Doc_Type]
+           ,[Doc_FileName]
+           ,[Doc_Status]
+           ,[Doc_StatusDate]
+           ,[Doc_Comments]
+           ,[Delete_Flag]
+		   ,[Doc_CoverLetter]
+		   ,[ServerCopiedAdd])
+     VALUES
+           (@DocVersion_UID
+           ,@DocStatus_UID
+           ,@DocumentUID
+           ,@Doc_Version
+           ,@Doc_Type
+           ,@Doc_FileName
+           ,@Doc_Status
+           ,@Doc_StatusDate
+           ,@Doc_Comments
+           ,@Delete_Flag
+           ,@Doc_CoverLetter
+		   ,'Y')
+
+		
+END
+ELSe
+Begin
+UPDATE [dbo].[DocumentVesrion]
+   SET [DocVersion_UID] = @DocVersion_UID
+      ,[DocStatus_UID] = @DocStatus_UID
+      ,[DocumentUID] = @DocumentUID
+      ,[Doc_Version] = @Doc_Version
+      ,[Doc_Type] = @Doc_Type
+      ,[Doc_FileName] = @Doc_FileName
+      ,[Doc_Status] = @Doc_Status
+      ,[Doc_StatusDate] = @Doc_StatusDate
+      ,[Doc_Comments] = Doc_Comments
+      ,[Delete_Flag] = @Delete_Flag
+	  ,[Doc_CoverLetter]=@Doc_CoverLetter
+      ,ServerCopiedUpdate='Y'
+ WHERE DocVersion_UID=@DocVersion_UID
+
+    UPDATE [dbo].[DocumentVesrion]
+   SET ServerCopiedUpdate='Y'
+ WHERE DocVersion_UID=@DocVersion_UID
+
+eNd
+
+END
+
+
+----
+USE [LNT_Database]
+GO
+/****** Object:  StoredProcedure [dbo].[dbsync_InsertorUpdate_DocumentStatus]    Script Date: 8/10/2021 2:01:16 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbsync_InsertorUpdate_DocumentStatus] 
+	-- Add the parameters for the stored procedure here
+@StatusUID as uniqueidentifier,
+@DocumentUID as uniqueidentifier,
+@AcivityUserUID as uniqueidentifier,
+@Ref_Number as varchar(100)=NULL,
+@Version as float,
+@ActivityType as varchar(100),
+@Activity_Budget as float=NULL,
+@ActivityDate as datetime,
+@PlannedDate as datetime=NULL,
+@DocumentDate as datetime=NULL,
+@CoverLetterFile as varchar(max),
+@LinkToReviewFile as varchar(max),
+@Status_Comments as varchar(750),
+@Current_Status as varchar(50),
+@Delete_Flag as varchar(1),
+@Origin as varchar(50)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if not exists (select * from DocumentStatus where StatusUID=@StatusUID)
+begin
+	INSERT INTO [dbo].[DocumentStatus]
+           ([StatusUID]
+           ,[DocumentUID]
+           ,[AcivityUserUID]
+           ,[Ref_Number]
+           ,[Version]
+           ,[ActivityType]
+           ,[Activity_Budget]
+           ,[ActivityDate]
+           ,[PlannedDate]
+           ,[DocumentDate]
+           ,[CoverLetterFile]
+           ,[LinkToReviewFile]
+           ,[Status_Comments]
+           ,[Current_Status]
+           ,[Delete_Flag]
+		   ,[Origin]
+		   , [ServerCopiedAdd])
+     VALUES
+           (@StatusUID
+           ,@DocumentUID
+           ,@AcivityUserUID
+           ,@Ref_Number
+           ,@Version
+           ,@ActivityType
+           ,@Activity_Budget
+           ,@ActivityDate
+           ,@PlannedDate
+           ,@DocumentDate
+           ,@CoverLetterFile
+           ,@LinkToReviewFile
+           ,@Status_Comments
+           ,@Current_Status
+           ,@Delete_Flag
+		   ,@Origin
+		   ,'Y')
+
+		
+
+		   END
+	ELSE
+	Begin
+	UPDATE [dbo].[DocumentStatus]
+   SET [StatusUID] = @StatusUID
+      ,[DocumentUID] = @DocumentUID
+      ,[AcivityUserUID] = @AcivityUserUID
+      ,[Ref_Number] = @Ref_Number
+      ,[Version] = @Version
+      ,[ActivityType] = @ActivityType
+      ,[Activity_Budget] = @Activity_Budget
+      ,[ActivityDate] = @ActivityDate
+      ,[PlannedDate] = @PlannedDate
+      ,[DocumentDate] = @DocumentDate
+      ,[CoverLetterFile] = @CoverLetterFile
+      ,[LinkToReviewFile] = @LinkToReviewFile
+      ,[Status_Comments] = @Status_Comments
+      ,[Current_Status] = @Current_Status
+      ,[Delete_Flag] = @Delete_Flag
+	  ,[Origin]=@Origin
+	 
+      
+ Where StatusUID=@StatusUID
+
+    UPDATE [dbo].[DocumentStatus]
+   SET ServerCopiedUpdate='Y'
+      
+ Where StatusUID=@StatusUID
+
+	END
+END
+
+
+----
+USE [LNT_Database]
+GO
+/****** Object:  StoredProcedure [dbo].[dbsync_InsertorUpdate_Documentflowdata]    Script Date: 8/10/2021 2:00:29 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbsync_InsertorUpdate_Documentflowdata] 
+	-- Add the parameters for the stored procedure here
+@DocumentFlow_UID as uniqueidentifier,
+@FlowMasterUID as uniqueidentifier,
+@DocumentUID as uniqueidentifier,
+@FlowStep1_UserID as uniqueidentifier,
+@FlowStep1_UserRole as uniqueidentifier,
+@FlowStep1_TargetDate as datetime,
+@FlowStep1_DisplayName varchar(75),
+@FlowStep2_UserID uniqueidentifier=NULL,
+@FlowStep2_UserRole uniqueidentifier=NULL,
+@FlowStep2_TargetDate datetime=NULL,
+@FlowStep2_DisplayName varchar(75)=NULL,
+@FlowStep3_UserID uniqueidentifier=NULL,
+@FlowStep3_UserRole uniqueidentifier=NULL,
+@FlowStep3_TargetDate datetime=NULL,
+@FlowStep3_DisplayName varchar(75)=NULL,
+@FlowStep4_UserID uniqueidentifier=NULL,
+@FlowStep4_UserRole uniqueidentifier=NULL,
+@FlowStep4_TargetDate datetime=NULL,
+@FlowStep4_DisplayName varchar(75)=NULL,
+@FlowStep5_UserID uniqueidentifier=NULL,
+@FlowStep5_UserRole uniqueidentifier=NULL,
+@FlowStep5_TargetDate datetime=NULL,
+@FlowStep5_DisplayName varchar(75)=NULL,
+@FlowStep6_UserID uniqueidentifier=NULL,
+@FlowStep6_UserRole uniqueidentifier=NULL,
+@FlowStep6_TargetDate datetime=NULL,
+@FlowStep6_DisplayName varchar(75)=NULL,
+@Delete_Flag varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+if not exists (select * from DocumentFlowData where DocumentFlow_UID=@DocumentFlow_UID)
+begin
+    -- Insert statements for procedure here
+	INSERT INTO [dbo].[DocumentFlowData]
+           ([DocumentFlow_UID]
+           ,[FlowMasterUID]
+           ,[DocumentUID]
+           ,[FlowStep1_UserID]
+           ,[FlowStep1_UserRole]
+           ,[FlowStep1_TargetDate]
+           ,[FlowStep1_DisplayName]
+           ,[FlowStep2_UserID]
+           ,[FlowStep2_UserRole]
+           ,[FlowStep2_TargetDate]
+           ,[FlowStep2_DisplayName]
+           ,[FlowStep3_UserID]
+           ,[FlowStep3_UserRole]
+           ,[FlowStep3_TargetDate]
+           ,[FlowStep3_DisplayName]
+           ,[FlowStep4_UserID]
+           ,[FlowStep4_UserRole]
+           ,[FlowStep4_TargetDate]
+           ,[FlowStep4_DisplayName]
+           ,[FlowStep5_UserID]
+           ,[FlowStep5_UserRole]
+           ,[FlowStep5_TargetDate]
+           ,[FlowStep5_DisplayName]
+           ,[FlowStep6_UserID]
+           ,[FlowStep6_UserRole]
+           ,[FlowStep6_TargetDate]
+           ,[FlowStep6_DisplayName]
+           ,[Delete_Flag]
+		    ,[ServerCopiedAdd])
+     VALUES
+           (@DocumentFlow_UID ,
+@FlowMasterUID,
+@DocumentUID,
+@FlowStep1_UserID,
+@FlowStep1_UserRole,
+@FlowStep1_TargetDate,
+@FlowStep1_DisplayName,
+@FlowStep2_UserID,
+@FlowStep2_UserRole,
+@FlowStep2_TargetDate,
+@FlowStep2_DisplayName,
+@FlowStep3_UserID,
+@FlowStep3_UserRole,
+@FlowStep3_TargetDate,
+@FlowStep3_DisplayName,
+@FlowStep4_UserID,
+@FlowStep4_UserRole,
+@FlowStep4_TargetDate,
+@FlowStep4_DisplayName,
+@FlowStep5_UserID,
+@FlowStep5_UserRole,
+@FlowStep5_TargetDate,
+@FlowStep5_DisplayName,
+@FlowStep6_UserID,
+@FlowStep6_UserRole,
+@FlowStep6_TargetDate,
+@FlowStep6_DisplayName,
+@Delete_Flag
+,'Y')
+
+
+
+END
+Else
+Begin
+UPDATE [dbo].[DocumentFlowData]
+   SET [DocumentFlow_UID] = @DocumentFlow_UID
+      ,[FlowMasterUID] = @FlowMasterUID
+      ,[DocumentUID] = @DocumentUID
+      ,[FlowStep1_UserID] = @FlowStep1_UserID
+      ,[FlowStep1_UserRole] = @FlowStep1_UserRole
+      ,[FlowStep1_TargetDate] = @FlowStep1_TargetDate
+      ,[FlowStep1_DisplayName] = @FlowStep1_DisplayName
+      ,[FlowStep2_UserID] = @FlowStep2_UserID
+      ,[FlowStep2_UserRole] = @FlowStep2_UserRole
+      ,[FlowStep2_TargetDate] = @FlowStep2_TargetDate
+      ,[FlowStep2_DisplayName] = @FlowStep2_DisplayName
+      ,[FlowStep3_UserID] = @FlowStep3_UserID
+      ,[FlowStep3_UserRole] = @FlowStep3_UserRole
+      ,[FlowStep3_TargetDate] = @FlowStep3_TargetDate
+      ,[FlowStep3_DisplayName] = @FlowStep3_DisplayName
+      ,[FlowStep4_UserID] = @FlowStep4_UserID
+      ,[FlowStep4_UserRole] = @FlowStep4_UserRole
+      ,[FlowStep4_TargetDate] = @FlowStep4_TargetDate
+      ,[FlowStep4_DisplayName] = @FlowStep4_DisplayName
+      ,[FlowStep5_UserID] = @FlowStep5_UserID
+      ,[FlowStep5_UserRole] = @FlowStep5_UserRole
+      ,[FlowStep5_TargetDate] = @FlowStep5_TargetDate
+      ,[FlowStep5_DisplayName] = @FlowStep5_DisplayName
+      ,[FlowStep6_UserID] = @FlowStep6_UserID
+      ,[FlowStep6_UserRole] = @FlowStep6_UserRole
+      ,[FlowStep6_TargetDate] = @FlowStep6_TargetDate
+      ,[FlowStep6_DisplayName] = @FlowStep6_DisplayName
+      ,[Delete_Flag] = @Delete_Flag
+      
+ WHERE DocumentFlow_UID=@DocumentFlow_UID
+
+ Update [dbo].[DocumentFlowData]
+   SET ServerCopiedUpdate='Y'
+   WHERE DocumentFlow_UID=@DocumentFlow_UID
+ 
+ENd
+END
+
+----
+
+USE [LNT_Database]
+GO
+/****** Object:  StoredProcedure [dbo].[dbsync_InsertOrUpdate_ActualDocuments]    Script Date: 8/10/2021 1:59:20 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbsync_InsertOrUpdate_ActualDocuments] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID uniqueidentifier,
+@ProjectUID uniqueidentifier,
+@WorkPackageUID uniqueidentifier,
+@DocumentUID uniqueidentifier,
+@ProjectRef_Number varchar(50),
+@Ref_Number varchar(75),
+@Doc_Type varchar(50),
+@IncomingRec_Date datetime,
+@FlowUID uniqueidentifier,
+@ActualDocument_Name varchar(250),
+@Description varchar(max),
+@ActualDocument_Version float,
+@ActualDocument_Type varchar(50),
+@Media_HC varchar(50),
+@Media_SC varchar(50),
+@Media_SCEF varchar(50),
+@Media_HCR varchar(50),
+@Media_SCR varchar(50),
+@Media_NA varchar(50),
+@ActualDocument_Path varchar(500),
+@Remarks varchar(max),
+@FileRef_Number varchar(100),
+@ActualDocument_CurrentStatus varchar(100),
+@FlowStep1_TargetDate datetime=NULL,
+@FlowStep2_TargetDate datetime=NULL,
+@FlowStep3_TargetDate datetime=NULL,
+@FlowStep4_TargetDate datetime=NULL,
+@FlowStep5_TargetDate datetime=NULL,
+@ActualDocument_Originator varchar(50),
+@Document_Date datetime=NULL,
+@ActualDocument_RelativePath varchar(500)=NULL,
+@ActualDocument_DirectoryName varchar(100)=NULL,
+@ActualDocument_CreatedDate as datetime=NULL,
+@Delete_Flag as varchar(1),
+@CoverLetterUID as uniqueidentifier =NULL,
+@SubmissionType as varchar(50)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if not exists (select ActualDocument_Name from ActualDocuments where ActualDocumentUID=@ActualDocumentUID)
+begin
+	INSERT INTO [dbo].[ActualDocuments]
+           ([ActualDocumentUID]
+           ,[ProjectUID]
+           ,[WorkPackageUID]
+           ,[DocumentUID]
+           ,[ProjectRef_Number]
+           ,[Ref_Number]
+           ,[Doc_Type]
+           ,[IncomingRec_Date]
+           ,[FlowUID]
+           ,[ActualDocument_Name]
+           ,[Description]
+           ,[ActualDocument_Version]
+           ,[ActualDocument_Type]
+           ,[ActualDocument_Originator]
+           ,[Media_HC]
+           ,[Media_SC]
+           ,[Media_SCEF]
+           ,[Media_HCR]
+           ,[Media_SCR]
+           ,[Media_NA]
+           ,[Document_Date]
+           ,[ActualDocument_Path]
+           ,[ActualDocument_RelativePath]
+           ,[ActualDocument_DirectoryName]
+           ,[Remarks]
+           ,[FileRef_Number]
+           ,[ActualDocument_CreatedDate]
+           ,[ActualDocument_CurrentStatus]
+           ,[Delete_Flag]
+           ,[FlowStep1_TargetDate]
+           ,[FlowStep2_TargetDate]
+           ,[FlowStep3_TargetDate]
+           ,[FlowStep4_TargetDate]
+           ,[FlowStep5_TargetDate]
+		   ,[CoverLetterUID]
+           ,[SubmissionType]
+		   ,[ServerCopiedAdd])
+     VALUES
+           (@ActualDocumentUID
+           ,@ProjectUID
+           ,@WorkPackageUID
+           ,@DocumentUID
+           ,@ProjectRef_Number
+           ,@Ref_Number
+           ,@Doc_Type
+           ,@IncomingRec_Date
+           ,@FlowUID
+           ,@ActualDocument_Name
+           ,@Description
+           ,@ActualDocument_Version
+           ,@ActualDocument_Type
+           ,@ActualDocument_Originator
+           ,@Media_HC
+           ,@Media_SC
+           ,@Media_SCEF
+           ,@Media_HCR
+           ,@Media_SCR
+           ,@Media_NA
+           ,@Document_Date
+           ,@ActualDocument_Path
+           ,@ActualDocument_RelativePath
+           ,@ActualDocument_DirectoryName
+           ,@Remarks
+           ,@FileRef_Number
+           ,@ActualDocument_CreatedDate
+           ,@ActualDocument_CurrentStatus
+           ,@Delete_Flag
+           ,@FlowStep1_TargetDate
+           ,@FlowStep2_TargetDate
+           ,@FlowStep3_TargetDate
+           ,@FlowStep4_TargetDate
+           ,@FlowStep5_TargetDate
+		   ,@CoverLetterUID
+		   ,@SubmissionType
+		   ,'Y')
+
+		
+
+END
+else
+begin
+update ActualDocuments set ProjectRef_Number=@ProjectRef_Number,Ref_Number=@Ref_Number,Doc_Type=@Doc_Type,
+	IncomingRec_Date=@IncomingRec_Date,FlowUID=@FlowUID,ActualDocument_Name=@ActualDocument_Name,Description=@Description,
+	ActualDocument_Type=@ActualDocument_Type,Media_HC=@Media_HC,Media_SC=@Media_SC,Media_SCEF=@Media_SCEF,
+	Media_HCR=@Media_HCR,Media_SCR=@Media_SCR,Media_NA=@Media_NA,Remarks=@Remarks,FileRef_Number=@FileRef_Number,
+	ActualDocument_Originator=@ActualDocument_Originator,Document_Date=@Document_Date,
+	ActualDocument_Version=@ActualDocument_Version,ActualDocument_CurrentStatus=@ActualDocument_CurrentStatus,
+	Delete_Flag=@Delete_Flag,FlowStep1_TargetDate=@FlowStep1_TargetDate,FlowStep2_TargetDate=@FlowStep2_TargetDate,FlowStep3_TargetDate=@FlowStep3_TargetDate,
+	FlowStep4_TargetDate=@FlowStep4_TargetDate,FlowStep5_TargetDate=@FlowStep5_TargetDate,
+	ActualDocument_CreatedDate=@ActualDocument_CreatedDate,
+	CoverLetterUID=@CoverLetterUID,SubmissionType=@SubmissionType,ServerCopiedUpdate='Y'
+	 where ActualDocumentUID=@ActualDocumentUID
+
+	  Update ActualDocuments set ServerCopiedUpdate='Y'
+    
+  where ActualDocumentUID=@ActualDocumentUID
+	END
+END
+
+---
+
+USE [LNT_Database]
+GO
+/****** Object:  StoredProcedure [dbo].[dbsync_InsertOrUpdateDocuments]    Script Date: 8/10/2021 1:53:22 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[dbsync_InsertOrUpdateDocuments]
+	-- Add the parameters for the stored procedure here
+@DocumentUID uniqueidentifier,
+@WorkPackageUID uniqueidentifier,
+@ProjectUID uniqueidentifier,
+@TaskUID uniqueidentifier,
+@DocName varchar(100),
+@Doc_Category varchar(50),
+@Doc_RefNumber varchar(50),
+@Doc_Type varchar(50),
+@Doc_Budget float,
+@FlowUID uniqueidentifier,
+@Flow_StartDate datetime,
+@CreatedDate as datetime,
+@FlowStep1_UserUID uniqueidentifier,
+@FlowStep1_TargetDate datetime,
+@FlowStep2_UserUID uniqueidentifier =NULL,
+@FlowStep2_TargetDate datetime =NULL,
+@FlowStep3_UserUID uniqueidentifier =NULL,
+@FlowStep3_TargetDate datetime=NULL,
+@FlowStep4_UserUID uniqueidentifier=NULL,
+@FlowStep4_TargetDate datetime=NULL,
+@FlowStep5_UserUID uniqueidentifier=NULL,
+@FlowStep5_TargetDate datetime=NULL,
+@EstimatedDocuments as int,
+@Remarks as varchar(250),
+@DocumentSearchType as varchar(50),
+@DeletedFlag as varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+If NOT Exists(Select * From Documents Where DocumentUID=@DocumentUID)
+Begin
+    -- Insert statements for procedure here
+	INSERT INTO [dbo].[Documents]
+           ([DocumentUID]
+           ,[WorkPackageUID]
+           ,[ProjectUID]
+           ,[TaskUID]
+           ,[DocName]
+           ,[Doc_Category]
+           ,[Doc_RefNumber]
+           ,[Doc_Type]
+           ,[Doc_Budget]
+           ,[FlowUID]
+           ,[Flow_StartDate]
+           ,[Delete_Flag]
+           ,[CreatedDate]
+           ,[FlowStep1_UserUID]
+           ,[FlowStep1_TargetDate]
+           ,[FlowStep2_UserUID]
+           ,[FlowStep2_TargetDate]
+           ,[FlowStep3_UserUID]
+           ,[FlowStep3_TargetDate]
+           ,[FlowStep4_UserUID]
+           ,[FlowStep4_TargetDate]
+           ,[FlowStep5_UserUID]
+           ,[FlowStep5_TargetDate]
+           ,[DocumentSearchType]
+           ,[EstimatedDocuments]
+           ,[Remarks]
+		   ,[ServerCopiedAdd])
+     VALUES
+           (@DocumentUID
+           ,@WorkPackageUID
+           ,@ProjectUID
+           ,@TaskUID
+           ,@DocName
+           ,@Doc_Category
+           ,@Doc_RefNumber
+           ,@Doc_Type
+           ,@Doc_Budget
+           ,@FlowUID
+           ,@Flow_StartDate
+           ,@DeletedFlag
+           ,@CreatedDate
+           ,@FlowStep1_UserUID
+           ,@FlowStep1_TargetDate
+           ,@FlowStep2_UserUID
+           ,@FlowStep2_TargetDate
+           ,@FlowStep3_UserUID
+           ,@FlowStep3_TargetDate
+           ,@FlowStep4_UserUID
+           ,@FlowStep4_TargetDate
+           ,@FlowStep5_UserUID
+           ,@FlowStep5_TargetDate
+           ,@DocumentSearchType
+           ,@EstimatedDocuments
+           ,@Remarks
+		   ,'Y')
+
+		 
+END
+ELSE
+Begin
+update Documents set TaskUID=@TaskUID,WorkPackageUID=@WorkPackageUID,DocName=@DocName,Doc_Category=@Doc_Category,Doc_RefNumber=@Doc_RefNumber,FlowUID=@FlowUID,
+	Flow_StartDate=@Flow_StartDate,FlowStep1_UserUID=@FlowStep1_UserUID,FlowStep1_TargetDate=@FlowStep1_TargetDate,
+	FlowStep2_UserUID=@FlowStep2_UserUID,FlowStep2_TargetDate=@FlowStep2_TargetDate,FlowStep3_UserUID=@FlowStep3_UserUID,FlowStep3_TargetDate=@FlowStep3_TargetDate,
+	FlowStep4_UserUID=@FlowStep4_UserUID,FlowStep4_TargetDate=@FlowStep4_TargetDate,FlowStep5_UserUID=@FlowStep5_UserUID,FlowStep5_TargetDate=@FlowStep5_TargetDate,EstimatedDocuments=@EstimatedDocuments,Remarks=@Remarks,DocumentSearchType=@DocumentSearchType,
+	Delete_Flag=@DeletedFlag
+    
+	where DocumentUID=@DocumentUID;
+
+
+	 Update Documents set ServerCopiedUpdate='Y'
+    
+	where DocumentUID=@DocumentUID
+
+END
+
+END
+
+----
+
+USE [ONTB_Arun_6Aug]
+GO
+/****** Object:  StoredProcedure [dbo].[dbsync_InsertWordocRead]    Script Date: 8/11/2021 2:45:30 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbsync_InsertWordocRead]
+	-- Add the parameters for the stored procedure here
+@UID as uniqueidentifier,
+@Doc_path as varchar(max),
+@Status as varchar(20),
+@HTML_Text as varchar(max),
+@CreatedDate as datetime,
+@DocumemtUID as uniqueidentifier,
+@Encrypted as varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if not exists (select Doc_path from WordDocRead where UID=@UID)
+begin
+	INSERT INTO [dbo].[WordDocRead]
+           ([UID]
+           ,[Doc_path]
+           ,[Status]
+           ,[HTML_Text]
+           ,[CreatedDate]
+           ,[DocumemtUID]
+           ,[Encrypted]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@UID
+           ,@Doc_path
+           ,@Status
+           ,@HTML_Text
+           ,@CreatedDate
+           ,@DocumemtUID
+           ,@Encrypted
+		   ,'Y')
+
+		   END
+
+END
+
+
+----
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[dbsync_InsertOrUpdateRABill_Abstract]
+	-- Add the parameters for the stored procedure here
+@RABillUid as uniqueidentifier,
+@WorkpackageUID as uniqueidentifier,
+@RABillNumber as nvarchar(50),
+@RABill_Date as datetime,
+@DeleteFlag as varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if not exists (select RABillUid from RABill_Abstract where RABillUid=@RABillUid)
+begin
+	INSERT INTO [dbo].[RABill_Abstract]
+           ([RABillUid]
+           ,[WorkpackageUID]
+           ,[RABillNumber]
+           ,[RABill_Date]
+           ,[ServerCopiedAdd]
+		   ,[DeleteFlag])
+     VALUES
+           (@RABillUid
+           ,@WorkpackageUID
+           ,@RABillNumber
+           ,@RABill_Date
+           ,'Y'
+		   ,@DeleteFlag)
+end
+else
+begin
+      Update [dbo].[RABill_Abstract]
+	  set WorkpackageUID=@WorkpackageUID,RABillNumber=@RABillNumber,RABill_Date=@RABill_Date,[DeleteFlag] =@DeleteFlag
+	 where RABillUid=@RABillUid
+
+
+	 Update [dbo].[RABill_Abstract] set ServerCopiedUpdate='Y'
+    
+   where RABillUid=@RABillUid
+
+
+end
+END
+
+
+
+----
+
+USE [ONTB_Arun_6Aug]
+GO
+/****** Object:  StoredProcedure [dbo].[dbsync_InsertDocumentsUploadLog]    Script Date: 8/19/2021 11:25:41 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbsync_InsertDocumentsUploadLog]
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@UploadStartDate as datetime,
+@UploadEndDate as datetime,
+@UploadUserUID as uniqueidentifier,
+@Duration as float
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if not exists (select ActualDocumentUID from DocumentsUploadLog where ActualDocumentUID=@ActualDocumentUID)
+begin
+	INSERT INTO [dbo].[DocumentsUploadLog]
+           ([ActualDocumentUID]
+           ,[UploadStartDate]
+           ,[UploadEndDate]
+           ,[UploadUserUID]
+           ,[Duration]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@ActualDocumentUID
+           ,@UploadStartDate
+           ,@UploadEndDate
+           ,@UploadUserUID
+           ,@Duration
+           ,'Y')
+		   end
+END
+
+
+-----
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+ALTER PROCEDURE [dbo].[dbsync_InsertorUpdate_RABills] 
+	-- Add the parameters for the stored procedure here
+@itemUId as uniqueidentifier,
+@ProjectUID as uniqueidentifier,
+@WorkpackageUID as uniqueidentifier,
+@item_number as nvarchar(50),
+@item_desc as nvarchar(max),
+@current_cost as decimal(18,0),
+@cumulative_cost as decimal(18,0),
+@created_date as datetime,
+@RABillUid as uniqueidentifier,
+@UID as uniqueidentifier,
+@DeleteFlag as varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+if not exists (select UID from RABills where UID=@UID)
+begin
+	INSERT INTO [dbo].[RABills]
+           ([itemUId]
+           ,[ProjectUID]
+           ,[WorkpackageUID]
+           ,[item_number]
+           ,[item_desc]
+           ,[current_cost]
+           ,[cumulative_cost]
+           ,[created_date]
+           ,[RABillUid]
+           ,[UID]
+           ,[ServerCopiedAdd]
+		   ,[DeleteFlag]
+           )
+     VALUES
+           (@itemUId
+           ,@ProjectUID
+           ,@WorkpackageUID
+           ,@item_number
+           ,@item_desc
+           ,@current_cost
+           ,@cumulative_cost
+           ,@created_date
+           ,@RABillUid
+           ,@UID
+           ,'Y'
+		   ,@DeleteFlag)
+		   end
+Else
+Begin
+
+UPDATE [dbo].[RABills]
+   SET [itemUId] = @itemUId
+      ,[ProjectUID] = @ProjectUID
+      ,[WorkpackageUID] = @WorkpackageUID
+      ,[item_number] = @item_number
+      ,[item_desc] = @item_desc
+      ,[current_cost] = @current_cost
+      ,[cumulative_cost] = @cumulative_cost
+      ,[created_date] = @created_date
+      ,[RABillUid] = @RABillUid
+      ,[DeleteFlag] =@DeleteFlag
+      
+ where UID=@UID
+
+ UPDATE [dbo].[RABills]
+ set ServerCopiedUpdate='Y'
+ where UID=@UID
+
+end
+
+END
+
+
+-------
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_InvoiceMaster] 
+	-- Add the parameters for the stored procedure here
+@InvoiceMaster_UID as uniqueidentifier,
+@ProjectUID as uniqueidentifier,
+@WorkpackageUID as uniqueidentifier,
+@Invoice_Number as varchar(100),
+@Invoice_Desc as varchar(500),
+@Invoice_Date as datetime,
+@Invoice_TotalAmount as decimal(18,2),
+@Invoice_DeductionAmount as decimal(18,2),
+@Invoice_NetAmount as decimal(18,2),
+@Currency as varchar(20),
+@Currency_CultureInfo as varchar(20),
+@Delete_Flag as varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+if Not exists(select InvoiceMaster_UID From [dbo].[InvoiceMaster] Where InvoiceMaster_UID=@InvoiceMaster_UID)
+Begin
+    -- Insert statements for procedure here
+	INSERT INTO [dbo].[InvoiceMaster]
+           ([InvoiceMaster_UID]
+           ,[ProjectUID]
+           ,[WorkpackageUID]
+           ,[Invoice_Number]
+           ,[Invoice_Desc]
+           ,[Invoice_Date]
+           ,[Invoice_TotalAmount]
+           ,[Invoice_DeductionAmount]
+           ,[Invoice_NetAmount]
+           ,[Currency]
+           ,[Currency_CultureInfo]
+           ,[Delete_Flag]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@InvoiceMaster_UID
+           ,@ProjectUID
+           ,@WorkpackageUID
+           ,@Invoice_Number
+           ,@Invoice_Desc
+           ,@Invoice_Date
+           ,@Invoice_TotalAmount
+           ,@Invoice_DeductionAmount
+           ,@Invoice_NetAmount
+           ,@Currency
+           ,@Currency_CultureInfo
+           ,@Delete_Flag
+           ,'Y')
+		   end
+		   Else
+		   Begin
+
+		   UPDATE [dbo].[InvoiceMaster]
+   SET 
+      [ProjectUID] = @ProjectUID
+      ,[WorkpackageUID] = @WorkpackageUID
+      ,[Invoice_Number] = @Invoice_Number
+      ,[Invoice_Desc] = @Invoice_Desc
+      ,[Invoice_Date] = @Invoice_Date
+      ,[Invoice_TotalAmount] = @Invoice_TotalAmount
+      ,[Invoice_DeductionAmount] = @Invoice_DeductionAmount
+      ,[Invoice_NetAmount] = @Invoice_NetAmount
+      ,[Currency] = @Currency
+      ,[Currency_CultureInfo] = @Currency_CultureInfo
+      ,[Delete_Flag] = @Delete_Flag
+      
+ WHERE InvoiceMaster_UID=@InvoiceMaster_UID
+
+
+ UPDATE [dbo].[InvoiceMaster]
+   SET 
+      ServerCopiedUpdate='Y'
+
+	  WHERE InvoiceMaster_UID=@InvoiceMaster_UID
+		   End
+
+
+END
+GO
+
+
+--------
+
+CREATE PROCEDURE [dbsync_InsertorUpdate_DeductionsMaster]
+	-- Add the parameters for the stored procedure here
+@UID as uniqueidentifier,
+@DeductionsDescription as varchar(100),
+@Maxpercentage as decimal(18,2),
+@Order_By as smallint
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if Not exists(select UID From [dbo].[DeductionsMaster] Where UID=@UID)
+Begin
+
+INSERT INTO [dbo].[DeductionsMaster]
+           ([UID]
+           ,[DeductionsDescription]
+           ,[Maxpercentage]
+           ,[Order_By]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@UID
+           ,@DeductionsDescription
+           ,@Maxpercentage
+           ,@Order_By
+           ,'Y')
+end
+ELSE
+Begin
+
+UPDATE [dbo].[DeductionsMaster]
+   SET [UID] = @UID
+      ,[DeductionsDescription] = @DeductionsDescription
+      ,[Maxpercentage] = @Maxpercentage
+      ,[Order_By] = @Order_By
+     
+ Where UID=@UID
+
+ UPDATE [dbo].[DeductionsMaster]
+   SET ServerCopiedUpdate='Y'
+    Where UID=@UID
+END
+
+END
+GO
+-----
+
+CREATE PROCEDURE [dbsync_InsertorUpdate_InvoiceRABills] 
+	-- Add the parameters for the stored procedure here
+@InvoiceRABill_UID as uniqueidentifier,
+@InvoiceMaster_UID as uniqueidentifier,
+@RABillUid as uniqueidentifier,
+@InvoiceRABill_Date as datetime,
+@Delete_Flag as varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+If not exists(select InvoiceRABill_UID From [dbo].[Invoice_RABills] Where InvoiceRABill_UID=@InvoiceRABill_UID)
+Begin
+	INSERT INTO [dbo].[Invoice_RABills]
+           ([InvoiceRABill_UID]
+           ,[InvoiceMaster_UID]
+           ,[RABillUid]
+           ,[InvoiceRABill_Date]
+           ,[Delete_Flag]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@InvoiceRABill_UID
+           ,@InvoiceMaster_UID
+           ,@RABillUid
+           ,@InvoiceRABill_Date
+           ,@Delete_Flag
+           ,'Y')
+
+		   end
+		   else
+		   begin
+		   UPDATE [dbo].[Invoice_RABills]
+   SET 
+      [InvoiceMaster_UID] = @InvoiceMaster_UID
+      ,[RABillUid] = @RABillUid
+      ,[InvoiceRABill_Date] = @InvoiceRABill_Date
+      ,[Delete_Flag] = @Delete_Flag
+      
+ WHERE  InvoiceRABill_UID=@InvoiceRABill_UID
+
+  UPDATE [dbo].[Invoice_RABills]
+   SET 
+      ServerCopiedUpdate='Y'
+	  WHERE  InvoiceRABill_UID=@InvoiceRABill_UID
+
+		   end
+
+
+
+END
+GO
+
+----
+CREATE PROCEDURE [dbsync_InsertorUpdate_InvoiceDeduction] 
+	-- Add the parameters for the stored procedure here
+@Invoice_DeductionUID as uniqueidentifier,
+@WorkpackageUID as uniqueidentifier,
+@InvoiceMaster_UID as uniqueidentifier,
+@Deduction_UID as uniqueidentifier,
+@Amount as decimal(18,2),
+@Currency as varchar(20),
+@Currency_CultureInfo as varchar(20),
+@Percentage as float,
+@Deduction_Mode as varchar(20),
+@Order_By as smallint,
+@Delete_Flag as varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	If not exists(select Invoice_DeductionUID From [dbo].[Invoice_Deduction] Where Invoice_DeductionUID=@Invoice_DeductionUID)
+Begin
+	INSERT INTO [dbo].[Invoice_Deduction]
+           ([Invoice_DeductionUID]
+           ,[WorkpackageUID]
+           ,[InvoiceMaster_UID]
+           ,[Deduction_UID]
+           ,[Amount]
+           ,[Currency]
+           ,[Currency_CultureInfo]
+           ,[Percentage]
+           ,[Deduction_Mode]
+           ,[Order_By]
+           ,[Delete_Flag]
+           ,[ServerCopiedAdd]
+           )
+     VALUES
+           (@Invoice_DeductionUID
+           ,@WorkpackageUID
+           ,@InvoiceMaster_UID
+           ,@Deduction_UID
+           ,@Amount
+           ,@Currency
+           ,@Currency_CultureInfo
+           ,@Percentage
+           ,@Deduction_Mode
+           ,@Order_By
+           ,@Delete_Flag
+           ,'Y')
+		   end
+		   else
+		   begin
+
+		   UPDATE [dbo].[Invoice_Deduction]
+   SET [Invoice_DeductionUID] = @Invoice_DeductionUID
+      ,[WorkpackageUID] = @WorkpackageUID
+      ,[InvoiceMaster_UID] = @InvoiceMaster_UID
+      ,[Deduction_UID] = @Deduction_UID
+      ,[Amount] = @Amount
+      ,[Currency] = @Currency
+      ,[Currency_CultureInfo] = @Currency_CultureInfo
+      ,[Percentage] = @Percentage
+      ,[Deduction_Mode] = @Deduction_Mode
+      ,[Order_By] = @Order_By
+      ,[Delete_Flag] = @Delete_Flag
+     
+ Where Invoice_DeductionUID=@Invoice_DeductionUID
+
+  UPDATE [dbo].[Invoice_Deduction]
+   SET ServerCopiedUpdate='Y'
+    Where Invoice_DeductionUID=@Invoice_DeductionUID
+
+		   end
+END
+GO
+
+
+////
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertOrUpdate_AssignJointInspectiontoRAbill]
+	-- Add the parameters for the stored procedure here
+@AssignJointInspectionUID as uniqueidentifier,
+@RABill_UID as uniqueidentifier,
+@RABill_ItemUID as uniqueidentifier,
+@InspectionUID as uniqueidentifier,
+@Assign_Date as datetime
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if not exists (select AssignJointInspectionUID from AssignJointInspectiontoRAbill where AssignJointInspectionUID=@AssignJointInspectionUID)
+begin
+	INSERT INTO [dbo].[AssignJointInspectiontoRAbill]
+           ([AssignJointInspectionUID]
+           ,[RABill_UID]
+           ,[RABill_ItemUID]
+           ,[InspectionUID]
+           ,[Assign_Date]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@AssignJointInspectionUID
+           ,@RABill_UID
+           ,@RABill_ItemUID
+           ,@InspectionUID
+           ,@Assign_Date
+           ,'Y')
+		   end
+		   else
+		   Begin
+		   UPDATE [dbo].[AssignJointInspectiontoRAbill]
+   SET 
+      [RABill_UID] = @RABill_UID
+      ,[RABill_ItemUID] = @RABill_ItemUID
+      ,[InspectionUID] = @InspectionUID
+      ,[Assign_Date] = @Assign_Date
+     
+where AssignJointInspectionUID=@AssignJointInspectionUID
+
+ UPDATE [dbo].[AssignJointInspectiontoRAbill]
+   SET 
+      ServerCopiedUpdate='Y'
+	  where AssignJointInspectionUID=@AssignJointInspectionUID
+
+
+		   End
+END
+GO
+
+
+------added on 03/09/2021
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Dbsync_Status_Count](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[ProjectUID] [uniqueidentifier] NULL,
+	[WorkPackageUID] [uniqueidentifier] NULL,
+	[SourceDocCount] [bigint] NULL,
+	[DestDocCount] [bigint] NULL,
+	[CreatedDate] [datetime] NULL,
+	[LinkStatus] [varchar](250) NULL,
+	[ServerCopiedAdd] [varchar](1) NULL,
+	[CopiedAddDate] [datetime] NULL,
+	[ServerCopiedUpdate] [varchar](1) NULL,
+	[CopiedUpdateDate] [datetime] NULL,
+	[SourceDate] [datetime] NULL,
+	[SourceStatus] [varchar](250) NULL,
+ CONSTRAINT [PK_Dbsync_Status_Count] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Dbsync_Status_Count] ADD  CONSTRAINT [DF_Dbsync_Status_Count_ServerCopiedAdd]  DEFAULT ('N') FOR [ServerCopiedAdd]
+GO
+
+
+
+----
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbsync_InsertOrUpdateDocCount]
+	-- Add the parameters for the stored procedure here
+@ProjectUID as uniqueidentifier,
+@WorkPackageUID as uniqueidentifier,
+@SourceDocCount as bigint,
+@DestDocCount as bigint
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	if not exists (select ProjectUID from Dbsync_Status_Count where WorkPackageUID=@WorkPackageUID)
+begin
+    INSERT INTO [dbo].[Dbsync_Status_Count]
+           ([ProjectUID]
+           ,[WorkPackageUID]
+           ,[SourceDocCount]
+           ,[DestDocCount]
+           ,[CreatedDate]
+           ,[LinkStatus]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@ProjectUID
+           ,@WorkPackageUID
+           ,@SourceDocCount
+           ,@DestDocCount
+           ,GETDATE()
+           ,'ON'
+           ,'Y')
+		   end
+		   ELSE
+		   Begin
+		   UPDATE [dbo].[Dbsync_Status_Count]
+   SET 
+      [SourceDocCount] = @SourceDocCount
+      ,[DestDocCount] = @DestDocCount
+      ,[CreatedDate] = GETDATE()
+      ,[LinkStatus] = 'ON'
+     
+ Where WorkPackageUID=@WorkPackageUID
+
+
+		   END
+	
+END
+
+----
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[dbsync_GetStatusDocCount] 
+	-- Add the parameters for the stored procedure here
+@WorkPackageUID as uniqueidentifier,
+@Count int OUTPUT
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	declare @sCount as bigint;
+	declare @sTotalCount as bigint;
+	set  @sCount=(select Count(*) From ActualDocuments Where WorkPackageUID =@WorkPackageUID and Delete_Flag='N');
+	set @sTotalCount = @sCount;
+
+set  @sCount=(Select Count(*) FRom DocumentStatus Where DocumentUID in (select ActualDocumentUID From ActualDocuments Where WorkPackageUID =@WorkPackageUID and Delete_Flag='N') and Delete_Flag='N' and DocumentDate is Not NULL)
+--set @sCount=(SELECT Count(*) FROM DocumentStatus INNER JOIN ActualDocuments ON DocumentStatus.DocumentUID = ActualDocuments.ActualDocumentUID
+						 --Where ActualDocuments.ActualDocument_Path != CoverLetterFile
+						-- and ActualDocuments.Delete_Flag ='N' and ActualDocuments.WorkPackageUID =@WorkPackageUID and  DocumentStatus.Delete_Flag='N')
+set @sTotalCount = @sTotalCount + @sCount;
+
+set  @sCount=(Select Count(*) FRom DocumentStatus Where DocumentUID in (select ActualDocumentUID From ActualDocuments Where WorkPackageUID =@WorkPackageUID and Delete_Flag='N') and ISNULL(LinkToReviewFile,'') !='' and Delete_Flag='N')
+set @sTotalCount = @sTotalCount + @sCount;
+
+set  @sCount=(Select Count(*) From DocumentVesrion Where DocumentUID in (select ActualDocumentUID From ActualDocuments Where WorkPackageUID =@WorkPackageUID and Delete_Flag='N') and Doc_Version > 1  and Delete_Flag='N')
+set @sTotalCount = @sTotalCount + @sCount;
+
+set  @sCount=(Select Count(*) From DocumentVesrion Where DocumentUID in (select ActualDocumentUID From ActualDocuments Where WorkPackageUID =@WorkPackageUID and Delete_Flag='N') and Doc_Version > 1  and ISNULL(Doc_CoverLetter,'') !='' and Delete_Flag='N')
+set @sTotalCount = @sTotalCount + @sCount;
+
+set @Count = @sTotalCount
+return @Count
+END
+
+-------------------------------------------06/09/2021
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbsync_InsertOrUpdate_UserDetails] 
+	-- Add the parameters for the stored procedure here
+@UserUID uniqueidentifier,
+@FirstName varchar(100),
+@LastName varchar(100),
+@EmailID varchar(100),
+@Phonenumber as varchar(20)=Null,
+@Mobilenumber varchar(15),
+@Address1 varchar(250),
+@Address2 varchar(250),
+@Username varchar(50),
+@password varchar(50),
+@CreatedDate as datetime,
+@DeletedFlag as varchar(1),
+@DeletedDate as datetime=NULL,
+@TypeOfUser as varchar(5),
+@Admin_Under as uniqueidentifier,
+@Project_Under as uniqueidentifier=NULL,
+@Profile_Pic varchar(150)=NULL
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+if Not Exists(Select UserUID From UserDetails Where UserUID=@UserUID)
+Begin
+	INSERT INTO [dbo].[UserDetails]
+           ([UserUID]
+           ,[FirstName]
+           ,[LastName]
+           ,[EmailID]
+           ,[Phonenumber]
+           ,[Mobilenumber]
+           ,[Address1]
+           ,[Address2]
+           ,[Username]
+           ,[password]
+           ,[CreatedDate]
+           ,[DeletedFlag]
+           ,[DeletedDate]
+           ,[TypeOfUser]
+           ,[Admin_Under]
+           ,[Project_Under]
+           ,[Profile_Pic]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@UserUID
+           ,@FirstName
+           ,@LastName
+           ,@EmailID
+           ,@Phonenumber
+           ,@Mobilenumber
+           ,@Address1
+           ,@Address2
+           ,@Username
+           ,@password
+           ,@CreatedDate
+           ,@DeletedFlag
+           ,@DeletedDate
+           ,@TypeOfUser
+           ,@Admin_Under
+           ,@Project_Under
+           ,@Profile_Pic
+           ,'Y')
+		   ENd
+	ELSE
+	Begin
+	UPDATE [dbo].[UserDetails]
+   SET 
+      [FirstName] = @FirstName
+      ,[LastName] = @LastName
+      ,[EmailID] = @EmailID
+      ,[Phonenumber] = @Phonenumber
+      ,[Mobilenumber] = @Mobilenumber
+      ,[Address1] = @Address1
+      ,[Address2] = @Address2
+      ,[Username] = @Username
+      ,[password] = @password
+      ,[CreatedDate] = @CreatedDate
+      ,[DeletedFlag] = @DeletedFlag
+      ,[DeletedDate] = @DeletedDate
+      ,[TypeOfUser] = @TypeOfUser
+      ,[Admin_Under] =@Admin_Under
+      ,[Project_Under] = @Project_Under
+      ,[Profile_Pic] = @Profile_Pic
+     
+ Where UserUID=@UserUID
+
+
+ Update [dbo].[UserDetails]
+   SET ServerCopiedUpdate='Y'
+Where UserUID=@UserUID
+
+	END
+
+END
+
+
+----
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertOrUpdate_UserProjects] 
+	-- Add the parameters for the stored procedure here
+@AssignID uniqueidentifier,
+@UserUID uniqueidentifier,
+@ProjectUID uniqueidentifier,
+@UserRole uniqueidentifier,
+@AssignDate datetime,
+@Delete_Flag varchar(1)
+   AS        
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if Not Exists(Select AssignID From UserProjects Where AssignID=@AssignID)
+Begin
+	INSERT INTO [dbo].[UserProjects]
+           ([AssignID]
+           ,[UserUID]
+           ,[ProjectUID]
+           ,[UserRole]
+           ,[AssignDate]
+           ,[Delete_Flag]
+           ,[ServerCopiedAdd]
+           )
+     VALUES
+           (@AssignID
+           ,@UserUID
+           ,@ProjectUID
+           ,@UserRole
+           ,@AssignDate
+           ,@Delete_Flag
+           ,'Y'
+           )
+		   ENd
+		   ELse
+		   Begin
+		   UPDATE [dbo].[UserProjects]
+   SET 
+      [UserUID] = @UserUID
+      ,[ProjectUID] = @ProjectUID
+      ,[UserRole] = @UserRole
+      ,[AssignDate] = @AssignDate
+      ,[Delete_Flag] = @Delete_Flag
+     
+	  Where AssignID=@AssignID
+
+	  UPDATE [dbo].[UserProjects]
+   SET 
+     ServerCopiedUpdate='Y'
+     
+	  Where AssignID=@AssignID
+End
+
+END
+GO
+----
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_UserWorkPackages] 
+	-- Add the parameters for the stored procedure here
+@UID uniqueidentifier,
+@ProjectUID uniqueidentifier,
+@UserUID uniqueidentifier,
+@WorkPackageUID uniqueidentifier,
+@Status varchar(1),
+@CreatedDate datetime,
+@UpdatedDate datetime=NULL,
+@Activity_Type varchar(50)=NULL,
+@Activity_Id varchar(50)=NULL,
+@UserRole_ID uniqueidentifier=NULL
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if Not Exists(Select UID From UserWorkPackages Where UID=@UID)
+Begin
+	INSERT INTO [dbo].[UserWorkPackages]
+           ([UID]
+           ,[ProjectUID]
+           ,[UserUID]
+           ,[WorkPackageUID]
+           ,[Status]
+           ,[CreatedDate]
+           ,[UpdatedDate]
+           ,[Activity_Type]
+           ,[Activity_Id]
+           ,[UserRole_ID]
+           ,[ServerCopiedAdd]
+          )
+     VALUES
+           (@UID
+           ,@ProjectUID
+           ,@UserUID
+           ,@WorkPackageUID
+           ,@Status
+           ,@CreatedDate
+           ,@UpdatedDate
+           ,@Activity_Type
+           ,@Activity_Id
+           ,@UserRole_ID
+           ,'Y'
+          )
+END
+ELSE
+Begin
+UPDATE [dbo].[UserWorkPackages]
+   SET 
+      [ProjectUID] = @ProjectUID
+      ,[UserUID] = @UserUID
+      ,[WorkPackageUID] = @WorkPackageUID
+      ,[Status] = @Status
+      ,[CreatedDate] = @CreatedDate
+      ,[UpdatedDate] = @UpdatedDate
+      ,[Activity_Type] = @Activity_Type
+      ,[Activity_Id] = @Activity_Id
+      ,[UserRole_ID] = @UserRole_ID
+      
+Where UID=@UID
+
+UPDATE [dbo].[UserWorkPackages]
+   SET 
+     ServerCopiedUpdate='Y'
+      
+Where UID=@UID
+
+
+eND
+END
+GO
+--------
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_UserRolesMaster]
+	-- Add the parameters for the stored procedure here
+@UserRole_ID uniqueidentifier,
+@UserRole_Desc varchar(100),
+@UserRole_Name varchar(50)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+If Not Exists (Select * From UserRolesMaster Where UserRole_ID=@UserRole_ID)
+Begin
+	INSERT INTO [dbo].[UserRolesMaster]
+           ([UserRole_ID]
+           ,[UserRole_Desc]
+           ,[UserRole_Name]
+           ,[ServerCopiedAdd]
+          )
+     VALUES
+           (@UserRole_ID
+           ,@UserRole_Desc
+           ,@UserRole_Name
+           ,'Y')
+		   End
+		   Else
+		   Begin
+		   UPDATE [dbo].[UserRolesMaster]
+   SET [UserRole_ID] = @UserRole_ID
+      ,[UserRole_Desc] = @UserRole_Desc
+      ,[UserRole_Name] = @UserRole_Name
+      
+ Where UserRole_ID=@UserRole_ID
+
+
+    UPDATE [dbo].[UserRolesMaster]
+   SET ServerCopiedUpdate='Y'
+    Where UserRole_ID=@UserRole_ID
+
+		   end
+END
+GO
+-----
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_UserType_Functionality_Master]
+	-- Add the parameters for the stored procedure here
+@UID uniqueidentifier,
+@Functionality varchar(500),
+@Code varchar(10)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+If Not Exists (Select * From UserType_Functionality_Master Where UID=@UID)
+Begin
+	INSERT INTO [dbo].[UserType_Functionality_Master]
+           ([UID]
+           ,[Functionality]
+           ,[Code]
+           ,[ServerCopiedAdd]
+           )
+     VALUES
+           (@UID
+           ,@Functionality
+           ,@Code
+           ,'Y'
+          )
+		   End
+		   Else
+		   Begin
+		   UPDATE [dbo].[UserType_Functionality_Master]
+   SET [UID] = @UID
+      ,[Functionality] =@Functionality
+      ,[Code] = @Code
+      
+Where UID=@UID
+
+
+    UPDATE [dbo].[UserType_Functionality_Master]
+   SET ServerCopiedUpdate='Y'
+   Where UID=@UID
+
+		   end
+END
+GO
+---
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_UserType_Functionality_Mapping] 
+	-- Add the parameters for the stored procedure here
+@UID as uniqueidentifier,
+@UserType as varchar(10),
+@FunctionalityUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+if NOt Exists(Select UID From UserType_Functionality_Mapping Where UID=@UID)
+Begin
+	INSERT INTO [dbo].[UserType_Functionality_Mapping]
+           ([UID]
+           ,[UserType]
+           ,[FunctionalityUID]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@UID
+           ,@UserType
+           ,@FunctionalityUID
+           ,'Y')
+		   End
+		   Else
+		   Begin
+
+		   UPDATE [dbo].[UserType_Functionality_Mapping]
+   SET [UID] = @UID
+      ,[UserType] = @UserType
+      ,[FunctionalityUID] = @FunctionalityUID
+     
+ Where UID=@UID
+
+ UPDATE [dbo].[UserType_Functionality_Mapping]
+   SET ServerCopiedUpdate='Y'
+    Where UID=@UID
+		   End
+
+END
+GO
+
+----
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_Issues] 
+	-- Add the parameters for the stored procedure here
+@Issue_Uid uniqueidentifier,
+@ProjectUID uniqueidentifier,
+@WorkPackagesUID uniqueidentifier,
+@TaskUID uniqueidentifier,
+@Issue_Description nvarchar(500),
+@Issue_Date datetime,
+@Issued_User nvarchar(50),
+@Assigned_User nvarchar(50),
+@Assigned_Date datetime,
+@Issue_ProposedCloser_Date datetime,
+@Approving_User nvarchar(50),
+@Actual_Closer_Date datetime,
+@Issue_Status nvarchar(20),
+@Issue_Remarks nvarchar(500),
+@Issue_Document varchar(150)=NULL,
+@Delete_Flag varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if NOt Exists(Select Issue_Uid From Issues Where Issue_Uid=@Issue_Uid)
+Begin
+	INSERT INTO [dbo].[Issues]
+           ([Issue_Uid]
+           ,[ProjectUID]
+           ,[WorkPackagesUID]
+           ,[TaskUID]
+           ,[Issue_Description]
+           ,[Issue_Date]
+           ,[Issued_User]
+           ,[Assigned_User]
+           ,[Assigned_Date]
+           ,[Issue_ProposedCloser_Date]
+           ,[Approving_User]
+           ,[Actual_Closer_Date]
+           ,[Issue_Status]
+           ,[Issue_Remarks]
+           ,[Issue_Document]
+           ,[Delete_Flag]
+           ,[ServerCopiedAdd]
+          )
+     VALUES
+           (@Issue_Uid
+           ,@ProjectUID
+           ,@WorkPackagesUID
+           ,@TaskUID
+           ,@Issue_Description
+           ,@Issue_Date
+           ,@Issued_User
+           ,@Assigned_User
+           ,@Assigned_Date
+           ,@Issue_ProposedCloser_Date
+           ,@Approving_User
+           ,@Actual_Closer_Date
+           ,@Issue_Status
+           ,@Issue_Remarks
+           ,@Issue_Document
+           ,@Delete_Flag
+           ,'Y'
+           )
+End
+Else
+Begin
+
+UPDATE [dbo].[Issues]
+   SET [Issue_Uid] = @Issue_Uid
+      ,[ProjectUID] =@ProjectUID
+      ,[WorkPackagesUID] = @WorkPackagesUID
+      ,[TaskUID] = @TaskUID
+      ,[Issue_Description] = @Issue_Description
+      ,[Issue_Date] = @Issue_Date
+      ,[Issued_User] = @Issued_User
+      ,[Assigned_User] = @Assigned_User
+      ,[Assigned_Date] = @Assigned_Date
+      ,[Issue_ProposedCloser_Date] = @Issue_ProposedCloser_Date
+      ,[Approving_User] = @Approving_User
+      ,[Actual_Closer_Date] = @Actual_Closer_Date
+      ,[Issue_Status] = @Issue_Status
+      ,[Issue_Remarks] = @Issue_Remarks
+      ,[Issue_Document] = @Issue_Document
+      ,[Delete_Flag] = @Delete_Flag
+      
+ WHERE Issue_Uid=@Issue_Uid
+
+
+ UPDATE [dbo].[Issues]
+   SET ServerCopiedUpdate='Y'
+    WHERE Issue_Uid=@Issue_Uid
+
+
+End
+END
+GO
+-------
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_IssueRemarks] 
+	-- Add the parameters for the stored procedure here
+@IssueRemarksUID uniqueidentifier,
+@Issue_Uid uniqueidentifier,
+@Issue_Status varchar(50),
+@Issue_Remarks varchar(max),
+@Issue_Document varchar(150)=NULL,
+@IssueRemark_Date datetime,
+@Delete_Flag varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+If Not Exists(Select IssueRemarksUID From IssueRemarks Where IssueRemarksUID=@IssueRemarksUID)
+Begin
+	INSERT INTO [dbo].[IssueRemarks]
+           ([IssueRemarksUID]
+           ,[Issue_Uid]
+           ,[Issue_Status]
+           ,[Issue_Remarks]
+           ,[Issue_Document]
+           ,[IssueRemark_Date]
+           ,[Delete_Flag]
+           ,[ServerCopiedAdd]
+           )
+     VALUES
+           (@IssueRemarksUID
+           ,@Issue_Uid
+           ,@Issue_Status
+           ,@Issue_Remarks
+           ,@Issue_Document
+           ,@IssueRemark_Date
+           ,@Delete_Flag
+           ,'Y')
+		   End
+		   Else
+		   Begin
+		   UPDATE [dbo].[IssueRemarks]
+   SET [IssueRemarksUID] = @IssueRemarksUID
+      ,[Issue_Uid] = @Issue_Uid
+      ,[Issue_Status] = @Issue_Status
+      ,[Issue_Remarks] = @Issue_Remarks
+      ,[Issue_Document] = @Issue_Document
+      ,[IssueRemark_Date] = @IssueRemark_Date
+      ,[Delete_Flag] = @Delete_Flag
+     
+ WHERE IssueRemarksUID=@IssueRemarksUID
+
+   UPDATE [dbo].[IssueRemarks]
+   SET ServerCopiedUpdate='Y'
+    WHERE IssueRemarksUID=@IssueRemarksUID
+
+
+		   End
+END
+GO
+
+-------
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[dbsync_checkIssuesSynced] 
+	-- Add the parameters for the stored procedure here
+@Issue_Uid as uniqueidentifier,
+@Count int OUTPUT  
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	
+	
+
+	set @Count = (select Count(*) From Issues Where Issue_Uid=@Issue_Uid and (ServerCopiedAdd='N' OR ServerCopiedUpdate='N'));
+
+	if(@Count = 0)
+	Begin
+	set @Count =(select Count(*) From IssueRemarks  Where Issue_Uid=@Issue_Uid) ;
+	  if(@Count > 0)
+	  begin
+	         set @Count =(select Count(*) From IssueRemarks  Where Issue_Uid=@Issue_Uid and (ServerCopiedAdd='N' OR ServerCopiedUpdate='N'));
+	  end
+	end
+
+	
+	
+
+	return @Count
+	
+END
+--------
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[dbsync_checkRABillsSynced] 
+	-- Add the parameters for the stored procedure here
+@RABillUid as uniqueidentifier,
+@Count int OUTPUT  
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	
+	
+
+	set @Count = (select Count(*) From RABill_Abstract Where RABillUid=@RABillUid and (ServerCopiedAdd='N' OR ServerCopiedUpdate='N'));
+
+	if(@Count = 0)
+	Begin
+	set @Count =(select Count(*) From RABills  Where RABillUid=@RABillUid) ;
+	  if(@Count > 0)
+	  begin
+	         set @Count =(select Count(*) From RABills  Where RABillUid=@RABillUid and (ServerCopiedAdd='N' OR ServerCopiedUpdate='N'));
+	  end
+	end
+
+	if(@Count = 0)
+	Begin
+	set @Count =(select Count(*) From AssignJointInspectiontoRAbill  Where RABill_UID=@RABillUid) ;
+	  if(@Count > 0)
+	  begin
+	         set @Count =(select Count(*) From AssignJointInspectiontoRAbill  Where RABill_UID=@RABillUid and (ServerCopiedAdd='N' OR ServerCopiedUpdate='N'));
+	  end
+	end
+
+	return @Count
+	
+END
+-----
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[dbsync_checkInvoiceMasterSynced] 
+	-- Add the parameters for the stored procedure here
+@InvoiceMaster_UID as uniqueidentifier,
+@Count int OUTPUT  
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	
+	
+
+	set @Count = (select Count(*) From InvoiceMaster Where InvoiceMaster_UID=InvoiceMaster_UID and (ServerCopiedAdd='N' OR ServerCopiedUpdate='N'));
+
+	
+
+	return @Count
+	
+END
+------
+
+USE [ONTB_Arun_27Aug]
+GO
+/****** Object:  StoredProcedure [dbo].[dbsync_checkInvoiceMasterSynced]    Script Date: 9/9/2021 2:01:29 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[dbsync_checkInvoiceRABillSynced] 
+	-- Add the parameters for the stored procedure here
+@InvoiceRABill_UID as uniqueidentifier,
+@Count int OUTPUT  
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	
+	
+
+	set @Count = (select Count(*) From Invoice_RABills Where InvoiceRABill_UID=@InvoiceRABill_UID and (ServerCopiedAdd='N' OR ServerCopiedUpdate='N'));
+
+	
+
+	return @Count
+	
+END
+-------
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[dbsync_checkInvoice_DeductionSynced] 
+	-- Add the parameters for the stored procedure here
+@Invoice_DeductionUID as uniqueidentifier,
+@Count int OUTPUT  
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	
+	
+
+	set @Count = (select Count(*) From Invoice_Deduction Where Invoice_DeductionUID=@Invoice_DeductionUID and (ServerCopiedAdd='N' OR ServerCopiedUpdate='N'));
+
+	
+
+	return @Count
+	
+END
+----added on 16/09/2021-----
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_ActivityDeleteLogs] 
+	-- Add the parameters for the stored procedure here
+@DeleteLog_UID uniqueidentifier,
+@Activity_UID uniqueidentifier,
+@Activity_UserUID uniqueidentifier,
+@Activity_For varchar(50),
+@Activity_Date datetime
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+if Not Exists(select DeleteLog_UID From [dbo].[ActivityDeleteLogs] Where DeleteLog_UID=@DeleteLog_UID)
+Begin
+	INSERT INTO [dbo].[ActivityDeleteLogs]
+           ([DeleteLog_UID]
+           ,[Activity_UID]
+           ,[Activity_UserUID]
+           ,[Activity_For]
+           ,[Activity_Date]
+           ,[ServerCopiedAdd])
+     VALUES
+           (@DeleteLog_UID
+           ,@Activity_UID
+           ,@Activity_UserUID
+           ,@Activity_For
+           ,@Activity_Date
+           ,'Y')
+		   end
+
+END
+GO
+
+-----------------------------------
+added on 17/09/2021
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbsync_InsertorUpdate_FinanceMileStones]
+	-- Add the parameters for the stored procedure here
+@Finance_MileStoneUID uniqueidentifier,
+@TaskUID uniqueidentifier,
+@Finance_MileStoneName varchar(50),
+@Finance_MileStoneCreatedDate datetime,
+@User_Created uniqueidentifier =NULL,
+@Delete_Flag varchar(1),
+@IsMonth varchar(1)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+if Not Exists(select Finance_MileStoneUID From FinanceMileStones where Finance_MileStoneUID=@Finance_MileStoneUID)
+Begin
+	INSERT INTO [dbo].[FinanceMileStones]
+           ([Finance_MileStoneUID]
+           ,[TaskUID]
+           ,[Finance_MileStoneName]
+          
+           ,[Finance_MileStoneCreatedDate]
+           ,[User_Created]
+           ,[Delete_Flag]
+           ,[IsMonth]
+           ,[ServerCopiedAdd]
+           )
+     VALUES
+           (@Finance_MileStoneUID
+           ,@TaskUID
+           ,@Finance_MileStoneName
+           ,@Finance_MileStoneCreatedDate 
+           ,@User_Created
+           ,@Delete_Flag
+           ,@IsMonth
+           ,'Y'
+          )
+		  End
+		  Else
+		  Begin
+
+		  UPDATE [dbo].[FinanceMileStones]
+   SET 
+      [TaskUID] = @TaskUID
+      ,[Finance_MileStoneName] = @Finance_MileStoneName
+      ,[Finance_MileStoneCreatedDate] = @Finance_MileStoneCreatedDate
+      ,[User_Created] = @User_Created
+      ,[Delete_Flag] = @Delete_Flag
+      ,[IsMonth] = @IsMonth
+      
+where Finance_MileStoneUID=@Finance_MileStoneUID
+
+
+UPDATE [dbo].[FinanceMileStones]
+   SET 
+      ServerCopiedUpdate='Y'
+	  where Finance_MileStoneUID=@Finance_MileStoneUID
+
+
+		  End
+
+
+END
+GO
+---------
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbsync_InsertorUpdate_FinanceMileStoneMonth]
+	-- Add the parameters for the stored procedure here
+@FinMileStoneMonthUID uniqueidentifier,
+@Finance_MileStoneUID uniqueidentifier,
+@AllowedPayment decimal(18,2),
+@UserCreated uniqueidentifier=NULL,
+@CreatedDate datetime,
+@DeletedFlag varchar(1),
+@Month varchar(20),
+@Year int,
+@MultiplyingFactor bigint,
+@WorkPackageUID uniqueidentifier,
+@OrderBy int,
+@DeletedBy uniqueidentifier=NULL,
+@DeletedDate datetime=NULL
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+if Not Exists(select FinMileStoneMonthUID From FinanceMileStoneMonth Where FinMileStoneMonthUID=@FinMileStoneMonthUID)
+Begin
+	INSERT INTO [dbo].[FinanceMileStoneMonth]
+           ([FinMileStoneMonthUID]
+           ,[Finance_MileStoneUID]
+           ,[AllowedPayment]
+           ,[UserCreated]
+           ,[CreatedDate]
+           ,[DeletedFlag]
+           ,[Month]
+           ,[Year]
+           ,[MultiplyingFactor]
+           ,[WorkPackageUID]
+           ,[OrderBy]
+           ,[DeletedBy]
+           ,[DeletedDate]
+           ,[ServerCopiedAdd]
+           )
+     VALUES
+           (@FinMileStoneMonthUID
+           ,@Finance_MileStoneUID 
+           ,@AllowedPayment 
+           ,@UserCreated
+           ,@CreatedDate
+           ,@DeletedFlag
+           ,@Month
+           ,@Year
+           ,@MultiplyingFactor
+           ,@WorkPackageUID
+           ,@OrderBy
+           ,@DeletedBy
+           ,@DeletedDate
+           ,'Y')
+		   End
+		   Else
+		   Begin
+		   UPDATE [dbo].[FinanceMileStoneMonth]
+   SET 
+      [Finance_MileStoneUID] = @Finance_MileStoneUID
+      ,[AllowedPayment] = @AllowedPayment
+      ,[UserCreated] = @UserCreated
+      ,[CreatedDate] = @CreatedDate
+      ,[DeletedFlag] = @DeletedFlag
+      ,[Month] = @Month
+      ,[Year] = @Year
+      ,[MultiplyingFactor] = @MultiplyingFactor
+      ,[WorkPackageUID] = @WorkPackageUID
+      ,[OrderBy] = @OrderBy
+      ,[DeletedBy] = @DeletedBy
+      ,[DeletedDate] = @DeletedDate
+     
+ Where FinMileStoneMonthUID=@FinMileStoneMonthUID
+
+ UPDATE [dbo].[FinanceMileStoneMonth]
+   SET 
+      ServerCopiedUpdate='Y'
+	   Where FinMileStoneMonthUID=@FinMileStoneMonthUID
+
+		   End
+
+END
+GO
+----
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[dbysnc_InsertorUpdate_FinanceMileStoneMonth_EditedValues]
+	-- Add the parameters for the stored procedure here
+@UID uniqueidentifier,
+@FinMileStoneMonthUID uniqueidentifier,
+@OldPaymentValue decimal(18,4),
+@NewPaymentValue decimal(18,4),
+@CreatedDate datetime,
+@EditedBy uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if Not Exists(select UID From FinanceMileStoneMonth_EditedValues Where UID=@UID)
+Begin
+	INSERT INTO [dbo].[FinanceMileStoneMonth_EditedValues]
+           ([UID]
+           ,[FinMileStoneMonthUID]
+           ,[OldPaymentValue]
+           ,[NewPaymentValue]
+           ,[CreatedDate]
+           ,[EditedBy]
+           ,[ServerCopiedAdd]
+           )
+     VALUES
+           (@UID
+           ,@FinMileStoneMonthUID
+           ,@OldPaymentValue
+           ,@NewPaymentValue
+           ,@CreatedDate
+           ,@EditedBy
+           ,'Y'
+          )
+End
+END

@@ -1,0 +1,214 @@
+/****** Object:  StoredProcedure [dbo].[GetWorkPackges]    Script Date: 12/24/2022 11:26:47 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[GetWorkPackges]
+as
+begin
+set nocount on;
+select ProjectUID,WorkPackageUID from WorkPackages where Delete_Flag='N' 
+end
+-----------------------------------------------------
+/****** Object:  StoredProcedure [dbo].[DeletePhysicalProgressGraphValues]    Script Date: 12/24/2022 11:30:46 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[DeletePhysicalProgressGraphValues]
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	delete from GraphPhysicalProgress;
+END
+
+--------------------------------------------------
+
+
+
+/****** Object:  StoredProcedure [dbo].[usp_GetTaskRevisedScheduleValuesForGraph]    Script Date: 12/24/2022 11:37:39 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[usp_GetTaskRevisedScheduleValuesForGraph]
+-- Add the parameters for the stored procedure here
+@WorkPackageUID as uniqueidentifier,
+@StartDate as datetime,
+@EndDate as datetime
+AS
+BEGIN
+-- SET NOCOUNT ON added to prevent extra result sets from
+-- interfering with SELECT statements.
+SET NOCOUNT ON;
+DECLARE @ScheduleVersion_Tasks TABLE
+(TaskScheduleVersion int, 
+ TaskUID Uniqueidentifier
+);
+
+--Select isnull(Sum(Schedule_Per),0) as TotalSchValue,isnull(Sum(Achieved_Per),0) as TotalAchValue From [dbo].[TaskSchedule] Where WorkpacageUID=@WorkPackageUID and Delete_Flag='N' and TaskScheduleVersion=(select max(TaskScheduleVersion) from TaskSchedule where WorkpacageUID=@WorkPackageUID)
+--and CAST(TaskSchedule.StartDate as DATE) = CAST(@StartDate as DATE) And CAST(TaskSchedule.EndDate as DATE) <= CAST(@EndDate as DATE)
+--END
+
+--insert into @ScheduleVersion_Tasks select max(TaskScheduleVersion) as TaskScheduleVersion,TaskUID from TaskSchedule 
+--where WorkpacageUID=@WorkPackageUID and CAST(TaskSchedule.StartDate as DATE) >= CAST(@StartDate as DATE) 
+--And CAST(TaskSchedule.EndDate as DATE) <= CAST(@EndDate as DATE) Group By TaskUId;
+--(x/unitOfQuantity)*(Task_Weightage/100)
+-- Insert statements for procedure here
+-- isnull(Sum(Achieved_Per),0) as TotalAchValue changed on 22/01/2022 to  isnull(Sum((Achieved_Value/T.UnitQuantity)*(T.Task_Weightage)),0) as TotalAchValue  
+Declare @ProjectName as varchar(max);
+Declare @ProjectUID as uniqueidentifier;
+set @ProjectUID =(select ProjectUID From WorkPackages Where WorkPackageUID=@WorkPackageUID);
+set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+
+if @ProjectName = 'CP-09'
+Begin
+Select 
+   isnull(Sum((revised_scheduled_value/T.revised_unitquantity)*(T.Task_Weightage)),0) as TotalRevSchValue
+   --isnull(Sum((Achieved_Value/T.UnitQuantity)*(T.Task_Weightage)),0) as TotalAchValue  
+   From [dbo].[TaskSchedule] TS
+   inner join
+   (select max(TaskScheduleVersion) as TaskScheduleVersion,TaskUID from TaskSchedule 
+       where WorkpacageUID=@WorkPackageUID and CAST(TaskSchedule.StartDate as DATE) >= CAST(@StartDate as DATE) 
+       And CAST(TaskSchedule.EndDate as DATE) <= CAST(@EndDate as DATE) Group By TaskUId) ST 
+   on WorkpacageUID=@WorkPackageUID 
+   And  CAST(TS.StartDate as DATE) >= CAST(@StartDate as DATE)
+   AND  CAST(TS.EndDate as DATE) <= CAST(@EndDate as DATE)
+   and TS.TaskUID=ST.TaskUID 
+   and TS.TaskScheduleVersion=ST.TaskScheduleVersion 
+  
+   Join Tasks T on T.TaskUID= TS.TaskUID and T.Delete_Flag='N' and TS.Delete_Flag='N'
+   and T.revised_unitquantity > 0 and T.Report5='Y';
+ End
+ else if @ProjectName = 'CP-02'
+Begin
+Select 
+   isnull(Sum((revised_scheduled_value/T.revised_unitquantity)),0) as TotalRevSchValue
+   --isnull(Sum((Achieved_Value/T.UnitQuantity)*(T.Task_Weightage)),0) as TotalAchValue  
+   From [dbo].[TaskSchedule] TS
+   inner join
+   (select max(TaskScheduleVersion) as TaskScheduleVersion,TaskUID from TaskSchedule 
+       where WorkpacageUID=@WorkPackageUID and CAST(TaskSchedule.StartDate as DATE) >= CAST(@StartDate as DATE) 
+       And CAST(TaskSchedule.EndDate as DATE) <= CAST(@EndDate as DATE) Group By TaskUId) ST 
+   on WorkpacageUID=@WorkPackageUID 
+   And  CAST(TS.StartDate as DATE) >= CAST(@StartDate as DATE)
+   AND  CAST(TS.EndDate as DATE) <= CAST(@EndDate as DATE)
+   and TS.TaskUID=ST.TaskUID 
+   and TS.TaskScheduleVersion=ST.TaskScheduleVersion 
+  
+   Join Tasks T on T.TaskUID= TS.TaskUID and T.Delete_Flag='N' and TS.Delete_Flag='N'
+   and T.revised_unitquantity > 0 and T.Report5='Y';
+ End
+ else if @ProjectName = 'CP-03'
+Begin
+Select 
+   isnull(Sum((revised_scheduled_value/T.revised_unitquantity)),0) as TotalRevSchValue
+   --isnull(Sum((Achieved_Value/T.UnitQuantity)*(T.Task_Weightage)),0) as TotalAchValue  
+   From [dbo].[TaskSchedule] TS
+   inner join
+   (select max(TaskScheduleVersion) as TaskScheduleVersion,TaskUID from TaskSchedule 
+       where WorkpacageUID=@WorkPackageUID and CAST(TaskSchedule.StartDate as DATE) >= CAST(@StartDate as DATE) 
+       And CAST(TaskSchedule.EndDate as DATE) <= CAST(@EndDate as DATE) Group By TaskUId) ST 
+   on WorkpacageUID=@WorkPackageUID 
+   And  CAST(TS.StartDate as DATE) >= CAST(@StartDate as DATE)
+   AND  CAST(TS.EndDate as DATE) <= CAST(@EndDate as DATE)
+   and TS.TaskUID=ST.TaskUID 
+   and TS.TaskScheduleVersion=ST.TaskScheduleVersion 
+  
+   Join Tasks T on T.TaskUID= TS.TaskUID and T.Delete_Flag='N' and TS.Delete_Flag='N'
+   and T.revised_unitquantity > 0 and T.Report5='Y';
+ End
+ if @ProjectName = 'CP-26'
+Begin
+Select 
+   isnull(Sum((revised_scheduled_value/T.revised_unitquantity)),0) as TotalRevSchValue
+   --isnull(Sum((Achieved_Value/T.UnitQuantity)*(T.Task_Weightage)),0) as TotalAchValue  
+   From [dbo].[TaskSchedule] TS
+   inner join
+   (select max(TaskScheduleVersion) as TaskScheduleVersion,TaskUID from TaskSchedule 
+       where WorkpacageUID=@WorkPackageUID and CAST(TaskSchedule.StartDate as DATE) >= CAST(@StartDate as DATE) 
+       And CAST(TaskSchedule.EndDate as DATE) <= CAST(@EndDate as DATE) Group By TaskUId) ST 
+   on WorkpacageUID=@WorkPackageUID 
+   And  CAST(TS.StartDate as DATE) >= CAST(@StartDate as DATE)
+   AND  CAST(TS.EndDate as DATE) <= CAST(@EndDate as DATE)
+   and TS.TaskUID=ST.TaskUID 
+   and TS.TaskScheduleVersion=ST.TaskScheduleVersion 
+  
+   Join Tasks T on T.TaskUID= TS.TaskUID and T.Delete_Flag='N' and TS.Delete_Flag='N'
+   and T.revised_unitquantity > 0 and T.Report5='Y';
+ End
+ Else
+ Begin
+ Select 
+   isnull(Sum((revised_scheduled_value/T.revised_unitquantity)),0) as TotalRevSchValue
+   --isnull(Sum((Achieved_Value/T.UnitQuantity)*(T.Task_Weightage)),0) as TotalAchValue  
+   From [dbo].[TaskSchedule] TS
+   inner join
+   (select max(TaskScheduleVersion) as TaskScheduleVersion,TaskUID from TaskSchedule 
+       where WorkpacageUID=@WorkPackageUID and CAST(TaskSchedule.StartDate as DATE) >= CAST(@StartDate as DATE) 
+       And CAST(TaskSchedule.EndDate as DATE) <= CAST(@EndDate as DATE) Group By TaskUId) ST 
+   on WorkpacageUID=@WorkPackageUID 
+   And  CAST(TS.StartDate as DATE) >= CAST(@StartDate as DATE)
+   AND  CAST(TS.EndDate as DATE) <= CAST(@EndDate as DATE)
+   and TS.TaskUID=ST.TaskUID 
+   and TS.TaskScheduleVersion=ST.TaskScheduleVersion 
+  
+   Join Tasks T on T.TaskUID= TS.TaskUID and T.Delete_Flag='N' and TS.Delete_Flag='N'
+   and T.revised_unitquantity > 0 ;
+
+ End
+END
+
+-----------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[InsertPhysicalProgressGraphValues]    Script Date: 12/24/2022 11:38:42 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[InsertPhysicalProgressGraphValues]
+@GraphPhysicalProgressUID as uniqueidentifier,
+@ProjectUID as uniqueidentifier,
+@WorkPackageUID as uniqueidentifier,
+@CreatedDate as Datetime,
+@ValuesString as nvarchar(max)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	if not exists (select GraphPhysicalProgressUID from GraphPhysicalProgress where GraphPhysicalProgressUID=@GraphPhysicalProgressUID)
+	begin
+		INSERT INTO [dbo].[GraphPhysicalProgress]
+			   ([GraphPhysicalProgressUID]
+			   ,[ProjectUID]
+			   ,[WorkPackageUID]
+			   ,[CreatedDate]
+			   ,[ValuesString])
+		 VALUES
+			   (@GraphPhysicalProgressUID
+			   ,@ProjectUID
+			   ,@WorkPackageUID
+			   ,@CreatedDate
+			   ,@ValuesString)
+      end
+END
+
+--------------------------------------
+
+

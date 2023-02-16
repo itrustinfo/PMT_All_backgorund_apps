@@ -1,0 +1,38 @@
+/****** Object:  StoredProcedure [dbo].[usp_GetAllBankGuarantees]    Script Date: 7/22/2022 5:04:15 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_GetAllBankGuarantees]
+as
+begin
+set nocount on;
+select ProjectUID, WorkPackageUID,Bank_GuaranteeUID, BG_Number,Date_of_Expiry from BankGuarantee where Delete_Flag='N';
+end
+
+----------------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[usp_GetAllInsurances]    Script Date: 7/22/2022 5:03:46 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_GetAllInsurances]
+as
+begin
+set nocount on;
+select Policy_Number,Name_of_InsuranceCompany,InsuranceUID, ProjectUID,WorkPackageUID,Maturity_Date from Insurance where Delete_Flag='N';
+end
+------------------------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[usp_GetAllIssues]    Script Date: 7/22/2022 5:03:06 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_GetAllIssues]
+as
+begin
+set nocount on;
+select Issued_User, Issue_Uid, ProjectUID,WorkPackagesUID,Issue_Description,Issue_Date from Issues where Delete_Flag='N';
+end
