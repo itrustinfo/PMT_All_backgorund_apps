@@ -117,55 +117,57 @@ namespace DBSyncProgram
             //Console.ReadLine();
             while (true)
             {
-                SynchSubmittals();  // tested - escape caharcters
+                //SynchSubmittals();  // tested - escape caharcters
 
-                SynchSubmittal_MultipleUsers();
+                //SynchSubmittal_MultipleUsers();
 
                 SynchActualDocuments(); // tested - escape caharcters
 
-                SynchDocumentStatus(); // tested - escape caharcters
+               // SynchDocumentStatus(); // tested - escape caharcters
 
-                SynchDocumentVersion(); // tested - escape caharcters
+              //  SynchDocumentVersion(); // tested - escape caharcters
 
-                SynchReferencNoHistory();
+                //SyncDocumentsAttachment();
 
-                SynchFlow_Master_Users();
+                //SynchReferencNoHistory();
 
-                SynchMeasurementBook();
+                //SynchFlow_Master_Users();
 
-                SynchDocumentFlowData(); // tested - escape caharcters
+                //SynchMeasurementBook();
 
-                SyncDocumentsUploadLog(); // tested
+                //SynchDocumentFlowData(); // tested - escape caharcters
 
-                SynchWorddocRead(); // tested
+                //SyncDocumentsUploadLog(); // tested
+
+                //SynchWorddocRead(); // tested
 
                 SynchRABill_Abstract(); // tested
 
                 SynchRABills_Documents();
 
-                SynchRABillsSync(); // tested
+                //SynchRABillsSync(); // tested
 
-                SynchAssignJointInspectiontoRAbill(); //tested
+                //SynchAssignJointInspectiontoRAbill(); //tested
 
-                SynchInvoiceMaster(); // tested
+                //SynchInvoiceMaster(); // tested
 
-                SynchDeductionsMaster(); // tested
+                //SynchDeductionsMaster(); // tested
 
-                SynchInvoiceRABills(); // tested
+                //SynchInvoiceRABills(); // tested
 
-                SynchInvoiceDeduction(); // tested
+                //SynchInvoiceDeduction(); // tested
 
-                SyncUserDetails(); //tested
+                //SyncUserDetails(); //tested
 
-                SyncUserProjects(); //tested
+                //SyncUserProjects(); //tested
 
-                SyncUserWorkPackages(); //tested
+                //SyncUserWorkPackages(); //tested
 
-                SyncUserRolesMaster(); //tested
+                //SyncUserRolesMaster(); //tested
 
-                SyncUserType_Functionality_Master(); //tested
+                //SyncUserType_Functionality_Master(); //tested
 
-                SyncUserType_Functionality_Mapping(); //tested
+                //SyncUserType_Functionality_Mapping(); //tested
 
                 SyncIssues(); //tested
 
@@ -175,53 +177,53 @@ namespace DBSyncProgram
 
                 SyncIssueRemarksDocs();
 
-                SynchActivityDeleteLogs(); //tested
+                //SynchActivityDeleteLogs(); //tested
 
-                SyncFinanceMileStones(); //tested
+                //SyncFinanceMileStones(); //tested
 
-                SyncFinanceMileStoneMonth(); //tested
+                //SyncFinanceMileStoneMonth(); //tested
 
-                SynchFinanceMileStoneMonth_EditedValues();  //tested
+                //SynchFinanceMileStoneMonth_EditedValues();  //tested
 
-                SyncTaskSchedule(); //tested
+                //SyncTaskSchedule(); //tested
 
-                SyncTaskScheduleVersion(); //tested
+                //SyncTaskScheduleVersion(); //tested
 
-                SyncTask(); //tested
+                //SyncTask(); //tested
 
-                //added on 05/01/2023
-                SyncResourceMaster();
+                ////added on 05/01/2023
+                //SyncResourceMaster();
 
-                SyncResourceDeployment();
+                //SyncResourceDeployment();
 
-                SynchResourceDeploymentUpdate();
-                //
-                SyncDailyProgressReportMaster(); //tested
+                //SynchResourceDeploymentUpdate();
+                ////
+                //SyncDailyProgressReportMaster(); //tested
 
-                SyncDailyProgress(); //tested
+                //SyncDailyProgress(); //tested
 
-                //added on 20 / 08 / 2022
-                SyncGFCReportMaster();
+                ////added on 20 / 08 / 2022
+                //SyncGFCReportMaster();
 
-                SyncGFCStatus();
+                //SyncGFCStatus();
 
-                SyncDesign_and_drawing_A_master();
+                //SyncDesign_and_drawing_A_master();
 
-                SyncDesign_and_drawing_works_A();
+                //SyncDesign_and_drawing_works_A();
 
-                Syncdesign_and_drawing_dwg_issue_master();
+                //Syncdesign_and_drawing_dwg_issue_master();
 
-                SyncDesign_and_drawing_works_dwg_issue();
+                //SyncDesign_and_drawing_works_dwg_issue();
 
-                Syncdesign_and_drawing_works_b_tt_master();
+                //Syncdesign_and_drawing_works_b_tt_master();
 
-                SyncDesign_and_drawing_works_b_tt();
+                //SyncDesign_and_drawing_works_b_tt();
 
-                SyncRABillPayments();
+                //SyncRABillPayments();
 
-                Synchform_task_update();
+                //Synchform_task_update();
 
-                SynchCorrespondenceCCToUsers();
+                //SynchCorrespondenceCCToUsers();
 
                 UpdateDbsync_Status();
                 Console.WriteLine("Next check happens after 10 seconds---------------");
@@ -5766,7 +5768,7 @@ namespace DBSyncProgram
                 //
                 //  MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From Tasks where ServerCopiedUpdate='N' and WorkPackageUID='" + wkPkgUID + "'", MyConnection);
 
-                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From [form-task-update] where ServerCopiedAdd='N' and WorkpackageUID='" + wkPkgUID + "'", MyConnection);
+                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From [form-task-update] where ServerCopiedUpdate='N' and WorkpackageUID='" + wkPkgUID + "'", MyConnection);
 
 
 
@@ -5868,7 +5870,7 @@ namespace DBSyncProgram
                 //
                 //  MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From Tasks where ServerCopiedUpdate='N' and WorkPackageUID='" + wkPkgUID + "'", MyConnection);
 
-                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From CorrespondenceCCToUsers where ServerCopiedAdd='N' and  ActualDocumentUID in (Select ActualDocumentUID From ActualDocuments Where WorkpackageUID='" + wkPkgUID + "')", MyConnection);
+                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From CorrespondenceCCToUsers where ServerCopiedUpdate='N' and  ActualDocumentUID in (Select ActualDocumentUID From ActualDocuments Where WorkpackageUID='" + wkPkgUID + "')", MyConnection);
 
 
 
@@ -5913,6 +5915,119 @@ namespace DBSyncProgram
             catch (Exception ex)
             {
                 dbutility.InsertintoDbsyncLogs(Guid.NewGuid(), "CorrespondenceCCToUsers Add/Update", "Error", ex.Message);
+                Console.WriteLine(ex.Message);
+                //Console.ReadLine();
+
+            }
+        }
+
+        //added on 26/05/2023 
+        private void SyncDocumentsAttachment()
+        {
+            try
+            {
+                // source
+                //string wkPkgUID = "28A6A63B-2573-40A8-BC89-E396C31CE516";
+                System.Data.SqlClient.SqlConnection MyConnection = new System.Data.SqlClient.SqlConnection();
+                MyConnection.ConnectionString = GetSourceConnectionString();
+                System.Data.SqlClient.SqlDataAdapter MyAdapter = new System.Data.SqlClient.SqlDataAdapter();
+                System.Data.DataSet MyDataset = new System.Data.DataSet();
+                System.Data.SqlClient.SqlCommand MyCommand = new System.Data.SqlClient.SqlCommand();
+                MyCommand.Connection = MyConnection;
+
+                // check the submittal table for any records to be added or updated.....
+                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From DocumentsAttachments where ServerCopiedAdd='N' and  ActualDocumentUID in (Select ActualDocumentUID From ActualDocuments Where WorkpackageUID='" + wkPkgUID + "')", MyConnection);
+                //
+
+                MyDataset.Clear();
+                MyAdapter.Fill(MyDataset);
+                string postData = "";
+                string URL = serviceURL + "DocumentsAttachmentSync"; ;
+                var data = "";
+
+
+                Console.WriteLine("Started Synching for DocumentsAttachments Add : ");
+                if (MyDataset.Tables[0].Rows.Count == 0)
+                {
+                    Console.WriteLine("No Records found for DocumentsAttachments Add : ");
+                }
+                foreach (DataRow dr in MyDataset.Tables[0].Rows) // get each row form source db and update it to destination db
+                {
+                    try
+                    {
+                        if (uploaddoc(dr["AttachmentFile"].ToString()))
+                        {
+                            postData = "AttachmentUID=" + dr["AttachmentUID"].ToString() + "&ActualDocumentUID=" + dr["ActualDocumentUID"].ToString() + "&StatusUID=" + dr["StatusUID"].ToString() +
+                             "&AttachmentFileName=" + dr["AttachmentFileName"].ToString() + "&AttachmentFile=" + dr["AttachmentFile"].ToString()
+                             + "&CreatedUserUID=" + dr["CreatedUserUID"].ToString()
+                             + "&CreatedDate=" + dr["CreatedDate"].ToString()
+                             + "&DeletedFlag=" + dr["DeletedFlag"].ToString();
+
+                            data = webPostMethod(postData, URL);
+                            if (data.ToString().Contains("true"))
+                            {
+                                dbutility.updateAddFlag(new Guid(dr["AttachmentUID"].ToString()), "DocumentsAttachments", "AttachmentUID");
+                                dbutility.InsertintoDbsyncLogs(new Guid(dr["AttachmentUID"].ToString()), "DocumentsAttachments Add", "Success", "");
+                                Console.WriteLine("Synching for DocumentsAttachments Add : " + dr["UID"].ToString() + " Done");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        dbutility.InsertintoDbsyncLogs(new Guid(dr["AttachmentUID"].ToString()), "DocumentsAttachments Add", "Error", ex.Message);
+                    }
+                }
+                //
+                //  MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From Tasks where ServerCopiedUpdate='N' and WorkPackageUID='" + wkPkgUID + "'", MyConnection);
+
+                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From DocumentsAttachments where ServerCopiedUpdate='N' and  ActualDocumentUID in (Select ActualDocumentUID From ActualDocuments Where WorkpackageUID='" + wkPkgUID + "')", MyConnection);
+
+
+
+
+                //
+                //if (MyConnection.State == System.Data.ConnectionState.Closed)
+                //{
+                //    MyConnection.Open();
+                //}
+                MyDataset.Clear();
+                MyAdapter.Fill(MyDataset);
+                Console.WriteLine("Started Synching for DocumentsAttachments Update : ");
+                if (MyDataset.Tables[0].Rows.Count == 0)
+                {
+                    Console.WriteLine("No Records found for DocumentsAttachments Update : ");
+                }
+                foreach (DataRow dr in MyDataset.Tables[0].Rows) // get each row form source db and update it to destination db
+                {
+                    try
+                    {
+                        postData = "AttachmentUID=" + dr["AttachmentUID"].ToString() + "&ActualDocumentUID=" + dr["ActualDocumentUID"].ToString() + "&StatusUID=" + dr["StatusUID"].ToString() +
+                            "&AttachmentFileName=" + dr["AttachmentFileName"].ToString() + "&AttachmentFile=" + dr["AttachmentFile"].ToString()
+                            + "&CreatedUserUID=" + dr["CreatedUserUID"].ToString()
+                            + "&CreatedDate=" + dr["CreatedDate"].ToString()
+                            + "&DeletedFlag=" + dr["DeletedFlag"].ToString();
+
+
+
+                        data = webPostMethod(postData, URL);
+                        if (data.ToString().Contains("true"))
+                        {
+                            dbutility.updateUpdateFlag(new Guid(dr["AttachmentUID"].ToString()), "DocumentsAttachments", "AttachmentUID");
+                            dbutility.InsertintoDbsyncLogs(new Guid(dr["AttachmentUID"].ToString()), "DocumentsAttachments Update", "Success", "");
+                            Console.WriteLine("Synching for DocumentsAttachments Update : " + dr["AttachmentUID"].ToString() + " Done");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        dbutility.InsertintoDbsyncLogs(new Guid(dr["AttachmentUID"].ToString()), "DocumentsAttachments Update", "Error", ex.Message);
+                    }
+                }
+                Console.WriteLine("Synching for DocumentsAttachments Add Done : ");
+                // Console.ReadLine();
+            }
+            catch (Exception ex)
+            {
+                dbutility.InsertintoDbsyncLogs(Guid.NewGuid(), "DocumentsAttachments Add/Update", "Error", ex.Message);
                 Console.WriteLine(ex.Message);
                 //Console.ReadLine();
 

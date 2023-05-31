@@ -695,7 +695,7 @@ namespace DBSyncProgram.DAL
         {
             DataSet ds = new DataSet();
             SqlConnection con = new SqlConnection(GetSourceConnectionString());
-            SqlDataAdapter da = new SqlDataAdapter("Select * From Dbsync_Settings Where WorkPackageName='CP-26'", con);
+            SqlDataAdapter da = new SqlDataAdapter("Select * From Dbsync_Settings Where WorkPackageName='CP-02'", con);
             da.Fill(ds);
             return ds;
         }
