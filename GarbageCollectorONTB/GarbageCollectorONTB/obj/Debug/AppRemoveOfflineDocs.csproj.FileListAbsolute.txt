@@ -1,0 +1,7 @@
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\bin\Debug\AppRemoveOfflineDocs.exe.config
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\bin\Debug\AppRemoveOfflineDocs.exe
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\bin\Debug\AppRemoveOfflineDocs.pdb
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\obj\Debug\AppRemoveOfflineDocs.csproj.AssemblyReference.cache
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\obj\Debug\AppRemoveOfflineDocs.csproj.CoreCompileInputs.cache
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\obj\Debug\AppRemoveOfflineDocs.exe
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\obj\Debug\AppRemoveOfflineDocs.pdb

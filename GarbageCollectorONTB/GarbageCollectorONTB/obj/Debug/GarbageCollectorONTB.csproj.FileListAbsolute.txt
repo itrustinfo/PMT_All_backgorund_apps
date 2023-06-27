@@ -1,0 +1,14 @@
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\bin\Debug\GarbagedCollectorONTB.dll.config
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\bin\Debug\GarbagedCollectorONTB.dll
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\bin\Debug\GarbagedCollectorONTB.pdb
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\obj\Debug\GarbageCollectorONTB.csproj.AssemblyReference.cache
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\obj\Debug\GarbageCollectorONTB.csproj.CoreCompileInputs.cache
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\obj\Debug\GarbagedCollectorONTB.dll
+C:\Users\SAJI AUGUSTIN\source\repos\AppRemoveOfflineDocs\obj\Debug\GarbagedCollectorONTB.pdb
+D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\obj\Debug\GarbageCollectorONTB.csprojAssemblyReference.cache
+D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\obj\Debug\GarbageCollectorONTB.csproj.CoreCompileInputs.cache
+D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\obj\Debug\GarbagedCollectorONTB.pdb
+D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\bin\Debug\GarbagedCollectorONTB.pdb
+D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\bin\Debug\GarbagedCollectorONTB.exe.config
+D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\bin\Debug\GarbagedCollectorONTB.exe
+D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\obj\Debug\GarbagedCollectorONTB.exe

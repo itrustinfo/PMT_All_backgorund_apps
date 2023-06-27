@@ -1,0 +1,159 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[DocumenttoBlobLogs](
+	[BlobConvertLogUID] [uniqueidentifier] NOT NULL,
+	[FileUID] [uniqueidentifier] NULL,
+	[FileTable] [varchar](50) NULL,
+	[Status] [varchar](50) NULL,
+	[Filepath] [varchar](500) NULL,
+	[CreatedDate] [datetime] NULL,
+ CONSTRAINT [PK_DocumenttoBlobLogs] PRIMARY KEY CLUSTERED 
+(
+	[BlobConvertLogUID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[DocumenttoBlobLogs] ADD  CONSTRAINT [DF_DocumenttoBlobLogs_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[usp_DocumenttoBlobLog_Insert]
+@BlobConvertLogUID uniqueidentifier,
+@FileUID uniqueidentifier,
+@FileTable varchar(50),
+@Status varchar(50),
+@Filepath varchar(500)
+as
+begin
+
+insert into DocumenttoBlobLogs(BlobConvertLogUID,FileUID,FileTable,Status,Filepath)
+values(@BlobConvertLogUID,@FileUID,@FileTable,@Status,@Filepath)
+end
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[usp_GetAllDocumentsby_ProjectUID]
+@ProjectUID uniqueidentifier
+as
+begin
+
+declare @dbname as varchar(50);
+Declare @PrjUID as nvarchar(max);
+DECLARE @sql NVARCHAR(MAX) ;
+set @dbname = (select DbName From MasterDbforBlob Where ProjectUID=@ProjectUID)
+set @PrjUID=@ProjectUID
+
+set @sql = N'select * from ActualDocuments where ProjectUID=''' + @PrjUID  + ''' and Delete_Flag=''N'' and ActualDocumentUID not in (select ActualDocumentUID from ' + @dbname + '.dbo.ActualDocumentBlob)'
+print @sql
+EXEC(@sql)
+end
+
+
+
+
+
+
+//
+USE [ONTB_Server_Blob]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetAllDocumentsAttachmentsby_ProjectUID]    Script Date: 4/25/2023 1:11:16 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_GetAllDocumentsAttachmentsby_ProjectUID]
+@ProjectUID uniqueidentifier
+as
+begin
+
+declare @dbname as varchar(50);
+Declare @PrjUID as nvarchar(max);
+DECLARE @sql NVARCHAR(MAX) ;
+set @dbname = (select DbName From MasterDbforBlob Where ProjectUID=@ProjectUID)
+set @PrjUID=@ProjectUID
+
+
+set @sql = N'SELECT * FROM DocumentsAttachments INNER JOIN
+                  ActualDocuments ON DocumentsAttachments.ActualDocumentUID = ActualDocuments.ActualDocumentUID
+				  Where ActualDocuments.ProjectUID=''' + @PrjUID  + ''' and Delete_Flag=''N'' and DocumentsAttachments.AttachmentUID not in (select AttachmentUID from ' + @dbname + '.dbo.DocumentsAttachments_Blob)'
+print @sql
+EXEC(@sql)
+end
+
+
+//added on 28/04/2023
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[usp_GetAll_GeneralDocuments]
+as
+begin
+set nocount on;
+select * from GeneralDocuments where Delete_Flag='N'
+and GeneralDocumentUID not in (select GeneralDocumentUID from GeneralDocumentsBlob) order by GeneralDocument_CreatedDate asc
+end
+
+
+//
+/****** Object:  StoredProcedure [dbo].[usp_GeneralDocumentBlobInsertorUpdate]    Script Date: 4/28/2023 12:53:52 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[usp_GeneralDocumentBlobInsertorUpdate]
+@GeneralDocumentBlobUID uniqueidentifier,
+@GeneralDocumentUID uniqueidentifier,
+@GeneralDocumentBlob varbinary(max)
+as
+begin
+if not exists(select GeneralDocumentBlobUID from GeneralDocumentsBlob where GeneralDocumentBlobUID=@GeneralDocumentBlobUID and Delete_Flag='N')
+begin
+	 insert into GeneralDocumentsBlob(GeneralDocumentBlobUID,GeneralDocumentUID,GeneralDocumentBlob)
+	 values(@GeneralDocumentBlobUID,@GeneralDocumentUID,@GeneralDocumentBlob)
+end
+else
+begin
+ update GeneralDocumentsBlob set GeneralDocumentBlob=@GeneralDocumentBlob where GeneralDocumentUID=@GeneralDocumentUID
+end
+end
+
+//added on 19/05/2023
+USE [ONTB_Server_Blob]
+GO
+/****** Object:  StoredProcedure [dbo].[blob_GetDocumentStatusPending]    Script Date: 6/15/2023 12:15:33 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[blob_GetDocumentStatusPending]
+@ProjectUID uniqueidentifier
+as
+begin
+
+declare @dbname as varchar(50);
+Declare @PrjUID as nvarchar(max);
+DECLARE @sql NVARCHAR(MAX) ;
+set @dbname = (select DbName From MasterDbforBlob Where ProjectUID=@ProjectUID)
+set @PrjUID=@ProjectUID
+
+
+set @sql = N'SELECT * FROM DocumentStatus INNER JOIN
+                  ActualDocuments ON DocumentStatus.DocumentUID = ActualDocuments.ActualDocumentUID
+				  Where ActualDocuments.ProjectUID=''' + @PrjUID  + ''' and DocumentStatus.Delete_Flag=''N'' and DocumentStatus.StatusUID not in (select StatusUID from ' + @dbname + '.dbo.DocumentStatus_Blob) and (DocumentStatus.CoverLetterFile is not null and DocumentStatus.CoverLetterFile <>'''')'
+print @sql
+EXEC(@sql)
+end
