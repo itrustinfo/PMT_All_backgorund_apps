@@ -464,5 +464,110 @@ namespace GarbageCollectorONTB
             return ds;
         }
 
+        public DataSet grbage_GetDocumentStatusDocsby_ProjectUID(Guid ProjectUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("grbage_GetDocumentStatusDocs", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("ProjectUID", ProjectUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet grbage_GetDocumentVersionDocsby_ProjectUID(Guid ProjectUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("grbage_GetDocumentVersionDocs", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("ProjectUID", ProjectUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet garbage_GetAllDocumentsAttachmentsby_ProjectUID(Guid ProjectUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("grabage_GetAllDocumentsAttachmentsby_ProjectUID", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("ProjectUID", ProjectUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet garbage_GetAll_GeneralDocuments()
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("garbage_GetAll_GeneralDocuments", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+              
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public int updategrabageFlag(Guid UID, string tablename, string primaryKeyname)
+        {
+            int sresult = 0;
+            try
+
+            {
+                using (SqlConnection con = new SqlConnection(GetConnectionString()))
+                {
+
+                    using (SqlCommand cmd = new SqlCommand("Update " + tablename + " set garbagecollectorflag ='Y' Where " + primaryKeyname + "='" + UID + "'"))
+                    {
+
+                        cmd.Connection = con;
+                        con.Open();
+                        sresult = (int)cmd.ExecuteNonQuery();
+                        con.Close();
+                    }
+                }
+                return sresult;
+            }
+            catch (Exception ex)
+            {
+                return sresult = 0;
+            }
+        }
     }
 }

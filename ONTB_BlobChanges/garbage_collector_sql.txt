@@ -6,6 +6,9 @@ Alter Table [dbo].[DocumentVesrion] add garbagecollectorflag varchar(1) null
 
 Alter Table [dbo].[DocumentsAttachments] add garbagecollectorflag varchar(1) null
 
+
+Alter Table[dbo].[GeneralDocuments]  add garbagecollectorflag varchar(1) null
+
 //added on 27/06/2023
 SET ANSI_NULLS ON
 GO
@@ -43,3 +46,89 @@ FROM     WorkPackages INNER JOIN
 
 end
 
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[grbage_GetDocumentStatusDocs]
+@ProjectUID uniqueidentifier
+as
+begin
+
+declare @dbname as varchar(50);
+Declare @PrjUID as nvarchar(max);
+DECLARE @sql NVARCHAR(MAX) ;
+set @dbname = (select DbName From MasterDbforBlob Where ProjectUID=@ProjectUID)
+set @PrjUID=@ProjectUID
+
+
+set @sql = N'SELECT * FROM DocumentStatus INNER JOIN
+                  ActualDocuments ON DocumentStatus.DocumentUID = ActualDocuments.ActualDocumentUID
+				  Where ActualDocuments.ProjectUID=''' + @PrjUID  + ''' and (DocumentStatus.garbagecollectorflag = ''N'' or DocumentStatus.garbagecollectorflag is NULL) and DocumentStatus.StatusUID in (select StatusUID from ' + @dbname + '.dbo.DocumentStatus_Blob) and (DocumentStatus.CoverLetterFile is not null and DocumentStatus.CoverLetterFile <>'''')'
+print @sql
+EXEC(@sql)
+end
+
+//
+refno hdfc : 23179091012
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[grbage_GetDocumentVersionDocs]
+@ProjectUID uniqueidentifier
+as
+begin
+
+declare @dbname as varchar(50);
+Declare @PrjUID as nvarchar(max);
+DECLARE @sql NVARCHAR(MAX) ;
+set @dbname = (select DbName From MasterDbforBlob Where ProjectUID=@ProjectUID)
+set @PrjUID=@ProjectUID
+
+
+set @sql = N'SELECT * FROM DocumentVesrion INNER JOIN
+                  ActualDocuments ON DocumentVesrion.DocumentUID = ActualDocuments.ActualDocumentUID
+				  Where ActualDocuments.ProjectUID=''' + @PrjUID  + ''' and (DocumentVesrion.garbagecollectorflag = ''N'' or DocumentVesrion.garbagecollectorflag is NULL) and DocumentVesrion.DocVersion_UID in (select DocVersion_UID from ' + @dbname + '.dbo.DocumentVersionBlob)'
+print @sql
+EXEC(@sql)
+end
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+alter proc [dbo].[grabage_GetAllDocumentsAttachmentsby_ProjectUID]
+@ProjectUID uniqueidentifier
+as
+begin
+
+declare @dbname as varchar(50);
+Declare @PrjUID as nvarchar(max);
+DECLARE @sql NVARCHAR(MAX) ;
+set @dbname = (select DbName From MasterDbforBlob Where ProjectUID=@ProjectUID)
+set @PrjUID=@ProjectUID
+
+
+set @sql = N'SELECT * FROM DocumentsAttachments INNER JOIN
+                  ActualDocuments ON DocumentsAttachments.ActualDocumentUID = ActualDocuments.ActualDocumentUID
+				  Where ActualDocuments.ProjectUID=''' + @PrjUID  + ''' and (DocumentsAttachments.garbagecollectorflag = ''N'' or DocumentsAttachments.garbagecollectorflag is NULL) and DocumentsAttachments.AttachmentUID in (select AttachmentUID from ' + @dbname + '.dbo.DocumentsAttachments_Blob)'
+print @sql
+EXEC(@sql)
+end
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+alter proc [dbo].[garbage_GetAll_GeneralDocuments]
+as
+begin
+set nocount on;
+select * from GeneralDocuments where (garbagecollectorflag = 'N' or garbagecollectorflag is NULL)
+and GeneralDocumentUID in (select GeneralDocumentUID from GeneralDocumentsBlob) order by GeneralDocument_CreatedDate asc
+end

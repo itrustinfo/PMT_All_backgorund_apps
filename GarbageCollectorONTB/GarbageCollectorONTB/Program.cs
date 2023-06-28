@@ -36,6 +36,8 @@ namespace GarbageCollectorONTB
             {
                 DBActions db_transact = new DBActions();
 
+                RemoveGeneralDocs();
+
                 DataSet ds1 = db_transact.GetWorkPackages();
 
                
@@ -43,7 +45,12 @@ namespace GarbageCollectorONTB
                 {
 
                     //RemoveOfflineIssueDocs(row.ItemArray[1].ToString());
-                    RemoveActualDocumenst(row.ItemArray[0].ToString());
+                    //RemoveActualDocumenst(row.ItemArray[0].ToString());
+
+                    //RemoveDocumentStatusDocs(row.ItemArray[0].ToString());
+                    //RemoveDocumentVersionDocs(row.ItemArray[0].ToString());
+                    // RemoveDocumentAtatchmentDocs(row.ItemArray[0].ToString());
+                   
                 }
 
                 return true;
@@ -111,7 +118,196 @@ namespace GarbageCollectorONTB
                         if (File.Exists(phy_path))
                         {
                             File.Delete(phy_path);
+                            db_transact.updategrabageFlag(new Guid(dr["ActualDocumentUID"].ToString()), "ActualDocuments", "ActualDocumentUID");
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+
+        public static void RemoveDocumentStatusDocs(string projectuid)
+        {
+            DBActions db_transact = new DBActions();
+
+            string doc_path = "";
+            string phy_path = "";
+
+            DataSet ds = null;
+
+            ds = db_transact.grbage_GetDocumentStatusDocsby_ProjectUID(new Guid(projectuid));
+
+            if (ds.Tables.Count > 0)
+            {
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                {
+                    
+
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(dr["LinkToReviewFile"].ToString()) && dr["LinkToReviewFile"] != DBNull.Value)
+                        {
+                            doc_path = dr["LinkToReviewFile"].ToString();
+                            phy_path = phy_path_issue_doc + "\\_modal_pages\\" + doc_path.Replace('/', '\\');
+                        }
+
+                        if (File.Exists(phy_path))
+                        {
+                            File.Delete(phy_path);
+                            db_transact.updategrabageFlag(new Guid(dr["StatusUID"].ToString()), "DocumentStatus", "StatusUID");
+                        }
+
+                        if (!string.IsNullOrEmpty(dr["CoverLetterFile"].ToString()) && dr["CoverLetterFile"] != DBNull.Value)
+                        {
+                            doc_path = dr["CoverLetterFile"].ToString();
+                            phy_path = phy_path_issue_doc + doc_path.Substring(1).Replace('/', '\\');
+                        }
+
+                        if (File.Exists(phy_path))
+                        {
+                            File.Delete(phy_path);
+                            db_transact.updategrabageFlag(new Guid(dr["StatusUID"].ToString()), "DocumentStatus", "StatusUID");
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+
+        public static void RemoveDocumentVersionDocs(string projectuid)
+        {
+            DBActions db_transact = new DBActions();
+
+            string doc_path = "";
+            string phy_path = "";
+
+            DataSet ds = null;
+
+            ds = db_transact.grbage_GetDocumentVersionDocsby_ProjectUID(new Guid(projectuid));
+
+            if (ds.Tables.Count > 0)
+            {
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                {
+
+
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(dr["Doc_FileName"].ToString()) && dr["Doc_FileName"] != DBNull.Value)
+                        {
+                            doc_path = dr["Doc_FileName"].ToString();
+                            phy_path = phy_path_issue_doc + doc_path.Substring(1).Replace('/', '\\');
+                        }
+
+                        if (File.Exists(phy_path))
+                        {
+                            File.Delete(phy_path);
+                            db_transact.updategrabageFlag(new Guid(dr["DocVersion_UID"].ToString()), "DocumentVesrion", "DocVersion_UID");
+                        }
+
+                        if (!string.IsNullOrEmpty(dr["Doc_CoverLetter"].ToString()) && dr["Doc_CoverLetter"] != DBNull.Value)
+                        {
+                            doc_path = dr["Doc_CoverLetter"].ToString();
+                            phy_path = phy_path_issue_doc + doc_path.Substring(1).Replace('/', '\\');
+                        }
+
+                        if (File.Exists(phy_path))
+                        {
+                            File.Delete(phy_path);
+                            db_transact.updategrabageFlag(new Guid(dr["DocVersion_UID"].ToString()), "DocumentVesrion", "DocVersion_UID");
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+
+        public static void RemoveDocumentAtatchmentDocs(string projectuid)
+        {
+            DBActions db_transact = new DBActions();
+
+            string doc_path = "";
+            string phy_path = "";
+
+            DataSet ds = null;
+
+            ds = db_transact.garbage_GetAllDocumentsAttachmentsby_ProjectUID(new Guid(projectuid));
+
+            if (ds.Tables.Count > 0)
+            {
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                {
+
+
+                    try
+                    {
+                       
+
+                        if (!string.IsNullOrEmpty(dr["AttachmentFile"].ToString()) && dr["AttachmentFile"] != DBNull.Value)
+                        {
+                            doc_path = dr["AttachmentFile"].ToString();
+                            phy_path = phy_path_issue_doc + doc_path.Substring(1).Replace('/', '\\');
+                        }
+
+                        if (File.Exists(phy_path))
+                        {
+                            File.Delete(phy_path);
+                            db_transact.updategrabageFlag(new Guid(dr["AttachmentUID"].ToString()), "DocumentsAttachments", "AttachmentUID");
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+
+        public static void RemoveGeneralDocs()
+        {
+            DBActions db_transact = new DBActions();
+
+            string doc_path = "";
+            string phy_path = "";
+
+            DataSet ds = null;
+
+            ds = db_transact.garbage_GetAll_GeneralDocuments();
+
+            if (ds.Tables.Count > 0)
+            {
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                {
+
+
+                    try
+                    {
+
+
+                        if (!string.IsNullOrEmpty(dr["GeneralDocument_Path"].ToString()) && dr["GeneralDocument_Path"] != DBNull.Value)
+                        {
+                            doc_path = dr["GeneralDocument_Path"].ToString();
+                            phy_path = phy_path_issue_doc + doc_path.Substring(1).Replace('/', '\\');
+                        }
+
+                        if (File.Exists(phy_path))
+                        {
+                            File.Delete(phy_path);
+                            db_transact.updategrabageFlag(new Guid(dr["GeneralDocumentUID"].ToString()), "GeneralDocuments", "GeneralDocumentUID");
+                        }
+
                     }
                     catch (Exception ex)
                     {
