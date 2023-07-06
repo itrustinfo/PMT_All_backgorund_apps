@@ -12,12 +12,13 @@ namespace GarbageCollectorONTB
     class Program
     {
         static string phy_path_issue_doc = "D:\\NJS Projects\\2023-02-06_ONTB_STP_Flow_Blob\\Latest-ProjectMonitoring-Tool-Oct-main\\ProjectManagementTool";
-
+        static int count = 0;
+        static int gcount = 0;
         static void Main(string[] args)
         {
              
 
-            Console.WriteLine("started...");
+            Console.WriteLine("started...please wait");
 
             if (!RemoveOfflineDocFiles())
             {
@@ -25,7 +26,8 @@ namespace GarbageCollectorONTB
                 Console.ReadKey();
             }
 
-            Console.WriteLine("finished...");
+            Console.WriteLine("finished... docs deleted :" + count);
+            Console.WriteLine("finished... General docs deleted :" + gcount);
             Console.ReadKey();
         }
 
@@ -35,6 +37,11 @@ namespace GarbageCollectorONTB
             try
             {
                 DBActions db_transact = new DBActions();
+
+                //Delete downloaded docs from _PreviewLoad folder
+                string donwloadfolder = phy_path_issue_doc + "\\_PreviewLoad\\";
+                Directory.Delete(donwloadfolder, true);
+                Directory.CreateDirectory(donwloadfolder);
 
                 RemoveGeneralDocs();
 
@@ -49,8 +56,10 @@ namespace GarbageCollectorONTB
 
                     //RemoveDocumentStatusDocs(row.ItemArray[0].ToString());
                     //RemoveDocumentVersionDocs(row.ItemArray[0].ToString());
-                    // RemoveDocumentAtatchmentDocs(row.ItemArray[0].ToString());
-                   
+                    //RemoveDocumentAtatchmentDocs(row.ItemArray[0].ToString());
+                    //RemoveGeneralDocs();
+
+
                 }
 
                 return true;
@@ -119,6 +128,23 @@ namespace GarbageCollectorONTB
                         {
                             File.Delete(phy_path);
                             db_transact.updategrabageFlag(new Guid(dr["ActualDocumentUID"].ToString()), "ActualDocuments", "ActualDocumentUID");
+                            count++;
+                        }
+
+                        //delete any copy or download files....
+                        string path = phy_path;
+                        string getExtension = Path.GetExtension(path);
+                        string outPath = path.Replace(getExtension, "") + "_copy" + getExtension;
+
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
+                         }
+                        //
+                        outPath = path.Replace(getExtension, "") + "_download" + getExtension;
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
                         }
                     }
                     catch (Exception ex)
@@ -158,18 +184,37 @@ namespace GarbageCollectorONTB
                         {
                             File.Delete(phy_path);
                             db_transact.updategrabageFlag(new Guid(dr["StatusUID"].ToString()), "DocumentStatus", "StatusUID");
+                            count++;
                         }
 
                         if (!string.IsNullOrEmpty(dr["CoverLetterFile"].ToString()) && dr["CoverLetterFile"] != DBNull.Value)
                         {
                             doc_path = dr["CoverLetterFile"].ToString();
                             phy_path = phy_path_issue_doc + doc_path.Substring(1).Replace('/', '\\');
+
                         }
 
                         if (File.Exists(phy_path))
                         {
                             File.Delete(phy_path);
                             db_transact.updategrabageFlag(new Guid(dr["StatusUID"].ToString()), "DocumentStatus", "StatusUID");
+                            count++;
+                        }
+                        //
+                        //delete any copy or download files....
+                        string path = phy_path;
+                        string getExtension = Path.GetExtension(path);
+                        string outPath = path.Replace(getExtension, "") + "_copy" + getExtension;
+
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
+                                              }
+                        //
+                        outPath = path.Replace(getExtension, "") + "_download" + getExtension;
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
                         }
 
                     }
@@ -210,6 +255,7 @@ namespace GarbageCollectorONTB
                         {
                             File.Delete(phy_path);
                             db_transact.updategrabageFlag(new Guid(dr["DocVersion_UID"].ToString()), "DocumentVesrion", "DocVersion_UID");
+                            count++;
                         }
 
                         if (!string.IsNullOrEmpty(dr["Doc_CoverLetter"].ToString()) && dr["Doc_CoverLetter"] != DBNull.Value)
@@ -222,6 +268,23 @@ namespace GarbageCollectorONTB
                         {
                             File.Delete(phy_path);
                             db_transact.updategrabageFlag(new Guid(dr["DocVersion_UID"].ToString()), "DocumentVesrion", "DocVersion_UID");
+                            count++;
+                        }
+                        //
+                        //delete any copy or download files....
+                        string path = phy_path;
+                        string getExtension = Path.GetExtension(path);
+                        string outPath = path.Replace(getExtension, "") + "_copy" + getExtension;
+
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
+                        }
+                        //
+                        outPath = path.Replace(getExtension, "") + "_download" + getExtension;
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
                         }
 
                     }
@@ -264,6 +327,22 @@ namespace GarbageCollectorONTB
                         {
                             File.Delete(phy_path);
                             db_transact.updategrabageFlag(new Guid(dr["AttachmentUID"].ToString()), "DocumentsAttachments", "AttachmentUID");
+                            count++;
+                        }
+                        //delete any copy or download files....
+                        string path = phy_path;
+                        string getExtension = Path.GetExtension(path);
+                        string outPath = path.Replace(getExtension, "") + "_copy" + getExtension;
+
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
+                        }
+                        //
+                        outPath = path.Replace(getExtension, "") + "_download" + getExtension;
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
                         }
 
                     }
@@ -306,6 +385,22 @@ namespace GarbageCollectorONTB
                         {
                             File.Delete(phy_path);
                             db_transact.updategrabageFlag(new Guid(dr["GeneralDocumentUID"].ToString()), "GeneralDocuments", "GeneralDocumentUID");
+                            gcount++;
+                        }
+                        //delete any copy or download files....
+                        string path = phy_path;
+                        string getExtension = Path.GetExtension(path);
+                        string outPath = path.Replace(getExtension, "") + "_copy" + getExtension;
+
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
+                        }
+                        //
+                        outPath = path.Replace(getExtension, "") + "_download" + getExtension;
+                        if (File.Exists(outPath))
+                        {
+                            File.Delete(outPath);
                         }
 
                     }

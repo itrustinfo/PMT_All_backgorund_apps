@@ -1,0 +1,26 @@
+USE [ONTB_Server_Blob]
+GO
+
+/****** Object:  Table [dbo].[BackupLogs]    Script Date: 7/6/2023 12:22:05 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[BackupLogs_dbblob](
+	[SrNo] [int] IDENTITY(1,1) NOT NULL,
+	[backupdate] [date] NULL,
+	[Starttime] [datetime] NULL,
+	[endtime] [datetime] NULL,
+	[type] [varchar](20) NULL,
+	[dbname] [varchar](20) NULL
+ CONSTRAINT [PK_BackupLogs_dbblob] PRIMARY KEY CLUSTERED 
+(
+	[SrNo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
+
