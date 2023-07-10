@@ -424,25 +424,7 @@ namespace GarbageCollectorONTB
 
             return ds;
         }
-        public DataSet GetAllIssueDocsByWorkPackageUID(Guid WorkPackageUID)
-        {
-            DataSet ds = new DataSet();
-            try
-            {
-                SqlConnection con = new SqlConnection(GetConnectionString());
-                SqlDataAdapter cmd = new SqlDataAdapter("GetAllIssueDocsByWorkPackageUID", con);
-                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
-                cmd.SelectCommand.Parameters.AddWithValue("WPUID", WorkPackageUID);
-                cmd.Fill(ds);
-            }
-            catch (Exception ex)
-            {
-                ds = null;
-                Console.WriteLine("Error : " + ex.Message);
-            }
-
-            return ds;
-        }
+      
 
         public DataSet garbage_GetAllDocumentsby_ProjectUID(Guid ProjectUID)
         {
@@ -568,6 +550,195 @@ namespace GarbageCollectorONTB
             {
                 return sresult = 0;
             }
+        }
+
+        //saji
+        public DataSet GetAllIssueDocsByWorkPackageUID(Guid WorkPackageUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetAllIssueDocsByWorkPackageUID", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("WPUID", WorkPackageUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet GetAllIssueRemarkDocsByWorkPackageUID(Guid WorkPackageUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetAllIssueRemarkDocsByWorkPackageUID", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("WPUID", WorkPackageUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet GetAllBankDocsByWorkPackageUID(Guid WorkPackageUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetAllBankDocsByWorkPackageUID", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("WPUID", WorkPackageUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet GetAllInsuranceDocsByWorkPackageUID(Guid WorkPackageUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetAllInsuranceDocsByWorkPackageUID", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("WPUID", WorkPackageUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet GetAllInsuranceReceiptDocsByWorkPackageUID(Guid WorkPackageUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetAllInsuranceReceiptDocsByWorkPackageUID", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("WPUID", WorkPackageUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet GetAllRABillsByWorkPackageUID(Guid WorkPackageUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetAllRABillsByWorkPackageUID", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("WPUID", WorkPackageUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public DataSet GetAllPhotographsByWorkPackageUID(Guid WorkPackageUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetAllPhotographsByWorkPackageUID", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("WPUID", WorkPackageUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
+        }
+
+        public int UpdateGarbageCollectorFlag(string docCat, int id1, string id2)
+        {
+            int cnt = 0;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(GetConnectionString()))
+                {
+
+                    using (SqlCommand cmd = new SqlCommand("update_garbage_collector_flag"))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Connection = con;
+                        cmd.Parameters.AddWithValue("@Name", docCat);
+                        cmd.Parameters.AddWithValue("@ID1", id1);
+                        cmd.Parameters.AddWithValue("@ID2", id2);
+
+                        con.Open();
+                        cnt = cmd.ExecuteNonQuery();
+                        con.Close();
+                    }
+                }
+                return cnt;
+            }
+            catch (Exception ex)
+            {
+                return cnt;
+            }
+        }
+
+        public DataSet GarbageGetWorkPackages()
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("garbage_GetWorkPackges", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+                Console.WriteLine("Error : " + ex.Message);
+            }
+
+            return ds;
         }
     }
 }

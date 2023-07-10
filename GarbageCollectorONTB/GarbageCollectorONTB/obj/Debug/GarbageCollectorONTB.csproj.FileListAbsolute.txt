@@ -11,4 +11,3 @@ D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\bin\Debug\GarbagedColl
 D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\obj\Debug\GarbageCollectorONTB.csproj.CoreCompileInputs.cache
 D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\obj\Debug\GarbagedCollectorONTB.exe
 D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\obj\Debug\GarbagedCollectorONTB.pdb
-D:\NJS Projects\GarbageCollectorONTB\GarbageCollectorONTB\obj\Debug\GarbageCollectorONTB.csprojAssemblyReference.cache
