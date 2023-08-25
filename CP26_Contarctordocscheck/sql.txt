@@ -1,0 +1,195 @@
+USE [ONTB_Server_Issue]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetDashboardContractotDocsSubmitted_Details]    Script Date: 8/25/2023 11:59:04 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create PROCEDURE [dbo].[usp_GetDashboardContractotDocsSubmitted_Details_fordoccheck] 
+	-- Add the parameters for the stored procedure here
+@ProjectUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	-- not to include cover letters to get the count
+	SET NOCOUNT ON;
+	Declare @User as varchar(max);
+	Declare @ProjectName as varchar(max);
+	set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+
+	if @ProjectName = 'CP-09'
+	Begin
+	set @User = (select UserUID From UserDetails Where Username='cp09-planning@lntecc.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName ,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) as SerialNo, @ProjectName as ProjectName
+   FROM
+      (ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID)  
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID =@User and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N' ) order by ActualDocuments.ActualDocument_CreatedDate DESC
+end
+else if @ProjectName = 'CP-13'
+Begin
+set @User = (select UserUID From UserDetails Where Username='kmsr@lntecc.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName ,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo, @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID =@User and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N' ) order by ActualDocuments.ActualDocument_CreatedDate DESC
+
+ENd
+else if @ProjectName = 'CP-02'
+Begin
+set @User = (select UserUID From UserDetails Where Username='vikash.sharma.ext@suez.com' and DeletedFlag='N');
+   
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName ,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo, @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N' ) ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+ 
+ENd
+else if @ProjectName = 'CP-03'
+Begin
+set @User = (select UserUID From UserDetails Where Username='vshrinivas.udupi@suez.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName ,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo, @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N') ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+ENd
+else if @ProjectName = 'CP-26'
+Begin
+set @User = (select UserUID From UserDetails Where Username='alokranjan@lntecc.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName ,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo, @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID =@User and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N')   ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+
+ENd
+else if @ProjectName = 'CP-10'
+Begin
+set @User = (select UserUID From UserDetails Where Username='sanjayselvaraj@meghaeng.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate,
+ ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo , @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='bwssbcp10@gmail.com' Or Username='sanjayselvaraj@meghaeng.com' Or Username='pradeep.selvaraj@meilgroup.org') and DeletedFlag='N') and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N') ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+
+ENd
+else if @ProjectName = 'CP-12'
+Begin
+set @User = (select UserUID From UserDetails Where Username='seema.mansuri@chevrox.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate,
+ ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo , @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='bangalorecp12@chevrox.com' Or Username='harshil.trivedi@chevrox.com' Or Username='seema.mansuri@chevrox.com') and DeletedFlag='N') and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N') ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+
+ENd
+else if @ProjectName = 'CP-04'
+Begin
+set @User = (select UserUID From UserDetails Where Username='sanjayselvaraj@meghaeng.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate,
+ ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo , @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='bwssbcp04@gmail.com' Or Username='sanjayselvaraj@meghaeng.com' Or Username='pradeep.selvaraj@meilgroup.org') and DeletedFlag='N') and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N') ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+
+ENd
+else if @ProjectName = 'CP-27'
+Begin
+set @User = (select UserUID From UserDetails Where Username='kbrcp27site2021@gmail.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description,
+ ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF,
+ ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks,
+ ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate,
+ ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName, ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo, @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='kbrcp27site2021@gmail.com' Or Username='kbrcp27@gmail.com') and DeletedFlag='N'  and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N' )) ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+ 
+ENd
+else if @ProjectName = 'CP-25'
+Begin
+set @User = (select UserUID From UserDetails Where Username='designdrawingcp25@gmail.com' and DeletedFlag='N');
+    
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version,
+ ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA,
+ ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number,
+ ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate,
+ ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo, @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='designdrawingcp25@gmail.com' Or Username='roshani.salunkhe@passavant-ee.com') and DeletedFlag='N'  and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N' ))  ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+ 
+ENd
+else if @ProjectName = 'CP-07'
+Begin
+set @User = (select UserUID From UserDetails Where Username='bwssbcp07@gmail.com' and DeletedFlag='N');
+    -- Insert statements for procedure here
+	--SELECT Count(ActualDocuments.ActualDocument_Name) as Count FROM Documents INNER JOIN
+ --                        ActualDocuments ON Documents.DocumentUID = ActualDocuments.DocumentUID 
+	--					  Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID =@User and ActualDocuments.Doc_Type !='Cover Letter'
+
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version,
+ ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA,
+ ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number,
+ ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate,
+ ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo, @ProjectName as ProjectName
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='bwssbcp07@gmail.com' Or Username='sanjayselvaraj@meghaeng.com' Or Username='pradeep.selvaraj@meilgroup.org') and DeletedFlag='N') and ActualDocuments.Doc_Type !='Cover Letter' and ActualDocuments.Delete_Flag ='N' )  ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC
+ 
+
+
+ENd
+
+END

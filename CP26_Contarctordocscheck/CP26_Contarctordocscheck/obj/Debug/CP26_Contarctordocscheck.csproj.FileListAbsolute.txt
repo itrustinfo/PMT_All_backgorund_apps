@@ -1,0 +1,7 @@
+D:\NJS Projects\CP26_Contarctordocscheck\CP26_Contarctordocscheck\bin\Debug\CP26_Contarctordocscheck.exe.config
+D:\NJS Projects\CP26_Contarctordocscheck\CP26_Contarctordocscheck\bin\Debug\CP26_Contarctordocscheck.exe
+D:\NJS Projects\CP26_Contarctordocscheck\CP26_Contarctordocscheck\bin\Debug\CP26_Contarctordocscheck.pdb
+D:\NJS Projects\CP26_Contarctordocscheck\CP26_Contarctordocscheck\obj\Debug\CP26_Contarctordocscheck.csprojAssemblyReference.cache
+D:\NJS Projects\CP26_Contarctordocscheck\CP26_Contarctordocscheck\obj\Debug\CP26_Contarctordocscheck.csproj.CoreCompileInputs.cache
+D:\NJS Projects\CP26_Contarctordocscheck\CP26_Contarctordocscheck\obj\Debug\CP26_Contarctordocscheck.exe
+D:\NJS Projects\CP26_Contarctordocscheck\CP26_Contarctordocscheck\obj\Debug\CP26_Contarctordocscheck.pdb
