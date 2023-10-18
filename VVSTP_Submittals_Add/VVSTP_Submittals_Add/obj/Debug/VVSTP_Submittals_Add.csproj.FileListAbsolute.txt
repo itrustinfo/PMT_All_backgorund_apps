@@ -1,0 +1,7 @@
+D:\NJS Projects\VVSTP_Submittals_Add\VVSTP_Submittals_Add\bin\Debug\VVSTP_Submittals_Add.exe.config
+D:\NJS Projects\VVSTP_Submittals_Add\VVSTP_Submittals_Add\bin\Debug\VVSTP_Submittals_Add.exe
+D:\NJS Projects\VVSTP_Submittals_Add\VVSTP_Submittals_Add\bin\Debug\VVSTP_Submittals_Add.pdb
+D:\NJS Projects\VVSTP_Submittals_Add\VVSTP_Submittals_Add\obj\Debug\VVSTP_Submittals_Add.csprojAssemblyReference.cache
+D:\NJS Projects\VVSTP_Submittals_Add\VVSTP_Submittals_Add\obj\Debug\VVSTP_Submittals_Add.csproj.CoreCompileInputs.cache
+D:\NJS Projects\VVSTP_Submittals_Add\VVSTP_Submittals_Add\obj\Debug\VVSTP_Submittals_Add.exe
+D:\NJS Projects\VVSTP_Submittals_Add\VVSTP_Submittals_Add\obj\Debug\VVSTP_Submittals_Add.pdb
