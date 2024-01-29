@@ -1,0 +1,17 @@
+/****** Object:  StoredProcedure [dbo].[ups_Issue_Delete]    Script Date: 1/19/2023 10:12:38 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_Issue_Delete]
+@Issue_Uid uniqueidentifier,
+@UserUID uniqueidentifier
+as
+begin
+--delete from UploadedIssueDocs where Issue_Uid = @Issue_Uid;
+update UploadedIssueDocs set DeleteFlag='Y' where Issue_Uid=@Issue_Uid;
+update Issues set Delete_Flag='Y' where Issue_Uid=@Issue_Uid;
+update IssueRemarks set Delete_Flag='Y' where Issue_Uid=@Issue_Uid;
+insert into ActivityDeleteLogs(DeleteLog_UID,Activity_UID,Activity_UserUID,Activity_For)
+	values(NEWID(),@Issue_Uid,@UserUID,'Issue');
+end

@@ -1,0 +1,77 @@
+       internal string GetTaskScheduleData_Taskuid(Guid Taskuid, DateTime achivedDate)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("sp_getTaskSchedule_Date", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@Taskuid", Taskuid);
+                cmd.SelectCommand.Parameters.AddWithValue("@achivedDate", achivedDate);
+                cmd.SelectCommand.CommandTimeout = 900;
+                cmd.Fill(ds);
+                if(ds.Tables[0].Rows.Count > 0)
+                {
+                    return ds.Tables[0].Rows[0][0].ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                ds = new DataSet();
+            }
+            return string.Empty;
+        }
+        internal DataTable getTaskFormupdateData(Guid projectGuid)
+        {
+            DataTable ds = new DataTable();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("sp_gettaskname_formUpdate", con);
+                cmd.SelectCommand.Parameters.AddWithValue("@projectuid", projectGuid);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE proc sp_gettaskname_formUpdate  
+@projectuid nvarchar(250)  
+as  
+begin  
+select taskuid,TaskName from [dbo].[form-task-update] where taskuid in (select Taskuid from Tasks where projectuid=@projectuid)  
+end
+-----------------------------------------------------------------------------------------------------------------------------
+CREATE proc sp_getTaskSchedule_Date  
+@taskuid nvarchar(250),  
+@achivedDate as datetime  
+as  
+begin  
+select sum(isnull(Achieved_Value,0)) from TaskSchedule where TaskUID=@taskuid and cast(Achieved_Date as date)=cast(@achivedDate as date)   
+end
+------------------------------------------------------------------------------------------------------------------------------------------------
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[form-task-update](
+	[Form-task-update-uid] [uniqueidentifier] NOT NULL,
+	[Taskuid] [nvarchar](250) NOT NULL,
+	[TaskName] [nvarchar](max) NOT NULL,
+	[projectuid] [nvarchar](250) NOT NULL,
+	[workpackageuid] [nvarchar](250) NOT NULL,
+	[ServerCopiedAdd] [varchar](1) NULL,
+	[CopiedAddDate] [datetime] NULL,
+	[ServerCopiedUpdate] [varchar](1) NULL,
+	[CopiedUpdateDate] [datetime] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[form-task-update] ADD  CONSTRAINT [DF_form-task-update_ServerCopiedAdd]  DEFAULT ('N') FOR [ServerCopiedAdd]
+GO

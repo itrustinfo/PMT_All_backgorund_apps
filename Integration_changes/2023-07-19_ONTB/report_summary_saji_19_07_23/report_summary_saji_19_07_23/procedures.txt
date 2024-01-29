@@ -1,0 +1,35 @@
+/****** Object:  StoredProcedure [dbo].[usp_GetFlow2OlddocsCount]    Script Date: 7/19/2023 5:16:11 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetFlow2OlddocsCount] 
+	-- Add the parameters for the stored procedure here
+@ProjectName as nvarchar(max),
+@Type as nvarchar(max)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	--Declare @User as varchar(max);
+	Declare @ProjectId as varchar(max);
+	set  @ProjectId = (select ProjectUID From ProjectDetails Where ProjectName=@ProjectName);
+    -- Insert statements for procedure here
+	if @Type = 'Pending Documents'
+	Begin
+		SELECT count(*) as total_documents FROM ActualDocuments INNER JOIN Documents ON ActualDocuments.DocumentUID = Documents.DocumentUID
+			Where ActualDocuments.ProjectUID =@ProjectId and ActualDocuments.ActualDocument_Name like 'dummy%' and ActualDocuments.Doc_Type !='Cover Letter' and (ActualDocuments.FlowUID ='7f1b7b32-83fc-4451-87c5-25ec31b9de39') and ActualDocuments.Delete_Flag ='N'
+	END
+	ELSE if @Type='Action Taken Documents'
+	Begin
+		SELECT count(*) FROM ActualDocuments INNER JOIN Documents ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		Where ActualDocuments.ProjectUID =@ProjectId and ActualDocuments.ActualDocument_Name not like 'dummy%' and ActualDocuments.Doc_Type !='Cover Letter' and (ActualDocuments.FlowUID ='7f1b7b32-83fc-4451-87c5-25ec31b9de39') and ActualDocuments.Delete_Flag ='N'
+	END
+
+END

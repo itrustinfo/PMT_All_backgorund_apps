@@ -1,0 +1,18 @@
+ public DataSet GetResourceDeployment_by_OverallGraph(Guid WorkpackageUID, Guid ResourceUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("get_resource_deployment_graph_data_overall", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@WorkpackageUID", WorkpackageUID);
+                cmd.SelectCommand.Parameters.AddWithValue("@ResourceUID", ResourceUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }

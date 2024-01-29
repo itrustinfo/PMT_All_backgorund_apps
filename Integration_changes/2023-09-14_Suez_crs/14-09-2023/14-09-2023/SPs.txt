@@ -1,0 +1,93 @@
+
+/****** Object:  Table [dbo].[Invoice_Documents]    Script Date: 9/14/2023 11:31:07 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Invoice_Documents](
+	[DocumentUID] [uniqueidentifier] NOT NULL,
+	[created_date] [datetime] NULL,
+	[InvoiceUID] [uniqueidentifier] NULL,
+	[WorkpackageUID] [uniqueidentifier] NULL,
+	[UserID] [uniqueidentifier] NOT NULL,
+	[FilePath] [varchar](250) NULL,
+	[Description] [varchar](500) NULL,
+	[DeleteFlag] [varchar](1) NULL,
+	[DeletedBy] [uniqueidentifier] NULL,
+	[DeletedDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Invoice_Documents] ADD  CONSTRAINT [DF_Invoice_Documents_DeleteFlag]  DEFAULT ('N') FOR [DeleteFlag]
+GO
+
+
+//
+
+
+USE [ONTB_Server_Issue_Inv]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_Invoice_Document_InsertorUpdate]    Script Date: 9/14/2023 11:11:06 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_Invoice_Document_InsertorUpdate]
+@Document_UID uniqueidentifier,
+@InvoiceUID uniqueidentifier,
+@WorkpackageUID uniqueidentifier,
+@Document_Path varchar(200),
+@Uploaded_Date datetime,
+@UserID uniqueidentifier,
+@Description varchar(200)
+as
+begin
+if not exists(select DocumentUID from Invoice_Documents where DocumentUID=@Document_UID)
+begin
+	insert into Invoice_Documents(DocumentUID,InvoiceUID,WorkpackageUID,UserID,FilePath,created_date,Description)
+	values(@Document_UID,@InvoiceUID,@WorkpackageUID,@UserID,@Document_Path,@Uploaded_Date,@Description)
+end
+else
+begin
+	update Invoice_Documents set FilePath=@Document_Path where DocumentUID=@Document_UID;
+end
+end
+
+---------------------------------------
+
+USE [ONTB_Server_Issue_Inv]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_Invoice_Document_Select]    Script Date: 9/14/2023 11:11:38 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_Invoice_Document_Select]
+@InvoiceUID uniqueidentifier
+as
+begin
+select DocumentUID,InvoiceUID,WorkpackageUID,FilePath,Description,created_date from Invoice_Documents where InvoiceUID = @InvoiceUID and DeleteFlag = 'N' order by created_date desc 
+end
+
+-------------------------------------------
+USE [ONTB_Server_Issue_Inv]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_Invoice_Document_Delete]    Script Date: 9/14/2023 11:12:13 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_Invoice_Document_Delete]
+@DocumentUID uniqueidentifier,
+@UserUID uniqueidentifier
+as
+begin
+update Invoice_Documents set DeleteFlag='Y', DeletedBy=@UserUID , DeletedDate=GETDATE()
+where DocumentUID=@DocumentUID
+
+insert into ActivityDeleteLogs(DeleteLog_UID,Activity_UID,Activity_UserUID,Activity_For)
+	values(NEWID(),@DocumentUID,@UserUID,'Invoice Document');
+
+end

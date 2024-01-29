@@ -1,0 +1,17 @@
+  public DataSet getActualDocumentStatusListNew(Guid DocumentUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("getActualDocumentStatusListNew", con);
+                cmd.SelectCommand.Parameters.AddWithValue("@DocumentUID", DocumentUID);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }

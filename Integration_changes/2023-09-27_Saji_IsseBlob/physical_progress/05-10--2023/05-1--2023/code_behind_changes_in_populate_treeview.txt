@@ -1,0 +1,9 @@
+ if (Level > 3)
+ {
+    tsk_order = tsk_order + 1;
+    dbgetdata.UpdateTaskOrder(row["TaskUID"].ToString(), tsk_order);
+ }
+ else if (Level == 3)
+ {
+    tsk_order = 0;
+ }

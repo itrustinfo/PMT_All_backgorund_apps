@@ -1,0 +1,216 @@
+/****** Object:  StoredProcedure [dbo].[ups_getDocumentCount_by_ProjectUID_WorkPackageUID_NewX]    Script Date: 3/21/2023 1:30:12 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_getDocumentCount_by_ProjectUID_WorkPackageUID_NewX]
+@ProjectUID uniqueidentifier ,
+@WorkPackageUID uniqueidentifier,
+@FlowName nvarchar(max)
+as
+  begin
+	set nocount on;
+	declare @StatusCount  int;
+	declare @StatusDelayCount  int;
+	declare @StatusOrder int;
+
+	declare @FlowUID nvarchar(max);
+	
+	
+	
+	Declare @ProjectName as varchar(max);
+	set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+		
+	declare @YValue nvarchar(max);
+	
+	declare @yvalues table(status_name nvarchar(max))
+	declare @graphTable table(YValue nvarchar(max),StatusCount int,StatusDelayCount int,StatusOrder int)
+
+	if (@FlowName != 'Total Drawings')
+	begin
+
+	set @FlowUID = (select FlowMasterUID from  DocumentFlowDisplayMaster where Flow_Name = @FlowName);
+	insert into @yvalues select Distinct ActualDocuments.ActualDocument_CurrentStatus From dbo.ActualDocuments Where ActualDocuments.Delete_Flag ='N' and ActualDocuments.WorkPackageUID=@WorkPackageUID and FlowUID = @FlowUID  and (Doc_Type='Document' or Doc_Type='General Document')  Order by ActualDocuments.ActualDocument_CurrentStatus Asc; 
+		
+	if (@ProjectName = 'CP-03')
+	  set @StatusCount = (select count(ActualDocumentUID) from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') );
+	else if (@ProjectName = 'CP-02')
+	  set @StatusCount = (select count(ActualDocumentUID) from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') );
+
+	insert into @graphTable values('Total Drawings',@StatusCount,0,@StatusOrder)
+
+	DECLARE YValues_Cursor CURSOR FOR  
+	SELECT status_name   
+	FROM @yvalues order by status_name  
+	OPEN YValues_Cursor;  
+	FETCH NEXT FROM YValues_Cursor INTO @YValue; 
+	set @StatusOrder =0;
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN  
+      if (@ProjectName = 'CP-03')
+	  begin
+		set @StatusCount = (select count(ActualDocumentUID) from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and ActualDocument_CurrentStatus = @YValue and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') );
+		set @StatusDelayCount=(select count(ActualDocumentUID) from Documents A,ActualDocuments B where A.DocumentUID=B.DocumentUID and B.ActualDocument_CurrentStatus=@YValue and (B.Doc_Type='Document' OR B.Doc_Type='General Document') and B.Delete_Flag='N' and B.ProjectUID=@ProjectUID and B.WorkPackageUID=@WorkPackageUID and B.FlowUID = @FlowUID and B.ActualDocument_CreatedDate > A.FlowStep1_TargetDate);
+	  end
+	  else if (@ProjectName = 'CP-02')
+	  begin
+	    set @StatusCount = (select count(ActualDocumentUID) from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and ActualDocument_CurrentStatus = @YValue and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') );
+		set @StatusDelayCount=(select count(ActualDocumentUID) from Documents A,ActualDocuments B where A.DocumentUID=B.DocumentUID and B.ActualDocument_CurrentStatus=@YValue and (B.Doc_Type='Document' OR B.Doc_Type='General Document') and B.Delete_Flag='N' and B.ProjectUID=@ProjectUID and B.WorkPackageUID=@WorkPackageUID and B.FlowUID = @FlowUID and B.ActualDocument_CreatedDate > A.FlowStep1_TargetDate);
+	  end
+
+	  if (@YValue = 'Submitted')
+	    set @StatusOrder = 1 
+	  else if (@YValue = 'ONTB Review')
+	    set @StatusOrder = 2 
+	  else if (@YValue = 'Code A')
+	    set @StatusOrder = 3
+      else if (@YValue = 'Code B')
+	    set @StatusOrder = 4
+	  else if (@YValue = 'Code C')
+	    set @StatusOrder = 5
+	  else if (@YValue = 'Code D')
+	    set @StatusOrder = 6
+	  else if (@YValue = 'Code E')
+	    set @StatusOrder = 7
+	  else if (@YValue = 'Code F')
+	    set @StatusOrder = 8
+	  else if (@YValue = 'Code G')
+	    set @StatusOrder = 9
+	  else if (@YValue = 'Code H')
+	    set @StatusOrder = 10
+	  else if (@YValue = 'Client Approved')
+	    set @StatusOrder = 11
+
+	  insert into @graphTable values(@YValue,@StatusCount,@StatusDelayCount,@StatusOrder)
+	  FETCH NEXT FROM YValues_Cursor INTO @YValue;  
+	END;  
+	CLOSE YValues_Cursor;  
+	DEALLOCATE YValues_Cursor; 
+	select * from @graphTable where ( @StatusCount > 0 or @StatusDelayCount >0) order by 4;
+end
+    else
+    begin
+
+    insert into @yvalues select Distinct ActualDocuments.ActualDocument_CurrentStatus From dbo.ActualDocuments Where ActualDocuments.Delete_Flag ='N' and ActualDocuments.WorkPackageUID=@WorkPackageUID and (Doc_Type='Document' or Doc_Type='General Document')  Order by ActualDocuments.ActualDocument_CurrentStatus Asc; 
+	
+	if (@ProjectName = 'CP-03')
+	  set @StatusCount = (select count(ActualDocumentUID) from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') );
+	else if (@ProjectName = 'CP-02')
+	  set @StatusCount = (select count(ActualDocumentUID) from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') );
+
+	
+	insert into @graphTable values('Total Drawings',@StatusCount,0,@StatusOrder)
+
+	DECLARE YValues_Cursor CURSOR FOR  
+	SELECT status_name   
+	FROM @yvalues order by status_name  
+	OPEN YValues_Cursor;  
+	FETCH NEXT FROM YValues_Cursor INTO @YValue; 
+	set @StatusOrder =0;
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN
+	
+	  if (@ProjectName = 'CP-03')
+	  begin
+		set @StatusCount = (select count(ActualDocumentUID) from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and ActualDocument_CurrentStatus = @YValue and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') );
+		set @StatusDelayCount=(select count(ActualDocumentUID) from Documents A,ActualDocuments B where A.DocumentUID=B.DocumentUID and B.ActualDocument_CurrentStatus=@YValue and (B.Doc_Type='Document' OR B.Doc_Type='General Document') and B.Delete_Flag='N' and B.ProjectUID=@ProjectUID and B.WorkPackageUID=@WorkPackageUID and B.ActualDocument_CreatedDate > A.FlowStep1_TargetDate);
+	  end
+	  else if (@ProjectName = 'CP-02')
+	  begin
+	    set @StatusCount = (select count(ActualDocumentUID) from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and ActualDocument_CurrentStatus = @YValue and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') );
+		set @StatusDelayCount=(select count(ActualDocumentUID) from Documents A,ActualDocuments B where A.DocumentUID=B.DocumentUID and B.ActualDocument_CurrentStatus=@YValue and (B.Doc_Type='Document' OR B.Doc_Type='General Document') and B.Delete_Flag='N' and B.ProjectUID=@ProjectUID and B.WorkPackageUID=@WorkPackageUID and B.ActualDocument_CreatedDate > A.FlowStep1_TargetDate);
+	  end
+	  if (@YValue = 'Submitted')
+	    set @StatusOrder = 1 
+	  else if (@YValue = 'ONTB Review')
+	    set @StatusOrder = 2 
+	  else if (@YValue = 'Code A')
+	    set @StatusOrder = 3
+      else if (@YValue = 'Code B')
+	    set @StatusOrder = 4
+	  else if (@YValue = 'Code C')
+	    set @StatusOrder = 5
+	  else if (@YValue = 'Code D')
+	    set @StatusOrder = 6
+	  else if (@YValue = 'Code E')
+	    set @StatusOrder = 7
+	  else if (@YValue = 'Code F')
+	    set @StatusOrder = 8
+	  else if (@YValue = 'Code G')
+	    set @StatusOrder = 9
+	  else if (@YValue = 'Code H')
+	    set @StatusOrder = 10
+	  else if (@YValue = 'Client Approved')
+	    set @StatusOrder = 11
+	  insert into @graphTable values(@YValue,@StatusCount,@StatusDelayCount,@StatusOrder)
+	  FETCH NEXT FROM YValues_Cursor INTO @YValue;  
+	END;  
+	CLOSE YValues_Cursor;  
+	DEALLOCATE YValues_Cursor; 
+	select * from @graphTable where ( @StatusCount > 0 or @StatusDelayCount >0) order by 4;
+end
+
+end
+
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[get_resource_deployment_graph_data_overall]
+@WorkPackageUID uniqueidentifier,
+@ResourceUID uniqueidentifier
+as
+  begin
+	set nocount on;
+			
+	SELECT TRIM(STR(YEAR(ResourceDeploymentUpdate.DeployedDate))) + '/' + TRIM(FORMAT(Month(ResourceDeploymentUpdate.DeployedDate),'00')) AS DeployedYearMonth,sum(ResourceDeploymentUpdate.Deployed) AS Deployed, count(distinct ResourceDeploymentUpdate.DeployedDate) as days FROM ResourceDeployment INNER JOIN
+                  ResourceDeploymentUpdate ON ResourceDeployment.ReourceDeploymentUID = ResourceDeploymentUpdate.ReourceDeploymentUID INNER JOIN
+                  ResourceMaster ON ResourceDeployment.ResourceUID = ResourceMaster.ResourceUID
+				  Where ResourceDeployment.WorkpackageUID=@WorkpackageUID and ResourceMaster.ResourceType_UID=@ResourceUID and ResourceDeploymentUpdate.Delete_Flag='N'
+				  group by TRIM(STR(YEAR(ResourceDeploymentUpdate.DeployedDate))) + '/' + TRIM(FORMAT(Month(ResourceDeploymentUpdate.DeployedDate),'00'))  Order by DeployedYearMonth
+	
+end
+
+//added on 23/03/2023
+USE [ONTB_Server]
+GO
+/****** Object:  StoredProcedure [dbo].[Sp_GetCategoryName_Statuscount]    Script Date: 3/24/2023 10:57:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER Proc [dbo].[Sp_GetCategoryName_Statuscount]
+@projectuid nvarchar(250)
+as
+begin
+
+Declare @User as varchar(max);
+Declare @ProjectName as varchar(max);
+set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+if @ProjectName = 'CP-02'
+	Begin
+select wfN1 as [Item Description],[Submitted] as [Pending Approval], [Code A],[Code B],[Code C],[Code D] from (select
+WC.WorkPackageCategory_Name as wfN,WC.WorkPackageCategory_Name as wfN1,ASD.ActualDocument_CurrentStatus  from documents ds
+ inner join ActualDocuments ASD
+on ds.DocumentUID=ASD.DocumentUID
+ inner join [dbo].[Workpackage_Categories] WC on ds.Doc_Category=WC.WorkPackageCategory_UID
+where ds.ProjectUID=@projectuid and ds.DocumentSearchType='Drawings' and ASD.Doc_Type!='Cover Letter' and ds.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and ASD.Delete_Flag='N'
+) as A
+pivot(count(wfn)   for ActualDocument_CurrentStatus in ([Code D],[Code C],[Code A],[Code B],[Submitted])) as B
+Order by B.wfN1
+end
+else if @ProjectName = 'CP-03'
+	Begin
+select wfN1 as [Item Description],[Submitted] as [Pending Approval], [Code A],[Code B],[Code C],[Code D] from (select
+WC.WorkPackageCategory_Name as wfN,WC.WorkPackageCategory_Name as wfN1,ASD.ActualDocument_CurrentStatus  from documents ds
+ inner join ActualDocuments ASD
+on ds.DocumentUID=ASD.DocumentUID
+ inner join [dbo].[Workpackage_Categories] WC on ds.Doc_Category=WC.WorkPackageCategory_UID
+where ds.ProjectUID=@projectuid and ds.DocumentSearchType='Drawings'and ASD.Doc_Type!='Cover Letter' and ds.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and ASD.Delete_Flag='N'
+) as A
+pivot(count(wfn)   for ActualDocument_CurrentStatus in ([Submitted],[Code D],[Code C],[Code A],[Code B])) as B
+Order by B.wfN1
+end
+end

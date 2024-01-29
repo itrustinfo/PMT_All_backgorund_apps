@@ -1,0 +1,27 @@
+/****** Object:  StoredProcedure [dbo].[usp_GetLabourDashboardGraph]    Script Date: 2/22/2023 2:56:33 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+alter PROCEDURE [dbo].[GetLastMonthDaysOfDeployment] 
+	-- Add the parameters for the stored procedure here
+@WorkPackageUID as uniqueidentifier,
+@Resource as varchar(75)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	declare @ResourceUID as uniqueidentifier;
+	declare @ResourceDeploymentUID as uniqueidentifier;
+	set @ResourceUID =(select ResourceUID FRom ResourceMaster Where WorkPackageUID=@WorkPackageUID and ResourceName=@Resource)
+ set @ResourceDeploymentUID = (select Top 1 ReourceDeploymentUID From ResourceDeploymentUpdate Where ReourceDeploymentUID in (select  ReourceDeploymentUID From ResourceDeployment Where ResourceUID=@ResourceUID) order by DeployedDate desc)
+
+ select Max(DeployedDate)  From ResourceDeploymentUpdate Where ReourceDeploymentUID=@ResourceDeploymentUID
+	
+END

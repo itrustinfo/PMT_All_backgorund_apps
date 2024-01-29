@@ -1,0 +1,164 @@
+alter table [dbo].[IssueRemarks] add UserUID uniqueidentifier null
+
+alter table [dbo].[Issues] alter column [Issue_Status] nvarchar(100) null
+
+alter table  [dbo].[IssueRemarks] alter column [Issue_Status] varchar(100) null
+
+USE [ONTB_Server_Issue]
+GO
+/****** Object:  StoredProcedure [dbo].[ups_Issue_Status_Remarks_Insert]    Script Date: 8/4/2023 11:14:12 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_Issue_Status_Remarks_Insert]
+@IssueRemarksUID uniqueidentifier,
+@Issue_Uid uniqueidentifier,
+@Issue_Status varchar(50),
+@Issue_Remarks varchar(max),
+@Issue_Document varchar(150),
+@ClosureDate datetime,
+@UserUID uniqueidentifier
+as
+begin
+
+if not exists (select IssueRemarksUID from IssueRemarks where IssueRemarksUID=@IssueRemarksUID)
+begin
+	insert into IssueRemarks(IssueRemarksUID,Issue_Uid,Issue_Status,Issue_Remarks,Issue_Document,UserUID)
+	values(@IssueRemarksUID,@Issue_Uid,@Issue_Status,@Issue_Remarks,@Issue_Document,@UserUID);
+
+	update Issues set Issue_Status=@Issue_Status where Issue_Uid=@Issue_Uid;
+end
+else
+begin
+   Update IssueRemarks set Issue_Remarks = @Issue_Remarks,Issue_Document = @Issue_Document,Issue_Status=@Issue_Status
+   where IssueRemarksUID=@IssueRemarksUID
+end
+
+if (@Issue_Status = 'Close')
+	 begin
+	   update issues set Actual_Closer_Date = @ClosureDate where Issue_Uid = @Issue_Uid;
+	 end
+end
+
+-----------------------------------------------------------------
+
+USE [ONTB_Server_Issue]
+GO
+/****** Object:  StoredProcedure [dbo].[ups_Get_Open_Closed_Rejected_Issues_by_WorkPackageUID]    Script Date: 8/8/2023 4:44:27 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_Get_Open_Closed_Rejected_Issues_by_WorkPackageUID]
+@WorkPackagesUID uniqueidentifier
+as
+begin
+	declare @TotCount varchar(10);
+	set @TotCount=(select count(Issue_Uid) from Issues where WorkPackagesUID=@WorkPackagesUID and Delete_Flag='N');
+
+	declare @OpenIssue varchar(10);
+	set @OpenIssue=(select count(Issue_Uid) from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status='Open' and Delete_Flag='N');
+
+	declare @InprogressIssues varchar(10);
+	set @InprogressIssues=(select count(Issue_Uid) from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status like '%In-Progress%' and Delete_Flag='N');
+
+	declare @ClosedIssue varchar(10);
+	set @ClosedIssue=(select count(Issue_Uid) from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status='Close' and Delete_Flag='N');
+
+	declare @RejectedIssue varchar(10);
+	set @RejectedIssue=(select count(Issue_Uid) from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status='Rejected' and Delete_Flag='N');
+
+	declare @ReplyIssue varchar(10);
+	set @ReplyIssue=(select count(Issue_Uid) from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status='Reply by Contractor' and Delete_Flag='N');
+
+	select @TotCount as TotCount,@OpenIssue as OpenIssues,@InprogressIssues as InProgressIssues,@ClosedIssue as ClosedIssues,@RejectedIssue as RejectedIssues,@ReplyIssue as ReplyIssue
+end
+
+
+//
+USE [ONTB_Server_Issue]
+GO
+/****** Object:  StoredProcedure [dbo].[ups_GetIssuesList_by_WorkPackageUID_IssueStatus]    Script Date: 8/7/2023 1:56:17 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_GetIssuesList_by_WorkPackageUID_IssueStatus]
+@WorkPackagesUID uniqueidentifier,
+@Status nvarchar(100),
+@iUser nvarchar(max)
+as
+begin
+set nocount on;
+
+if (@iUser = 'All')
+begin
+	if (@Status != '')
+		select * from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status like '%' + @Status + '%' and Delete_Flag='N' order by Issue_Date desc
+	else
+	   select * from Issues where WorkPackagesUID=@WorkPackagesUID and Delete_Flag='N' order by Issue_Date desc
+end
+else
+
+	begin
+	if (@Status != '')
+		select * from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status like '%' + @Status + '%' and Issued_User = @iUser  and Delete_Flag='N' order by Issue_Date desc
+	else
+	   select * from Issues where WorkPackagesUID=@WorkPackagesUID and Issued_User = @iUser and Delete_Flag='N' order by Issue_Date desc
+	end
+end
+
+
+//
+USE [ONTB_Server_Issue]
+GO
+/****** Object:  StoredProcedure [dbo].[ups_GetIssuesList_by_TaskUID_IssueStatus]    Script Date: 8/9/2023 2:58:06 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_GetIssuesList_by_TaskUID_IssueStatus]
+@TaskUID uniqueidentifier,
+@Status nvarchar(100),
+@iUser nvarchar(max)
+as
+begin
+set nocount on;
+
+if (@iUser = 'All')
+	begin
+		if (@Status != '')
+			select * from Issues where TaskUID=@TaskUID and Issue_Status like '%' + @Status + '%' and Delete_Flag='N' order by Issue_Date desc
+		else
+		   select * from Issues where TaskUID=@TaskUID and Delete_Flag='N' order by Issue_Date desc
+	end
+else
+
+	begin
+		if (@Status != '')
+			select * from Issues where TaskUID=@TaskUID and Issue_Status like '%' + @Status + '%' and Issued_User = @iUser  and Delete_Flag='N' order by Issue_Date desc
+		else
+		   select * from Issues where TaskUID=@TaskUID and Issued_User = @iUser and Delete_Flag='N' order by Issue_Date desc
+	end
+end
+
+//
+USE [ONTB_Server_Issue]
+GO
+/****** Object:  StoredProcedure [dbo].[GetAllIssuedUsers]    Script Date: 8/9/2023 3:03:26 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[GetAllIssuedUsers]
+@WorkPackagesUID uniqueidentifier,
+@Status nvarchar(100)
+as
+begin
+set nocount on;
+if (@Status != '')
+	select distinct B.UserUID as userId,B.FirstName + ' '+ B.LastName as userName from Issues A, UserDetails B where A.Issued_User = B.UserUID and WorkPackagesUID=@WorkPackagesUID and Issue_Status like '%' + @Status + '%' and Delete_Flag='N' order by userName
+else
+   select distinct B.UserUID as userId ,B.FirstName + ' ' + b.LastName as userName from Issues A, UserDetails B where A.Issued_User = B.UserUID and WorkPackagesUID=@WorkPackagesUID and Delete_Flag='N' order by userName
+end

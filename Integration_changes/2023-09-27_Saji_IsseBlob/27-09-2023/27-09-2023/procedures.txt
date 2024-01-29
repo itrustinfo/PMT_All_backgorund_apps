@@ -1,0 +1,12 @@
+/****** Object:  StoredProcedure [dbo].[IssueHistory_by_Issue_Uid]    Script Date: 9/27/2023 4:25:59 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[IssueHistory_by_Issue_Uid]
+@Issue_Uid uniqueidentifier
+as
+begin
+set nocount on;
+((select A.Issue_Description as description, A.Issue_Remarks as remarks,A.Issued_User as issue_user, A.Issue_Date as issue_date,'Open' as issue_status, B.doc_name as doc_name, A.Issue_Uid as id,B.doc_path as doc_path,B.doc_id as docid from Issues A full outer join UploadedIssueDocs B on A.Issue_Uid = B.Issue_Uid where A.Delete_Flag = 'N' and A.Issue_Uid = @Issue_Uid) union (select  '' as Description,A.Issue_Remarks as remarks,'' as issue_user, A.IssueRemark_Date as issue_date, A.Issue_Status as issue_status, B.doc_name as doc_name,A.IssueRemarksUID as id, B.doc_path as doc_path, B.uploaded_doc_id as docid from IssueRemarks A full outer join UploadedDocs B on A.IssueRemarksUID = B.issue_remarks_uid where A.Delete_Flag = 'N' and A.Issue_Uid = @Issue_Uid)) order by id
+end

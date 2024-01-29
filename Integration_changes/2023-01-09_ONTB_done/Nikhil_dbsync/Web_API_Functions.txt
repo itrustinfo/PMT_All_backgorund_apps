@@ -1,0 +1,66 @@
+public int InsertorUpdate_form_task_update(Guid Form_task_update_uid, Guid Taskuid, string TaskName, Guid projectuid, Guid workpackageuid)
+        {
+            int sresult = 0;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(db.GetConnectionString()))
+                {
+
+                    using (SqlCommand cmd = new SqlCommand("dbsync_InsertorUpdate_form_task_update"))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Connection = con;
+                        cmd.Parameters.AddWithValue("@Form_task_update_uid", Form_task_update_uid);
+                        cmd.Parameters.AddWithValue("@Taskuid", Taskuid);
+                        cmd.Parameters.AddWithValue("@TaskName", TaskName);
+                        cmd.Parameters.AddWithValue("@projectuid", projectuid);
+                        cmd.Parameters.AddWithValue("@workpackageuid", workpackageuid);
+               
+                        con.Open();
+                        sresult = (int)cmd.ExecuteNonQuery();
+                        con.Close();
+
+                    }
+                }
+                return sresult;
+            }
+            catch (Exception ex)
+            {
+                return sresult = 0;
+            }
+        }
+
+-----------------------------------------------------------------------------
+
+
+ public int InsertorUpdate_CorrespondenceCCToUsers(Guid UID, Guid ActualDocumentUID, Guid StatusUID, string UserType, string CreatedDate)
+        {
+            int sresult = 0;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(db.GetConnectionString()))
+                {
+
+                    using (SqlCommand cmd = new SqlCommand("dbsync_InsertorUpdate_CorrespondenceCCToUsers"))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Connection = con;
+                        cmd.Parameters.AddWithValue("@UID", UID);
+                        cmd.Parameters.AddWithValue("@ActualDocumentUID", ActualDocumentUID);
+                        cmd.Parameters.AddWithValue("@StatusUID", StatusUID);
+                        cmd.Parameters.AddWithValue("@UserType", UserType);
+                        cmd.Parameters.AddWithValue("@CreatedDate", CreatedDate);
+                        con.Open();
+                        sresult = (int)cmd.ExecuteNonQuery();
+                        con.Close();
+
+                    }
+                }
+                return sresult;
+            }
+            catch (Exception ex)
+            {
+                return sresult = 0;
+            }
+
+        }

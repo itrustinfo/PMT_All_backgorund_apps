@@ -1,0 +1,130 @@
+/****** Object:  StoredProcedure [dbo].[GetUploadedIssueImages]    Script Date: 1/18/2023 10:36:03 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetUploadedIssueImages] 
+@issue_uid nvarchar(max)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT doc_path + doc_name as IssueImage from UploadedIssueDocs where Issue_Uid = @issue_uid and (DeleteFlag is null or DeleteFlag <> 'Y');
+END
+------------------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[GetUploadedIssueStatusImages]    Script Date: 1/18/2023 10:34:36 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetUploadedIssueStatusImages] 
+@issue_remark_uid nvarchar(max)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT doc_path + doc_name as IssueImage from UploadedDocs where issue_remarks_uid = @issue_remark_uid and (DeleteFlag is null or DeleteFlag <> 'Y');
+END
+
+------------------------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[GetUploadedDocuments]    Script Date: 1/18/2023 10:28:49 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetUploadedDocuments] 
+@issue_remarks_uid nvarchar(200)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT uploaded_doc_id,doc_name,doc_path from UploadedDocs where issue_remarks_uid = @issue_remarks_uid and (DeleteFlag is null or DeleteFlag <> 'Y');
+END
+
+----------------------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[GetUploadedIssueDocuments]    Script Date: 1/18/2023 10:14:56 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetUploadedIssueDocuments] 
+@issue_uid nvarchar(max)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT doc_id,doc_name,doc_path from UploadedIssueDocs where issue_uid = @issue_uid and (DeleteFlag is null or DeleteFlag <> 'Y');
+END
+
+---------------------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[deleteUploadedIssueDoc]    Script Date: 1/18/2023 2:16:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[deleteUploadedIssueDoc] 
+@docid int 	
+AS
+BEGIN
+	
+	SET NOCOUNT ON;
+    update UploadedIssueDocs set DeleteFlag = 'Y' where doc_id = @docid;
+	
+END
+
+----------------------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[deleteUploadedDoc]    Script Date: 1/18/2023 2:17:46 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[deleteUploadedDoc] 
+@uploaded_docid int 	
+AS
+BEGIN
+	
+	SET NOCOUNT ON;
+    update UploadedDocs set DeleteFlag = 'Y' where uploaded_doc_id = @uploaded_docid;
+	
+END
+
+-----------------------------Changes in tables--------------------------------
+
+1. UploadedDocs
+
+Alter table UploadedDocs add DeleteFlag nchar(1) null
+
+2. UploadedIssueDocs
+
+Alter table UploadedIssueDocs add DeleteFlag nchar(1) null

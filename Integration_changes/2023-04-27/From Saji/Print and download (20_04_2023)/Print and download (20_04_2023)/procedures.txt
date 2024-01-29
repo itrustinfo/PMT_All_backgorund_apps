@@ -1,0 +1,56 @@
+/****** Object:  StoredProcedure [dbo].[GetUploadedIssueDocuments]    Script Date: 4/20/2023 11:56:08 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetUploadedIssueDocuments] 
+@issue_uid nvarchar(max)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT doc_id,doc_name,doc_path from UploadedIssueDocs where issue_uid = @issue_uid and (DeleteFlag is null or DeleteFlag <> 'Y');
+END
+
+-------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[GetUploadedIssueStatusDocuments]    Script Date: 4/20/2023 11:59:12 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetUploadedIssueStatusDocuments] 
+@issue_uid nvarchar(max)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT uploaded_doc_id,doc_name,doc_path from IssueRemarks A, UploadedDocs B where A.IssueRemarksUID = B.issue_remarks_uid and A.Issue_Uid = @issue_uid and (B.DeleteFlag is null or B.DeleteFlag <> 'Y');
+END
+----------------------------------------
+
+/***** Object:  StoredProcedure [dbo].[GetUploadedIssueStatusDocuments]    Script Date: 4/25/2023 12:03:36 PM *****/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetUploadedIssueStatusDocuments] 
+@issue_uid nvarchar(max)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT uploaded_doc_id,doc_name,doc_path,A.Issue_Status from IssueRemarks A, UploadedDocs B where A.IssueRemarksUID = B.issue_remarks_uid and A.Issue_Uid = @issue_uid and (B.DeleteFlag is null or B.DeleteFlag <> 'Y');
+END

@@ -1,0 +1,11 @@
+/****** Object:  StoredProcedure [dbo].[GetDataList1]    Script Date: 7/25/2023 1:31:28 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ ALTER proc [dbo].[GetDataList1]
+ as
+ begin
+ set nocount on;
+ select Revision, ROW_NUMBER() OVER(partition by revision order by revision) as SerialNo,Comment1,Reply1 from ONTBComments1  order by revision
+ end

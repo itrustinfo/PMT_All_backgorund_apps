@@ -1,0 +1,42 @@
+  public DataSet GetUsers_under_selected_projects()
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetUsers_under_selected_projects", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }
+
+//--------------------------------------
+
+  public DataTable UserStatusSummary_ByDate(Guid userUID, DateTime FromDate, DateTime ToDate)
+        {
+            DataTable ds = new DataTable();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("userStatusSummaryByDate", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@UserUID", userUID);
+                cmd.SelectCommand.Parameters.AddWithValue("@FromDate", FromDate);
+                cmd.SelectCommand.Parameters.AddWithValue("@ToDate", ToDate);
+                cmd.Fill(ds);
+                cmd.SelectCommand.CommandTimeout = 0;
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }
+
+//---------------------------------

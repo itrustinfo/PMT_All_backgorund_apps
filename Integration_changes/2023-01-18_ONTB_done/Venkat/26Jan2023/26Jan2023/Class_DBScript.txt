@@ -1,0 +1,34 @@
+
+ internal DataTable Getdocument_Category_Summary(Guid projectUid)
+        {
+            DataTable ds = new DataTable();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("Sp_GetCategoryName_Statuscount", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@projectuid", projectUid);
+                cmd.SelectCommand.CommandTimeout = 900;
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }
+
+------------------------------------------------------------------------------------------------------------------
+Create Proc Sp_GetCategoryName_Statuscount
+@projectuid nvarchar(250)
+as
+begin
+select wfN1 as [Item Description], [Code A],[Code B],[Code C],[Code D],[Submitted] as [Submitted],[Client Approved] as [Total No. Of Client approval] from (select
+WC.WorkPackageCategory_Name as wfN,WC.WorkPackageCategory_Name as wfN1,ASD.ActualDocument_CurrentStatus  from documents ds
+ inner join ActualDocuments ASD
+on ds.DocumentUID=ASD.DocumentUID
+ inner join [dbo].[Workpackage_Categories] WC on ds.Doc_Category=WC.WorkPackageCategory_UID
+where ds.ProjectUID=@projectuid and ASD.Doc_Type!='Cover Letter'
+) as A
+pivot(count(wfn)   for ActualDocument_CurrentStatus in ([Code D],[Code C],[Code A],[Code B],[Submitted],[Client Approved])) as B
+end

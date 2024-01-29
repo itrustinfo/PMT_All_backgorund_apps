@@ -1,0 +1,142 @@
+--------------------------------------------------------------------------------
+New Procedures
+--------------------------------------------------------------------
+/****** Object:  StoredProcedure [dbo].[usp_GetTaskSchedule_By_TaskUID_TaskScheduleVersion_test]    Script Date: 9/1/2023 4:17:51 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+Create proc [dbo].[usp_GetTaskSchedule_By_TaskUID_TaskScheduleVersion_test]
+@TaskUID uniqueidentifier,
+@TaskScheduleVersion float
+as
+begin
+set nocount on;
+select TaskScheduleUID,FORMAT(StartDate,'MMM') as s_month,year(startdate) as s_year ,Schedule_Value from TaskSchedule where TaskUID=@TaskUID and Delete_Flag='N' and TaskScheduleVersion=@TaskScheduleVersion order by StartDate;
+end
+
+--------------------------------------------------------------------------------------------------
+Modified Procedures
+------------------------------------------------------------------------------------------------
+/****** Object:  StoredProcedure [dbo].[usp_TaskSchedule_Delete_by_TaskScheduleUID]    Script Date: 9/1/2023 4:19:32 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_TaskSchedule_Delete_by_TaskScheduleUID]
+@TaskScheduleUID uniqueidentifier
+as
+begin
+declare @AchievedValue decimal(18,3);
+set @AchievedValue=(select isnull(Achieved_Value,0) from TaskSchedule where TaskScheduleUID=@TaskScheduleUID and Delete_Flag='N');
+if (@AchievedValue = 0)
+	update TaskSchedule set Delete_Flag = 'Y' where TaskScheduleUID=@TaskScheduleUID;
+end
+
+------------------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[usp_InsertorUpdateTaskSchedule]    Script Date: 9/1/2023 4:21:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_InsertorUpdateTaskSchedule]
+@TaskScheduleUID uniqueidentifier,
+@WorkpacageUID uniqueidentifier,
+@TaskUID uniqueidentifier,
+@StartDate datetime,
+@EndDate datetime,
+@Schedule_Value float,
+@Schedule_Type varchar(30)
+as
+begin
+declare @AchievedValue decimal(18,3);
+if not exists(select TaskScheduleUID from TaskSchedule where TaskScheduleUID=@TaskScheduleUID)
+begin
+	declare @Cnt int;
+	set @Cnt= (select max(TaskScheduleVersion) from TaskScheduleVesrion where TaskUID=@TaskUID);
+
+	declare @UOM varchar(50);
+	set @UOM=(select UnitforProgress from Tasks where TaskUID=@TaskUID);
+
+	declare @ExistingTaskScheduleUID uniqueidentifier;
+	
+	declare @AchievedDate Datetime;
+	declare @AchievedPercent decimal(18,3);
+
+	if @Cnt > 1 
+	begin
+		set @ExistingTaskScheduleUID=(select TaskScheduleUID from TaskSchedule where TaskUID=@TaskUID and TaskScheduleVersion=(@Cnt-1) and Cast(StartDate as date)=cast(@StartDate as date) and cast(EndDate as date)=cast(@EndDate as date) and Delete_Flag='N');
+		set @AchievedValue=(select Achieved_Value from TaskSchedule where TaskScheduleUID=@ExistingTaskScheduleUID and Delete_Flag='N');
+		set @AchievedDate=(select Achieved_Date from TaskSchedule where TaskScheduleUID=@ExistingTaskScheduleUID and Delete_Flag='N');
+		set @AchievedPercent=(select Achieved_Per from TaskSchedule where TaskScheduleUID=@ExistingTaskScheduleUID and Delete_Flag='N');
+	end
+
+	if Upper(@UOM)='PERCENT'
+	begin
+		if @Cnt > 1
+		begin
+			insert into TaskSchedule(TaskScheduleUID,WorkpacageUID,TaskUID,StartDate,EndDate,Schedule_Value,Schedule_Type,TaskScheduleVersion,Schedule_Per,Achieved_Value,Achieved_Date,Achieved_Per)
+			values(@TaskScheduleUID,@WorkpacageUID,@TaskUID,@StartDate,@EndDate,@Schedule_Value,@Schedule_Type,@Cnt,@Schedule_Value,@AchievedValue,@AchievedDate,@AchievedPercent)
+		end
+		else
+		begin
+			insert into TaskSchedule(TaskScheduleUID,WorkpacageUID,TaskUID,StartDate,EndDate,Schedule_Value,Schedule_Type,TaskScheduleVersion,Schedule_Per)
+			values(@TaskScheduleUID,@WorkpacageUID,@TaskUID,@StartDate,@EndDate,@Schedule_Value,@Schedule_Type,@Cnt,@Schedule_Value)
+		end
+	end
+	else
+	begin
+		declare @Task_Weightage float;
+		set @Task_Weightage=(select isnull(Task_Weightage,0) from Tasks where TaskUID=@TaskUID);
+
+		if @Task_Weightage>0
+		begin
+
+			declare @TotalTraget float;
+			set @TotalTraget=(select UnitQuantity from Tasks where TaskUID=@TaskUID);
+
+			declare @SchedulePercentage float;
+
+			if @Schedule_Value>0 and @TotalTraget >0 
+			begin
+				set @SchedulePercentage=(@Schedule_Value/@TotalTraget) * @Task_Weightage;
+			end
+			else
+			begin
+				set @SchedulePercentage=0;
+			end
+			if @Cnt > 1
+			begin
+				insert into TaskSchedule(TaskScheduleUID,WorkpacageUID,TaskUID,StartDate,EndDate,Schedule_Value,Schedule_Type,TaskScheduleVersion,Schedule_Per,Achieved_Value,Achieved_Date,Achieved_Per)
+				values(@TaskScheduleUID,@WorkpacageUID,@TaskUID,@StartDate,@EndDate,@Schedule_Value,@Schedule_Type,@Cnt,@SchedulePercentage,@AchievedValue,@AchievedDate,@AchievedPercent)
+			end
+			else
+			begin
+				insert into TaskSchedule(TaskScheduleUID,WorkpacageUID,TaskUID,StartDate,EndDate,Schedule_Value,Schedule_Type,TaskScheduleVersion,Schedule_Per)
+				values(@TaskScheduleUID,@WorkpacageUID,@TaskUID,@StartDate,@EndDate,@Schedule_Value,@Schedule_Type,@Cnt,@SchedulePercentage)
+			end
+		end
+		else
+		begin
+			if @Cnt > 1
+			begin
+				insert into TaskSchedule(TaskScheduleUID,WorkpacageUID,TaskUID,StartDate,EndDate,Schedule_Value,Schedule_Type,TaskScheduleVersion,Achieved_Value,Achieved_Date,Achieved_Per)
+				values(@TaskScheduleUID,@WorkpacageUID,@TaskUID,@StartDate,@EndDate,@Schedule_Value,@Schedule_Type,@Cnt,@AchievedValue,@AchievedDate,@AchievedPercent)
+			end
+			else
+			begin
+				insert into TaskSchedule(TaskScheduleUID,WorkpacageUID,TaskUID,StartDate,EndDate,Schedule_Value,Schedule_Type,TaskScheduleVersion)
+				values(@TaskScheduleUID,@WorkpacageUID,@TaskUID,@StartDate,@EndDate,@Schedule_Value,@Schedule_Type,@Cnt)
+			end
+		end
+	end
+end
+else
+begin
+	update TaskSchedule set TaskUID=@TaskUID,StartDate=@StartDate,EndDate=@EndDate,Schedule_Value=@Schedule_Value,Schedule_Type=@Schedule_Type where TaskScheduleUID=@TaskScheduleUID;
+end
+end
+
+------------------------------------------
+

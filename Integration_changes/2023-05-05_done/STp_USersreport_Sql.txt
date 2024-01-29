@@ -1,0 +1,464 @@
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+alter PROCEDURE [usp_GetAutoForwardedDocs] 
+	-- Add the parameters for the stored procedure here
+@ProjectName as varchar(50),
+@FlowName as varchar(50),
+@startdate as datetime,
+@enddate as datetime
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	declare @ProjectUID as uniqueidentifier;
+	declare @FlowUID as uniqueidentifier;
+	set @ProjectUID =(Select ProjectUID From ProjectDetails Where ProjectName=@ProjectName)
+	set @FlowUID =(select FlowMasterUID From DocumentFlowDisplayMaster Where Flow_Name=@FlowName)
+    -- Insert statements for procedure here
+	SELECT DocumentStatus.StatusUID, DocumentStatus.AcivityUserUID, DocumentStatus.Ref_Number, DocumentStatus.Version, DocumentStatus.ActivityType, DocumentStatus.Activity_Budget, DocumentStatus.ActivityDate, 
+                  DocumentStatus.PlannedDate, DocumentStatus.DocumentDate, DocumentStatus.CoverLetterFile, DocumentStatus.LinkToReviewFile, DocumentStatus.Status_Comments, DocumentStatus.Current_Status, DocumentStatus.Delete_Flag, 
+                  DocumentStatus.ServerCopiedAdd, DocumentStatus.CopiedAddDate, DocumentStatus.ServerCopiedUpdate, DocumentStatus.CopiedUpdateDate, DocumentStatus.Origin, DocumentStatus.CreatedDate, DocumentStatus.Forwarded, 
+                  DocumentStatus.DocumentUID, ActualDocuments.FlowUID,ActualDocuments.DocumentUID as SubmittalUID
+FROM     DocumentStatus INNER JOIN
+                  ActualDocuments ON DocumentStatus.DocumentUID = ActualDocuments.ActualDocumentUID Where Forwarded ='Y' 
+				  and ActualDocuments.FlowUID=@FlowUID and ActualDocuments.ProjectUID=@ProjectUID
+				  and (DocumentStatus.CreatedDate >= @startdate and  DocumentStatus.CreatedDate <= @enddate)
+				  Order by CreatedDate DEsc
+
+END
+GO
+
+//
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [usp_GetPrevStatus] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@Status as varchar(100)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+select *,LAG(DocumentStatus.ActivityType) OVER (ORDER BY DocumentStatus.CreatedDate) as PrevStatus 
+INTO #products_temp_table
+From DocumentStatus Where DocumentUID=@ActualDocumentUID
+order by CreatedDate Desc
+
+SELECT * FROM #products_temp_table Where Current_Status=@Status
+
+DROP TABLE #products_temp_table
+
+END
+GO
+
+
+//
+USE [ONTB_Server]
+GO
+/****** Object:  StoredProcedure [dbo].[GetNextStep_By_DocumentUID]    Script Date: 5/8/2023 3:26:37 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[GetNextStep_By_DocumentUID]
+@ActualDocumentUID uniqueidentifier,
+@CurrentStatus as varchar(75)
+as
+begin
+declare @DocUID uniqueidentifier;
+declare @FlowUID uniqueidentifier;
+set @DocUID=(select DocumentUID from ActualDocuments where ActualDocumentUID=@ActualDocumentUID);
+set @FlowUID=(select FlowUID from Documents where DocumentUID=@DocUID);
+
+
+select ForFlow_Step from UserTypeStatus Where Current_Status=@CurrentStatus and FlowUID=@FlowUID order by ForFlow_Step
+
+
+end
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[GetNextStep_By_DocumentUID_forreport]
+@ActualDocumentUID uniqueidentifier,
+@CurrentStatus as varchar(75)
+as
+begin
+declare @DocUID uniqueidentifier;
+declare @FlowUID uniqueidentifier;
+set @DocUID=(select DocumentUID from ActualDocuments where ActualDocumentUID=@ActualDocumentUID);
+set @FlowUID=(select FlowUID from Documents where DocumentUID=@DocUID);
+
+
+select Top 1 ForFlow_Step from UserTypeStatus Where Current_Status=@CurrentStatus and FlowUID=@FlowUID order by ForFlow_Step
+
+
+end
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+create proc [dbo].[usp_UserDocumentStatus_forREportPending]
+@DocumentDate datetime
+as
+begin
+select p.ProjectName, f.Flow_Name, a.ActualDocumentUID, a.ProjectUID, a.WorkPackageUID, a.DocumentUID, a.ProjectRef_Number, a.Ref_Number, 
+ a.Doc_Type, a.IncomingRec_Date, a.FlowUID, a.ActualDocument_Name, a.Description, a.Remarks, a.FileRef_Number, a.ActualDocument_CreatedDate, a.ActualDocument_CurrentStatus, d.DocName, a.ActualDocument_Type, a.Document_Date, d.CreatedDate, a.ActualDocument_Path
+from ActualDocuments a, ProjectDetails p, DocumentFlowDisplayMaster f, Documents d
+where a.ProjectUID = p.ProjectUID and a.FlowUID = f.FlowMasterUID and a.DocumentUID = d.DocumentUID
+and p.ProjectName in ('CP-25', 'CP-26','CP-27') 
+and f.Flow_Name in ('Works A', 'Works B', 'Vendor Approval','Contractor Correspondence') and a.ActualDocument_CreatedDate <=@DocumentDate and a.Delete_Flag = 'N' and
+a.Doc_Type != 'Cover Letter'
+union
+select p.ProjectName, 'Bommanahalli' as Flow_Name, a.ActualDocumentUID, a.ProjectUID, a.WorkPackageUID, a.DocumentUID, a.ProjectRef_Number, a.Ref_Number, 
+ a.Doc_Type, a.IncomingRec_Date, a.FlowUID, a.ActualDocument_Name, a.Description, a.Remarks, a.FileRef_Number, a.ActualDocument_CreatedDate, a.ActualDocument_CurrentStatus, d.DocName, a.ActualDocument_Type, a.Document_Date, d.CreatedDate, a.ActualDocument_Path
+from ActualDocuments a, ProjectDetails p, DocumentFlowDisplayMaster f, Documents d
+where a.ProjectUID = p.ProjectUID and a.FlowUID = f.FlowMasterUID and a.DocumentUID = d.DocumentUID
+and d.TaskUID in ('86aab0ac-ba00-419c-a5d5-ef56d1c2886d')
+and f.Flow_Name in ('Works A', 'Works B', 'Vendor Approval') and a.ActualDocument_CreatedDate <=@DocumentDate
+and a.Delete_Flag = 'N' and a.Doc_Type != 'Cover Letter'
+union
+select p.ProjectName, 'Mahadevpura' as Flow_Name, a.ActualDocumentUID, a.ProjectUID, a.WorkPackageUID, a.DocumentUID, a.ProjectRef_Number, a.Ref_Number, 
+ a.Doc_Type, a.IncomingRec_Date, a.FlowUID, a.ActualDocument_Name, a.Description, a.Remarks, a.FileRef_Number, a.ActualDocument_CreatedDate, a.ActualDocument_CurrentStatus, d.DocName, a.ActualDocument_Type, a.Document_Date, d.CreatedDate, a.ActualDocument_Path
+from ActualDocuments a, ProjectDetails p, DocumentFlowDisplayMaster f, Documents d
+where a.ProjectUID = p.ProjectUID and a.FlowUID = f.FlowMasterUID and a.DocumentUID = d.DocumentUID
+and d.TaskUID in ('79e170b6-6767-4819-8de3-2e36b717e53f')
+and f.Flow_Name in ('Works A', 'Works B', 'Vendor Approval') and a.ActualDocument_CreatedDate <=@DocumentDate
+and a.Delete_Flag = 'N' and a.Doc_Type != 'Cover Letter'
+
+end
+
+
+USE [ONTB_Server]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetNextUserDocuments_pending]    Script Date: 5/9/2023 1:07:34 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+alter PROCEDURE [dbo].[usp_GetNextUserDocumentsReport_pending] 
+	-- Add the parameters for the stored procedure here
+@ProjectName as nvarchar(100),
+@UserUIDs as varchar(max)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	-- not to include cover letters to get the count
+	SET NOCOUNT ON;
+	Declare @ProjectUID as uniqueidentifier;
+	set @ProjectUID = (select ProjectUID from ProjectDetails where ProjectName = @ProjectName);
+    -- Insert statements for procedure here
+	--SELECT Count(ActualDocuments.ActualDocument_Name) as Count FROM Documents INNER JOIN
+ --                        ActualDocuments ON Documents.DocumentUID = ActualDocuments.DocumentUID 
+	--					  Where ActualDocuments.ProjectUID =@ProjectUID and Documents.FlowStep1_UserUID =@User and ActualDocuments.Doc_Type !='Cover Letter'
+
+	(SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.ActualDocument_CreatedDate as IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName,ROW_NUMBER() OVER(ORDER BY ActualDocuments.ActualDocument_CreatedDate  DESC) AS SerialNo, @ProjectName as ProjectName,
+ ActualDocuments.FlowUID as Flow_Name,ActualDocuments.ActualDocument_CreatedDate as CreatedDate
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		Where ActualDocuments.ProjectUID =@ProjectUID and ActualDocuments.Delete_Flag ='N' and ActualDocuments.FlowUID !='F4532C1C-7388-48DF-8C33-A60B94D0049C' and ActualDocuments.Doc_Type !='Cover Letter'
+		and ActualDocuments.ActualDocumentUID in (SELECT convert(uniqueidentifier, value) FROM string_split(@UserUIDs, ',')))
+		
+		ORDER BY ActualDocuments.IncomingRec_Date  DESC
+
+END
+//
+USE [ONTB_Server]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetAutoForwardedDocs]    Script Date: 5/9/2023 5:02:37 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetAutoForwardedDocs] 
+	-- Add the parameters for the stored procedure here
+@ProjectName as varchar(50),
+@FlowName as varchar(50),
+@startdate as datetime,
+@enddate as datetime
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	declare @ProjectUID as uniqueidentifier;
+	declare @FlowUID as uniqueidentifier;
+	set @ProjectUID =(Select ProjectUID From ProjectDetails Where ProjectName=@ProjectName)
+	set @FlowUID =(select FlowMasterUID From DocumentFlowDisplayMaster Where Flow_Name=@FlowName)
+    -- Insert statements for procedure here
+if @FlowName = 'Bommanahalli'
+Begin
+set @FlowUID =(select FlowMasterUID From DocumentFlowDisplayMaster Where Flow_Name='Works B')
+	SELECT DocumentStatus.StatusUID, DocumentStatus.AcivityUserUID, DocumentStatus.Ref_Number, DocumentStatus.Version, DocumentStatus.ActivityType, DocumentStatus.Activity_Budget, DocumentStatus.ActivityDate, 
+                  DocumentStatus.PlannedDate, DocumentStatus.DocumentDate, DocumentStatus.CoverLetterFile, DocumentStatus.LinkToReviewFile, DocumentStatus.Status_Comments, DocumentStatus.Current_Status, DocumentStatus.Delete_Flag, 
+                  DocumentStatus.ServerCopiedAdd, DocumentStatus.CopiedAddDate, DocumentStatus.ServerCopiedUpdate, DocumentStatus.CopiedUpdateDate, DocumentStatus.Origin, DocumentStatus.CreatedDate, DocumentStatus.Forwarded, 
+                  DocumentStatus.DocumentUID, ActualDocuments.FlowUID, ActualDocuments.DocumentUID AS SubmittalUID
+FROM     DocumentStatus INNER JOIN
+                  ActualDocuments ON DocumentStatus.DocumentUID = ActualDocuments.ActualDocumentUID INNER JOIN
+                  Documents ON ActualDocuments.DocumentUID = Documents.DocumentUID Where Forwarded ='Y' 
+				  and ActualDocuments.FlowUID=@FlowUID and ActualDocuments.ProjectUID=@ProjectUID
+				   and Documents.TaskUID in ('86aab0ac-ba00-419c-a5d5-ef56d1c2886d')
+				  and (DocumentStatus.CreatedDate >= @startdate and  DocumentStatus.CreatedDate <= @enddate)
+				 
+				  Order by CreatedDate DEsc
+End
+else if @FlowName = 'Mahadevpura'
+Begin
+set @FlowUID =(select FlowMasterUID From DocumentFlowDisplayMaster Where Flow_Name='Works B')
+	SELECT DocumentStatus.StatusUID, DocumentStatus.AcivityUserUID, DocumentStatus.Ref_Number, DocumentStatus.Version, DocumentStatus.ActivityType, DocumentStatus.Activity_Budget, DocumentStatus.ActivityDate, 
+                  DocumentStatus.PlannedDate, DocumentStatus.DocumentDate, DocumentStatus.CoverLetterFile, DocumentStatus.LinkToReviewFile, DocumentStatus.Status_Comments, DocumentStatus.Current_Status, DocumentStatus.Delete_Flag, 
+                  DocumentStatus.ServerCopiedAdd, DocumentStatus.CopiedAddDate, DocumentStatus.ServerCopiedUpdate, DocumentStatus.CopiedUpdateDate, DocumentStatus.Origin, DocumentStatus.CreatedDate, DocumentStatus.Forwarded, 
+                  DocumentStatus.DocumentUID, ActualDocuments.FlowUID, ActualDocuments.DocumentUID AS SubmittalUID
+FROM     DocumentStatus INNER JOIN
+                  ActualDocuments ON DocumentStatus.DocumentUID = ActualDocuments.ActualDocumentUID INNER JOIN
+                  Documents ON ActualDocuments.DocumentUID = Documents.DocumentUID Where Forwarded ='Y' 
+				  and ActualDocuments.FlowUID=@FlowUID and ActualDocuments.ProjectUID=@ProjectUID
+				   and Documents.TaskUID in ('79e170b6-6767-4819-8de3-2e36b717e53f')
+				  and (DocumentStatus.CreatedDate >= @startdate and  DocumentStatus.CreatedDate <= @enddate)
+				 
+				  Order by CreatedDate DEsc
+End
+else
+Begin
+	SELECT DocumentStatus.StatusUID, DocumentStatus.AcivityUserUID, DocumentStatus.Ref_Number, DocumentStatus.Version, DocumentStatus.ActivityType, DocumentStatus.Activity_Budget, DocumentStatus.ActivityDate, 
+                  DocumentStatus.PlannedDate, DocumentStatus.DocumentDate, DocumentStatus.CoverLetterFile, DocumentStatus.LinkToReviewFile, DocumentStatus.Status_Comments, DocumentStatus.Current_Status, DocumentStatus.Delete_Flag, 
+                  DocumentStatus.ServerCopiedAdd, DocumentStatus.CopiedAddDate, DocumentStatus.ServerCopiedUpdate, DocumentStatus.CopiedUpdateDate, DocumentStatus.Origin, DocumentStatus.CreatedDate, DocumentStatus.Forwarded, 
+                  DocumentStatus.DocumentUID, ActualDocuments.FlowUID,ActualDocuments.DocumentUID as SubmittalUID
+FROM     DocumentStatus INNER JOIN
+                  ActualDocuments ON DocumentStatus.DocumentUID = ActualDocuments.ActualDocumentUID Where Forwarded ='Y' 
+				  and ActualDocuments.FlowUID=@FlowUID and ActualDocuments.ProjectUID=@ProjectUID
+				  and (DocumentStatus.CreatedDate >= @startdate and  DocumentStatus.CreatedDate <= @enddate)
+				  Order by CreatedDate DEsc
+End
+
+END
+
+//added on 11/05/2023
+IsPMC	varchar(1)	Checked
+Discipline	varchar(100)	Checked  to USerDetails table
+
+
+USE [ONTB_Server]
+GO
+/****** Object:  StoredProcedure [dbo].[ups_InserorUpdateUser]    Script Date: 5/11/2023 5:46:08 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_InserorUpdateUser]
+@UserUID uniqueidentifier,
+@FirstName varchar(100),
+@LastName varchar(100),
+@EmailID varchar(100),
+@Mobilenumber varchar(15),
+@Address1 varchar(250),
+@Address2 varchar(250),
+@Username varchar(50),
+@password varchar(50),
+@TypeOfUser varchar(5),
+@Admin_Under uniqueidentifier,
+@Profile_Pic varchar(150),
+@DocumentMail varchar(1),
+@ProjecMasterMail varchar(1),
+@IsContractor varchar(50),
+@UserTypeID int,
+@IsPMC as varchar(1),
+@Discipline as varchar(100)
+as
+begin
+if not exists(select UserUID from UserDetails where UserUID=@UserUID)
+begin
+	--DECLARE @cur as CURSOR;
+	declare @WorkPackageUID varchar(50);
+	declare @ProjectUID varchar(50);
+	declare @Name varchar(50);
+	if @Profile_Pic <>''
+	begin
+		insert into UserDetails(UserUID,FirstName,LastName,EmailID,Mobilenumber,Address1,Address2,Username,password,TypeOfUser,CreatedDate,Admin_Under,Profile_Pic,IsContractor,UserTypeID,IsPMC,Discipline)
+		values(@UserUID,@FirstName,@LastName,@EmailID,@Mobilenumber,@Address1,@Address2,@Username,@password,@TypeOfUser,GETDATE(),@Admin_Under,@Profile_Pic,@IsContractor,@UserTypeID,@IsPMC,@Discipline);
+
+		--insert into UserProjects(AssignID,UserUID,ProjectUID,UserRole,AssignDate)
+		--values(NEWID(),@UserUID,@Project_Under,@TypeOfUser,GETDATE());
+		--set @cur= CURSOR FOR SELECT WorkPackageUID,ProjectUID,Name FROM WorkPackages where ProjectUID=@Project_Under;
+		--OPEN @cur
+		--FETCH NEXT FROM @cur INTO @WorkPackageUID, @ProjectUID, @Name
+		--WHILE @@FETCH_STATUS = 0 BEGIN
+		--	insert into UserWorkPackages(UID,ProjectUID,UserUID,WorkPackageUID,Status,CreatedDate)
+		--	values(NEWID(),@ProjectUID,@UserUID,@WorkPackageUID,'A',GETDATE())
+		--	FETCH NEXT FROM @cur INTO @WorkPackageUID, @ProjectUID, @Name
+		--END
+		--CLOSE @cur    
+		--DEALLOCATE @cur
+
+	end
+	else
+	begin
+		--insert into UserDetails(UserUID,FirstName,LastName,EmailID,Mobilenumber,Address1,Address2,Username,password,TypeOfUser,CreatedDate,Admin_Under,Profile_Pic)
+		--values(@UserUID,@FirstName,@LastName,@EmailID,@Mobilenumber,@Address1,@Address2,@Username,@password,@TypeOfUser,GETDATE(),@Admin_Under,@Profile_Pic)
+		insert into UserDetails(UserUID,FirstName,LastName,EmailID,Mobilenumber,Address1,Address2,Username,password,TypeOfUser,CreatedDate,Admin_Under, IsContractor, UserTypeID,IsPMC,Discipline)
+		values(@UserUID,@FirstName,@LastName,@EmailID,@Mobilenumber,@Address1,@Address2,@Username,@password,@TypeOfUser,GETDATE(),@Admin_Under,@IsContractor,@UserTypeID,@IsPMC,@Discipline);
+
+		--insert into UserProjects(AssignID,UserUID,ProjectUID,UserRole,AssignDate)
+		--values(NEWID(),@UserUID,@Project_Under,@TypeOfUser,GETDATE());
+
+		--set @cur= CURSOR FOR SELECT WorkPackageUID,ProjectUID,Name FROM WorkPackages where ProjectUID=@Project_Under;
+		--OPEN @cur
+		--FETCH NEXT FROM @cur INTO @WorkPackageUID, @ProjectUID, @Name
+		--WHILE @@FETCH_STATUS = 0 BEGIN
+		--	insert into UserWorkPackages(UID,ProjectUID,UserUID,WorkPackageUID,Status,CreatedDate)
+		--	values(NEWID(),@ProjectUID,@UserUID,@WorkPackageUID,'A',GETDATE())
+		--	FETCH NEXT FROM @cur INTO @WorkPackageUID, @ProjectUID, @Name
+		--END
+		--CLOSE @cur    
+		--DEALLOCATE @cur
+	end
+
+	if @DocumentMail = 'Y'
+	Begin
+	  INSERT INTO [dbo].[UserMailAccess]
+           ([UserUID]
+           ,[Type]
+           )
+     VALUES
+           (@UserUID
+           ,'documentmail')
+
+	end
+
+	if @ProjecMasterMail = 'Y'
+	Begin
+	  INSERT INTO [dbo].[UserMailAccess]
+           ([UserUID]
+           ,[Type]
+           )
+     VALUES
+           (@UserUID
+           ,'projectmastermail')
+
+	end
+
+
+end
+else
+begin
+	if @Profile_Pic !=''
+	begin
+		update UserDetails set FirstName=@FirstName,LastName=@LastName,Mobilenumber=@Mobilenumber,Address1=@Address1,Address2=@Address2,Profile_Pic=@Profile_Pic,
+		TypeOfUser=@TypeOfUser,IsContractor=@IsContractor,UserTypeID=@UserTypeID,
+		IsPMC=@IsPMC,
+		Discipline=@Discipline
+		where UserUID=@UserUID;
+	end
+	else
+	begin
+		update UserDetails set FirstName=@FirstName,LastName=@LastName,Mobilenumber=@Mobilenumber,Address1=@Address1,Address2=@Address2,
+		TypeOfUser=@TypeOfUser,IsContractor=@IsContractor,UserTypeID=@UserTypeID,
+		IsPMC=@IsPMC,
+		Discipline=@Discipline where UserUID=@UserUID;
+	end
+
+	Delete From UserMailAccess Where UserUID =@UserUID
+
+	if @DocumentMail = 'Y'
+	Begin
+	  INSERT INTO [dbo].[UserMailAccess]
+           ([UserUID]
+           ,[Type]
+           )
+     VALUES
+           (@UserUID
+           ,'documentmail')
+
+	end
+
+	if @ProjecMasterMail = 'Y'
+	Begin
+	  INSERT INTO [dbo].[UserMailAccess]
+           ([UserUID]
+           ,[Type]
+           )
+     VALUES
+           (@UserUID
+           ,'projectmastermail')
+
+	end
+end
+end
+
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[usp_Get_UserDetails] 
+	-- Add the parameters for the stored procedure here
+@UserUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT     UserUID, FirstName,LastName, EmailID, Phonenumber, Mobilenumber, Address1, Address2, Username, password, CreatedDate, DeletedFlag, DeletedDate, TypeOfUser,Profile_Pic,IsContractor,UserTypeID,IsPMC,Discipline
+FROM         UserDetails
+Where UserDetails.UserUID = @UserUID
+END

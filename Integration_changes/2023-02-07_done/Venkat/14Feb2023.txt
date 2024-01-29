@@ -1,0 +1,105 @@
+Andriod Controller
+--------------------------------
+    [Authorize]
+        [HttpPost]
+        [Route("api/Andriod/Get_Andoird_Camera_details")]
+        public IHttpActionResult Get_Andoird_Camera_details([FromBody] UserProjectDocuments projectUser)
+        {
+            DataTable dtRespone = new DataTable();
+            Guid transactionUid = Guid.NewGuid();
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                //Insert into WebAPITransctions table
+                var BaseURL = HttpContext.Current.Request.Url.ToString();
+                string postData = "ProjectName=" + projectUser.ProjectName + ";Username=" + projectUser.Username ;
+
+                var identity = (ClaimsIdentity)User.Identity;
+                if (db.CheckGetWebApiSettings(identity.Name, GetIp()) > 0)
+                {
+                    try
+                    {
+                        db.WebAPITransctionInsert(transactionUid, BaseURL, postData, "");
+                        DataTable dtProject = db.GetWorkPackages_ProjectName(projectUser.ProjectName);
+                        if (dtProject.Rows.Count == 0)
+                        {
+                            return Json(new
+                            {
+                                Status = "Failure",
+                                Message = "Error:Invalid ProjectName"
+                            });
+                        }
+                        if ( ! string.IsNullOrEmpty(projectUser.Username ))
+                        {
+                            DataSet dsUsers = db.getUserDetails_by_EmailID(projectUser.Username);
+                            if (dsUsers.Tables[0].Rows.Count == 0)
+                            {
+                                return Json(new
+                                {
+                                    Status = "Failure",
+                                    Message = "Error:Invalid UserName"
+                                });
+                            }
+                        }
+                  dtRespone=  db.getAndroidCameraDetails(new Guid(dtProject.Rows[0]["ProjectUid"].ToString()));
+                        if(dtRespone.Rows.Count==0)
+                        {
+                            return Json(new
+                            {
+                                Status = "Failure",
+                                Message = "Error:No Camera details available"
+                            });
+                        }
+
+                      
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+                return Json(new { Status = "Success", response = JsonConvert.SerializeObject(dtRespone) });
+            }
+            catch(Exception ex)
+            {
+                return Json(new
+                {
+                    Status = "Failure",
+                    Message = "Error"+ex.Message
+                });
+            }
+        }
+-------------------------------------------------------------------------------
+class 
+-------------
+
+ internal DataTable getAndroidCameraDetails(Guid ProjectUID)
+        {
+            DataTable ds = new DataTable();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("usp_GetAndriodCameraDetails", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@ProjectUID", ProjectUID);
+                cmd.SelectCommand.CommandTimeout = 900;
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }
+-------------------------------------------
+stored Procedure
+------------------------
+
+ALTER proc [dbo].[usp_GetAndriodCameraDetails]
+@ProjectUID nvarchar(250)
+as
+begin
+select [Camera_UID],ProjectUID, WorkpackageUID,[Camera_Name],[Camera_IPAddress],[Camera_Description],[Camera_IPAddress_rtsp]
+
+from [dbo].[Cameras] where Projectuid=@ProjectUID and Camera_Delete='N'
+end

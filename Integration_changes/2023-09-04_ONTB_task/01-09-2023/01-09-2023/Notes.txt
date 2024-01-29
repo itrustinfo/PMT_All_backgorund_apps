@@ -1,0 +1,10 @@
+
+I have created a new page named "add-taskschedule-revised".
+
+Please make the changes in "Engineering-Workpackage" to call the above page
+
+Change in Code Behind
+  TaskSchedule.HRef= "/_modal_pages/addtask-targetschedule-revised.aspx?type=add&TaskUID=" + TaskUID + "&WorkUID=" + ds.Rows[0]["WorkPackageUID"].ToString();
+
+Change in Html page
+  <a id="TaskSchedule" runat="server" href="/_modal_pages/addtask-targetschedule-revised.aspx?type=Add" class="showModalTaskSchedule"><asp:Button ID="btnaddtaskschedule" runat="server" Text="+ Task Schedule" CssClass="btn btn-primary"></asp:Button></a>

@@ -1,0 +1,135 @@
+
+/****** Object:  StoredProcedure [dbo].[dbsync_InsertorUpdate_form-task-update]    Script Date: 1/12/2023 10:46:26 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+Create PROCEDURE [dbo].[dbsync_InsertorUpdate_form_task_update]
+	-- Add the parameters for the stored procedure here
+	@Form_task_update_uid uniqueidentifier
+           ,@Taskuid  nvarchar(250)
+           ,@TaskName nvarchar(max)
+           ,@projectuid nvarchar(250)
+           ,@workpackageuid nvarchar(250)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+IF Not Exists(select * From [form-task-update] Where [Form-task-update-uid]=@Form_task_update_uid)
+BEGIN
+INSERT INTO [dbo].[form-task-update]
+           ([Form-task-update-uid]
+           ,[Taskuid]
+           ,[TaskName]
+           ,[projectuid]
+           ,[workpackageuid]
+           ,[ServerCopiedAdd])
+
+     VALUES
+          ( @Form_task_update_uid
+           ,@Taskuid
+           ,@TaskName
+           ,@projectuid
+           ,@workpackageuid
+           ,'Y' )
+End
+Else
+Begin
+UPDATE [dbo].[form-task-update]
+   SET [Taskuid] = @Taskuid
+      ,[TaskName] = @TaskName
+      ,[projectuid] = @projectuid
+      ,[workpackageuid] = @workpackageuid
+
+ WHERE [Form-task-update-uid]=@Form_task_update_uid
+ UPDATE [dbo].[form-task-update]
+   SET ServerCopiedUpdate='Y'
+   where [Form-task-update-uid]=@Form_task_update_uid
+End
+
+
+END
+
+----------------------------------------------------------------------------------------------------------------------
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[dbsync_InsertorUpdate_CorrespondenceCCToUsers]
+	-- Add the parameters for the stored procedure here
+            @UID  uniqueidentifier
+           ,@ActualDocumentUID uniqueidentifier
+           ,@StatusUID uniqueidentifier
+           ,@UserType varchar(100)
+           ,@CreatedDate datetime
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+IF Not Exists(select * From CorrespondenceCCToUsers Where UID=@UID)
+Begin
+INSERT INTO [dbo].[CorrespondenceCCToUsers]
+           ([UID]
+           ,[ActualDocumentUID]
+           ,[StatusUID]
+           ,[UserType]
+           ,[CreatedDate]
+           ,[ServerCopiedAdd]
+		   )
+
+     VALUES
+           (@UID
+           ,@ActualDocumentUID
+           ,@StatusUID
+           ,@UserType
+           ,@CreatedDate
+           ,'Y')
+
+
+End
+Else
+Begin
+UPDATE [dbo].[CorrespondenceCCToUsers]
+   SET [ActualDocumentUID] =@ActualDocumentUID
+      ,[StatusUID] = @StatusUID
+      ,[UserType] = @UserType
+      ,[CreatedDate] = @CreatedDate
+
+ WHERE [UID] = @UID
+
+ UPDATE [dbo].[CorrespondenceCCToUsers]
+   SET ServerCopiedUpdate ='Y'
+     WHERE [UID] = @UID
+End
+
+END
+GO
+

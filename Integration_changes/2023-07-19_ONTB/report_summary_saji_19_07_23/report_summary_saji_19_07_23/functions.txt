@@ -1,0 +1,21 @@
+ public DataSet GetFlow2OlddocsCount(string prjName, String Type)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("usp_GetFlow2OlddocsCount", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@ProjectName", prjName);
+                cmd.SelectCommand.Parameters.AddWithValue("@Type", Type);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }
+
+//-------------------------------------------------------
+

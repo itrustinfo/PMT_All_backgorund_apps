@@ -1,0 +1,293 @@
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [usp_GetSuezResubmitDocs] 
+	-- Add the parameters for the stored procedure here
+@ProjectUID uniqueidentifier ,
+@WorkPackageUID uniqueidentifier,
+@FlowName nvarchar(max),
+@Status as varchar(50)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	Declare @ProjectName as varchar(max);
+	set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+
+	declare @FlowUID nvarchar(max);
+	set @FlowUID = (select FlowMasterUID from  DocumentFlowDisplayMaster where Flow_Name = @FlowName);
+
+	if (@ProjectName = 'CP-03')
+	 select * from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.FlowUID = @FlowUID and A.Delete_Flag='N' and ActualDocument_CurrentStatus=@Status and (A.Doc_Type='Document' or A.Doc_Type='General Document') ;
+	else if (@ProjectName = 'CP-02')
+	  select * from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.FlowUID = @FlowUID and A.Delete_Flag='N' and ActualDocument_CurrentStatus=@Status and (A.Doc_Type='Document' or A.Doc_Type='General Document') ;
+
+END
+GO
+
+
+//
+USE [ONTB_Server_Issue]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetDocsStatusafterResubmission]    Script Date: 8/17/2023 5:20:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetDocsStatusafterResubmission] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier
+
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	--declare @ResubmitDate as Datetime;
+	--set  @ResubmitDate = (select top(1) Doc_StatusDate From DocumentVesrion where DocumentUID=@ActualDocumentUID and Delete_Flag='N' order by Doc_StatusDate desc)
+	--select * From DocumentStatus Where DocumentUID=@ActualDocumentUID and ActivityDate > @ResubmitDate and Delete_Flag='N'
+
+	declare @StatusUID as uniqueidentifier;
+	set @StatusUID =(select top(1) StatusUID From DocumentStatus Where DocumentUID=@ActualDocumentUID and Delete_Flag='N' order by CreatedDate desc)
+	select * From DocumentVesrion Where DocStatus_UID=@StatusUID
+END
+
+
+
+//
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [usp_GetSuezResubmitDocs_category] 
+	-- Add the parameters for the stored procedure here
+@ProjectUID uniqueidentifier ,
+@WorkPackageUID uniqueidentifier,
+@FlowName nvarchar(max),
+@Status as varchar(50),
+@Categoryname as varchar(100)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	Declare @ProjectName as varchar(max);
+	set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+
+	declare @FlowUID nvarchar(max);
+	set @FlowUID = (select FlowMasterUID from  DocumentFlowDisplayMaster where Flow_Name = @FlowName);
+
+	declare @CategoryUID nvarchar(max);
+	set @CategoryUID =(select WorkPackageCategory_UID From Workpackage_Categories Where WorkPackageUID=@WorkPackageUID and WorkPackageCategory_Name=@Categoryname)
+
+	if (@ProjectName = 'CP-03')
+	 select * from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.Doc_Category=@CategoryUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.FlowUID = @FlowUID and A.Delete_Flag='N' and ActualDocument_CurrentStatus=@Status and (A.Doc_Type='Document' or A.Doc_Type='General Document') ;
+	else if (@ProjectName = 'CP-02')
+	  select * from ActualDocuments A, Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.Doc_Category=@CategoryUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.FlowUID = @FlowUID and A.Delete_Flag='N' and ActualDocument_CurrentStatus=@Status and (A.Doc_Type='Document' or A.Doc_Type='General Document') ;
+
+END
+GO
+
+
+//added on 16/08/2023
+
+/****** Object:  StoredProcedure [dbo].[Approved_ActualDocuments_SelectBy_WorkPackageUID_NotDelayed_New]    Script Date: 8/16/2023 3:01:43 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[Approved_ActualDocuments_SelectBy_WorkPackageUID_NotDelayed_New_suez]
+@ProjectUID uniqueidentifier,
+@WorkPackageUID uniqueidentifier,
+@FlowName nvarchar(max),
+@Status nvarchar(max),
+@UserUIDs as varchar(max)
+as
+begin
+set nocount on;
+
+Declare @ProjectName as varchar(max);
+set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+
+declare @FlowUID nvarchar(max);
+set @FlowUID = (select FlowMasterUID from  DocumentFlowDisplayMaster where Flow_Name = @FlowName);
+
+if (@FlowName != 'Total Drawings' and @Status != 'Total Drawings')
+begin
+if (@ProjectName = 'CP-09')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-13')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='cp13-planning@lntecc.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document');
+else if (@ProjectName = 'CP-02')
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') and A.ActualDocumentUID not in (SELECT convert(uniqueidentifier, value) FROM string_split(@UserUIDs, ',')) order by SerialNo;
+else if (@ProjectName = 'CP-03')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') and A.ActualDocumentUID not in (SELECT convert(uniqueidentifier, value) FROM string_split(@UserUIDs, ',')) order by SerialNo;
+else if (@ProjectName = 'CP-26')
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='alokranjan@lntecc.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-10')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='sanjayselvaraj@meghaeng.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-27')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='kbrcp27site2021@gmail.com' Or Username='kbrcp27@gmail.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-25')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='designdrawingcp25@gmail.com' Or Username='roshani.salunkhe@passavant-ee.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-07')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='bwssbcp07@gmail.com' Or Username='sanjayselvaraj@meghaeng.com' Or Username='pradeep.selvaraj@meilgroup.org') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.ActualDocument_CurrentStatus = @Status and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+end
+else if (@FlowName != 'Total Drawings' and @Status = 'Total Drawings')
+begin
+if (@ProjectName = 'CP-09')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-13')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='cp13-planning@lntecc.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document');
+else if (@ProjectName = 'CP-02')
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-03')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-26')
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='alokranjan@lntecc.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-10')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='sanjayselvaraj@meghaeng.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-27')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='kbrcp27site2021@gmail.com' Or Username='kbrcp27@gmail.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-25')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='designdrawingcp25@gmail.com' Or Username='roshani.salunkhe@passavant-ee.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-07')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='bwssbcp07@gmail.com' Or Username='sanjayselvaraj@meghaeng.com' Or Username='pradeep.selvaraj@meilgroup.org') and DeletedFlag='N')  and A.FlowUID = @FlowUID  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+end
+else if (@FlowName = 'Total Drawings' and @Status ='Total Drawings')
+begin
+if (@ProjectName = 'CP-09')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com') and DeletedFlag='N')   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-13')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='cp13-planning@lntecc.com') and DeletedFlag='N')  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document');
+else if (@ProjectName = 'CP-02')
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-03')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')    and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-26')
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='alokranjan@lntecc.com') and DeletedFlag='N')    and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-10')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='sanjayselvaraj@meghaeng.com') and DeletedFlag='N')   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-27')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='kbrcp27site2021@gmail.com' Or Username='kbrcp27@gmail.com') and DeletedFlag='N')   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-25')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='designdrawingcp25@gmail.com' Or Username='roshani.salunkhe@passavant-ee.com') and DeletedFlag='N')    and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-07')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='bwssbcp07@gmail.com' Or Username='sanjayselvaraj@meghaeng.com' Or Username='pradeep.selvaraj@meilgroup.org') and DeletedFlag='N')    and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+end
+else
+begin
+if (@ProjectName = 'CP-09')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com') and DeletedFlag='N') and A.ActualDocument_CurrentStatus = @Status   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-13')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='cp13-planning@lntecc.com') and DeletedFlag='N') and A.ActualDocument_CurrentStatus = @Status   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo;
+else if (@ProjectName = 'CP-02')
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and A.ActualDocument_CurrentStatus = @Status   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') and A.ActualDocumentUID not in (SELECT convert(uniqueidentifier, value) FROM string_split(@UserUIDs, ',')) order by SerialNo;
+else if (@ProjectName = 'CP-03')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.ActualDocument_CurrentStatus = @Status  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') and A.ActualDocumentUID not in (SELECT convert(uniqueidentifier, value) FROM string_split(@UserUIDs, ',')) order by SerialNo;
+else if (@ProjectName = 'CP-26')
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='alokranjan@lntecc.com') and DeletedFlag='N') and A.ActualDocument_CurrentStatus = @Status  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-10')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='sanjayselvaraj@meghaeng.com') and DeletedFlag='N')  and A.ActualDocument_CurrentStatus = @Status  and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document')  order by SerialNo;
+else if (@ProjectName = 'CP-27')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='kbrcp27site2021@gmail.com' Or Username='kbrcp27@gmail.com') and DeletedFlag='N') and A.ActualDocument_CurrentStatus = @Status   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-25')
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='designdrawingcp25@gmail.com' Or Username='roshani.salunkhe@passavant-ee.com') and DeletedFlag='N') and A.ActualDocument_CurrentStatus = @Status   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+else if (@ProjectName = 'CP-07')
+	 select A.*,ROW_NUMBER() OVER(ORDER BY  A.FlowUID, A.ActualDocument_CurrentStatus, A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='bwssbcp07@gmail.com' Or Username='sanjayselvaraj@meghaeng.com' Or Username='pradeep.selvaraj@meilgroup.org') and DeletedFlag='N') and A.ActualDocument_CurrentStatus = @Status   and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') order by SerialNo ;
+
+end
+
+end
+
+
+//
+USE [ONTB_Server_Issue]
+GO
+/****** Object:  StoredProcedure [dbo].[Approved_ActualDocuments_SelectBy_WorkPackageUID_NotDelayed_New_UnderReview]    Script Date: 8/17/2023 11:30:34 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[Approved_ActualDocuments_SelectBy_WorkPackageUID_NotDelayed_New_UnderReview]
+@ProjectUID uniqueidentifier,
+@WorkPackageUID uniqueidentifier,
+@FlowName nvarchar(max),
+@Status nvarchar(max),
+@UserUIDs as varchar(max)
+as
+begin
+set nocount on;
+
+Declare @ProjectName as varchar(max);
+set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+
+declare @FlowUID nvarchar(max);
+set @FlowUID = (select FlowMasterUID from  DocumentFlowDisplayMaster where Flow_Name = @FlowName);
+
+if (@FlowName != 'Total Drawings' and @Status != 'Total Drawings')
+begin
+ if (@ProjectName = 'CP-02')
+ Begin
+   select A.*,ROW_NUMBER() OVER(ORDER BY  A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') and A.ActualDocument_CurrentStatus='Submitted' 
+
+   union all
+
+	select A.*,ROW_NUMBER() OVER(ORDER BY  A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') and A.ActualDocumentUID in (SELECT convert(uniqueidentifier, value) FROM string_split(@UserUIDs, ',')) order by A.ActualDocument_CreatedDate desc;
+	end
+else if (@ProjectName = 'CP-03')
+Begin
+(select A.*,ROW_NUMBER() OVER(ORDER BY  A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') and A.ActualDocument_CurrentStatus='Submitted'
+	
+	union all
+
+    select A.*,ROW_NUMBER() OVER(ORDER BY  A.ActualDocument_CreatedDate Desc) as SerialNo,@ProjectName as ProjectName,@FlowName as FlowName from ActualDocuments A,Documents B where A.DocumentUID = B.DocumentUID and A.ProjectUID=@ProjectUID and A.WorkPackageUID=@WorkPackageUID and B.DocumentSearchType ='Drawings' and B.FlowStep1_UserUID IN (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N')  and A.FlowUID = @FlowUID and A.Delete_Flag='N' and (A.Doc_Type='Document' or A.Doc_Type='General Document') and A.ActualDocumentUID in (SELECT convert(uniqueidentifier, value) FROM string_split(@UserUIDs, ','))) order by A.ActualDocument_CreatedDate desc;
+	end
+
+end
+end

@@ -1,0 +1,50 @@
+ public int InsertCorrespondence(Guid UID, Guid ActualDocumentUID, string RefNumber,Guid StatusUID,string Status,DateTime CoverLetterDate, Guid UserUID,string CoverLetterFile,string LinkReviewFile,string StatusComment,string LetterType)
+        {
+            int cnt = 0;
+            try
+            {
+                using (SqlConnection SqlConn = new SqlConnection(db.GetConnectionString()))
+                {
+                    SqlCommand SqlCmd = new SqlCommand("InsertCorrespondenceFile", SqlConn);
+                    SqlCmd.CommandType = CommandType.StoredProcedure;
+                    SqlCmd.Parameters.AddWithValue("@UID", UID);
+                    SqlCmd.Parameters.AddWithValue("@ActualDocumentUID", ActualDocumentUID);
+                    SqlCmd.Parameters.AddWithValue("@RefNumber",RefNumber);
+                    SqlCmd.Parameters.AddWithValue("@StatusUID", StatusUID);
+                    SqlCmd.Parameters.AddWithValue("@Status", Status);
+                    SqlCmd.Parameters.AddWithValue("@CLDate",CoverLetterDate );
+                    SqlCmd.Parameters.AddWithValue("@UserUID", UserUID);
+                    SqlCmd.Parameters.AddWithValue("@CLFile", CoverLetterFile);
+                    SqlCmd.Parameters.AddWithValue("@LRFile", LinkReviewFile);
+                    SqlCmd.Parameters.AddWithValue("@StatusComment", StatusComment);
+                    SqlCmd.Parameters.AddWithValue("@LetterType", LetterType);
+                    SqlConn.Open();
+                    cnt = SqlCmd.ExecuteNonQuery();
+                    SqlConn.Close();
+                }
+                return cnt;
+            }
+            catch (Exception ex)
+            {
+                return cnt;
+            }
+        }
+
+        public DataSet getCorrespondenceLetters(Guid StatusUID,string LetterType)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("getCorrespondenceData", con);
+                cmd.SelectCommand.Parameters.AddWithValue("@statusUID", StatusUID);
+                cmd.SelectCommand.Parameters.AddWithValue("@letterType", LetterType);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }

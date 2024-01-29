@@ -1,0 +1,51 @@
+DashboardDisplay	varchar(1)	Checked  add to Cameras
+
+//
+Update Cameras set DashboardDisplay='Y'
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[Camera_Selectby_WorkpackageUID_Dashboard]
+@WorkpackageUID uniqueidentifier
+as
+begin
+set nocount on;
+select * from Cameras where WorkpackageUID=@WorkpackageUID and Camera_Delete='N' and DashboardDisplay ='Y'
+end
+
+//
+USE [ONTB_Server]
+GO
+/****** Object:  StoredProcedure [dbo].[Camera_InsertorUpdate]    Script Date: 4/6/2023 1:40:51 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[Camera_InsertorUpdate]
+@Camera_UID uniqueidentifier,
+@ProjectUID uniqueidentifier,
+@WorkpackageUID uniqueidentifier,
+@Camera_Name varchar(75),
+@Camera_IPAddress varchar(100),
+@Camera_Description varchar(500),
+@Camera_IPAddress_rtsp varchar(250),
+@DashboardDisplay varchar(1)
+as
+begin
+if not exists(select Camera_UID from Cameras where Camera_UID=@Camera_UID)
+begin
+	insert into Cameras(Camera_UID,ProjectUID,WorkpackageUID,Camera_Name,Camera_IPAddress,Camera_Description,Camera_Delete,Camera_IPAddress_rtsp,DashboardDisplay)
+	values(@Camera_UID,@ProjectUID,@WorkpackageUID,@Camera_Name,@Camera_IPAddress,@Camera_Description,'N',@Camera_IPAddress_rtsp,@DashboardDisplay)
+end
+else
+begin
+	update Cameras set ProjectUID=@ProjectUID,WorkpackageUID=@WorkpackageUID,Camera_Name=@Camera_Name,Camera_IPAddress=@Camera_IPAddress,Camera_Description=@Camera_Description,Camera_IPAddress_rtsp=@Camera_IPAddress_rtsp,DashboardDisplay=@DashboardDisplay where Camera_UID=@Camera_UID;
+end
+end
+
+
+
+

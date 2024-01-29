@@ -1,0 +1,38 @@
+create PROCEDURE [usp_GetResouceAveargeForMonth] 
+	-- Add the parameters for the stored procedure here
+@WorkPackageUID uniqueidentifier,
+@ResourceUID uniqueidentifier,
+@Month as int,
+@Year as int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	select Count(distinct DeployedDate) as sCount From ResourceDeploymentUpdate
+Where MONTH(DeployedDate) =@Month and Year(DeployedDate) =@Year
+END
+GO
+
+//
+ALTER PROCEDURE [dbo].[usp_GetLabourDashboardGraph] 
+	-- Add the parameters for the stored procedure here
+@WorkPackageUID as uniqueidentifier,
+@Resource as varchar(75)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	declare @ResourceUID as uniqueidentifier;
+	declare @ResourceDeploymentUID as uniqueidentifier;
+	declare @Count as int;
+	set @ResourceUID =(select ResourceUID FRom ResourceMaster Where WorkPackageUID=@WorkPackageUID and ResourceName=@Resource)
+ set @ResourceDeploymentUID = (select Top 1 ReourceDeploymentUID From ResourceDeploymentUpdate Where ReourceDeploymentUID in (select  ReourceDeploymentUID From ResourceDeployment Where ResourceUID=@ResourceUID) order by DeployedDate desc)
+
+ set @Count=(select Count(distinct DeployedDate) as sCount From ResourceDeploymentUpdate Where ReourceDeploymentUID=@ResourceDeploymentUID and Delete_Flag='N');
+ select Sum(Deployed)/@Count as Average From ResourceDeploymentUpdate Where ReourceDeploymentUID=@ResourceDeploymentUID and Delete_Flag='N'
+	
+END

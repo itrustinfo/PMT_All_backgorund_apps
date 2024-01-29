@@ -1,0 +1,61 @@
+USE [ONTB_Server]
+GO
+/****** Object:  StoredProcedure [dbo].[GetUsers_under_selected_projects]    Script Date: 5/11/2023 6:00:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[GetUsers_under_selected_projects]
+as
+begin
+
+  set nocount on;
+  declare @project1 as nvarchar(max);
+  declare @project2 as nvarchar(max);
+  declare @project3 as nvarchar(max);
+
+  set @project1 = (select ProjectUID from ProjectDetails where ProjectName = 'CP-25');
+  set @project2 = (select ProjectUID from ProjectDetails where ProjectName = 'CP-26');
+  set @project3 = (select ProjectUID from ProjectDetails where ProjectName = 'CP-27');
+
+  select distinct B.UserUID as UserUID,(B.FirstName +' '+B.LastName + ' (' + B.Discipline + ')') as UserName,B.EmailID as EmailID from UserProjects A,UserDetails B where B.UserUID=A.UserUID and B.DeletedFlag='N' and (B.IsShown='N' or B.IsShown is NULL) and B.IsPMC='Y' and A.ProjectUID IN (@project1,@project2,@project3) 
+  Order by UserName 
+end
+----------------------------------------------
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER proc [dbo].[userStatusSummaryByDate]
+@UserUID uniqueidentifier,
+@FromDate datetime,
+@ToDate datetime
+as
+begin
+select p.ProjectName, f.Flow_Name, a.ActualDocumentUID, a.ProjectUID, a.WorkPackageUID, a.DocumentUID, a.ProjectRef_Number, a.Ref_Number, 
+ a.Doc_Type, a.IncomingRec_Date, a.FlowUID, a.ActualDocument_Name, a.Description, a.Remarks, a.FileRef_Number, a.ActualDocument_CreatedDate, a.ActualDocument_CurrentStatus, d.DocName, a.ActualDocument_Type, a.Document_Date, d.CreatedDate, a.ActualDocument_Path
+from DocumentStatus b, ActualDocuments a, ProjectDetails p, DocumentFlowDisplayMaster f, Documents d
+where b.DocumentUID = a.ActualDocumentUID and a.ProjectUID = p.ProjectUID and a.FlowUID = f.FlowMasterUID and a.DocumentUID = d.DocumentUID
+and p.ProjectName in ('CP-25', 'CP-26','CP-27') 
+and f.Flow_Name in ('Works A', 'Works B', 'Vendor Approval','Contractor Correspondence') and a.Delete_Flag = 'N' and
+a.Doc_Type != 'Cover Letter' and (b.CreatedDate >= @FromDate and b.CreatedDate <= @ToDate) and b.AcivityUserUID = @UserUID
+union
+select p.ProjectName, 'Bommanahalli' as Flow_Name, a.ActualDocumentUID, a.ProjectUID, a.WorkPackageUID, a.DocumentUID, a.ProjectRef_Number, a.Ref_Number, 
+ a.Doc_Type, a.IncomingRec_Date, a.FlowUID, a.ActualDocument_Name, a.Description, a.Remarks, a.FileRef_Number, a.ActualDocument_CreatedDate, a.ActualDocument_CurrentStatus, d.DocName, a.ActualDocument_Type, a.Document_Date, d.CreatedDate, a.ActualDocument_Path
+from DocumentStatus b, ActualDocuments a, ProjectDetails p, DocumentFlowDisplayMaster f, Documents d
+where b.DocumentUID = a.ActualDocumentUID and a.ProjectUID = p.ProjectUID and a.FlowUID = f.FlowMasterUID and a.DocumentUID = d.DocumentUID
+and d.TaskUID in ('86aab0ac-ba00-419c-a5d5-ef56d1c2886d')
+and f.Flow_Name in ('Works A', 'Works B', 'Vendor Approval')
+and a.Delete_Flag = 'N' and a.Doc_Type != 'Cover Letter' and (b.CreatedDate >= @FromDate and b.CreatedDate <= @ToDate) and b.AcivityUserUID = @UserUID
+union
+select p.ProjectName, 'Mahadevpura' as Flow_Name, a.ActualDocumentUID, a.ProjectUID, a.WorkPackageUID, a.DocumentUID, a.ProjectRef_Number, a.Ref_Number, 
+ a.Doc_Type, a.IncomingRec_Date, a.FlowUID, a.ActualDocument_Name, a.Description, a.Remarks, a.FileRef_Number, a.ActualDocument_CreatedDate, a.ActualDocument_CurrentStatus, d.DocName, a.ActualDocument_Type, a.Document_Date, d.CreatedDate, a.ActualDocument_Path
+from DocumentStatus b, ActualDocuments a, ProjectDetails p, DocumentFlowDisplayMaster f, Documents d
+where b.DocumentUID = a.ActualDocumentUID and a.ProjectUID = p.ProjectUID and a.FlowUID = f.FlowMasterUID and a.DocumentUID = d.DocumentUID
+and d.TaskUID in ('79e170b6-6767-4819-8de3-2e36b717e53f')
+and f.Flow_Name in ('Works A', 'Works B', 'Vendor Approval')
+and a.Delete_Flag = 'N' and a.Doc_Type != 'Cover Letter' and (b.CreatedDate >= @FromDate and b.CreatedDate <= @ToDate) and b.AcivityUserUID = @UserUID
+
+end

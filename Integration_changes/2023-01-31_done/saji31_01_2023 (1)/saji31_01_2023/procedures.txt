@@ -1,0 +1,98 @@
+/****** Object:  StoredProcedure [dbo].[ups_GetIssuesList_by_WorkPackageUID_IssueStatus]    Script Date: 1/31/2023 10:02:52 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_GetIssuesList_by_WorkPackageUID_IssueStatus]
+@WorkPackagesUID uniqueidentifier,
+@Status nvarchar(100),
+@iUser nvarchar(max)
+as
+begin
+set nocount on;
+
+if (@iUser = 'All')
+begin
+	if (@Status != '')
+		select * from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status = @Status and Delete_Flag='N' order by Issue_Date desc
+	else
+	   select * from Issues where WorkPackagesUID=@WorkPackagesUID and Delete_Flag='N' order by Issue_Date desc
+end
+else
+
+	begin
+	if (@Status != '')
+		select * from Issues where WorkPackagesUID=@WorkPackagesUID and Issue_Status = @Status and Issued_User = @iUser  and Delete_Flag='N' order by Issue_Date desc
+	else
+	   select * from Issues where WorkPackagesUID=@WorkPackagesUID and Issued_User = @iUser and Delete_Flag='N' order by Issue_Date desc
+	end
+end
+
+---------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[GetAllIssuedUsers]    Script Date: 1/31/2023 2:22:50 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[GetAllIssuedUsers]
+@WorkPackagesUID uniqueidentifier,
+@Status nvarchar(100)
+as
+begin
+set nocount on;
+if (@Status != '')
+	select distinct B.UserUID as userId,B.Username as userName from Issues A, UserDetails B where A.Issued_User = B.UserUID and WorkPackagesUID=@WorkPackagesUID and Issue_Status = @Status and Delete_Flag='N' order by userName
+else
+   select distinct B.UserUID as userId ,B.Username as userName from Issues A, UserDetails B where A.Issued_User = B.UserUID and WorkPackagesUID=@WorkPackagesUID and Delete_Flag='N' order by userName
+end
+
+
+---
+/***** Object:  StoredProcedure [dbo].[GetAllIssuedUsers]    Script Date: 1/31/2023 5:27:11 PM *****/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[GetAllIssuedUsers]
+@WorkPackagesUID uniqueidentifier,
+@Status nvarchar(100)
+as
+begin
+set nocount on;
+if (@Status != '')
+	select distinct B.UserUID as userId,B.FirstName + ' '+ B.LastName as userName from Issues A, UserDetails B where A.Issued_User = B.UserUID and WorkPackagesUID=@WorkPackagesUID and Issue_Status = @Status and Delete_Flag='N' order by userName
+else
+   select distinct B.UserUID as userId ,B.FirstName + ' ' + b.LastName as userName from Issues A, UserDetails B where A.Issued_User = B.UserUID and WorkPackagesUID=@WorkPackagesUID and Delete_Flag='N' order by userName
+end
+
+------
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_GetIssuesList_by_TaskUID_IssueStatus]
+@TaskUID uniqueidentifier,
+@Status nvarchar(100),
+@iUser nvarchar(max)
+as
+begin
+set nocount on;
+
+if (@iUser = 'All')
+	begin
+		if (@Status != '')
+			select * from Issues where TaskUID=@TaskUID and Issue_Status = @Status and Delete_Flag='N' order by Issue_Date desc
+		else
+		   select * from Issues where TaskUID=@TaskUID and Delete_Flag='N' order by Issue_Date desc
+	end
+else
+
+	begin
+		if (@Status != '')
+			select * from Issues where TaskUID=@TaskUID and Issue_Status = @Status and Issued_User = @iUser  and Delete_Flag='N' order by Issue_Date desc
+		else
+		   select * from Issues where TaskUID=@TaskUID and Issued_User = @iUser and Delete_Flag='N' order by Issue_Date desc
+	end
+end

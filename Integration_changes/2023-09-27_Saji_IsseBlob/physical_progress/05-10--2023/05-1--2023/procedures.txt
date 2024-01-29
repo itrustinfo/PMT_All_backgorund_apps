@@ -1,0 +1,12 @@
+/****** Object:  StoredProcedure [dbo].[update_task_order]    Script Date: 10/5/2023 12:31:17 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[update_task_order]
+@TaskUID nvarchar(max),
+@TaskOrder int
+as
+begin
+update Tasks set Task_Order = @TaskOrder where TaskUID=@TaskUID
+end

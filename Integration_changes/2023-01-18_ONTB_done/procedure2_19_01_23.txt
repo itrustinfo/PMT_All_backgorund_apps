@@ -1,0 +1,30 @@
+/****** Object:  StoredProcedure [dbo].[ups_Issues_Remarks_Delete]    Script Date: 1/19/2023 1:20:48 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_Issues_Remarks_Delete]
+@IssueRemarksUID uniqueidentifier,
+@UserUID uniqueidentifier
+as
+begin
+update IssueRemarks set Delete_Flag='Y' where IssueRemarksUID=@IssueRemarksUID;
+update UploadedDocs set DeleteFlag = 'Y' where issue_remarks_uid = @IssueRemarksUID;
+
+declare @LastUpdatedStatus varchar(50);
+
+if not exists(select Issue_Status from IssueRemarks where IssueRemarksUID=@IssueRemarksUID and Delete_Flag='N')
+begin
+	set @LastUpdatedStatus='Open';
+end
+else
+begin
+	set @LastUpdatedStatus=(select top 1 Issue_Status from IssueRemarks where IssueRemarksUID=@IssueRemarksUID and Delete_Flag='N' order by IssueRemark_Date desc);
+end
+
+update Issues set Issue_Status=@LastUpdatedStatus where Issue_Uid=(select Issue_Uid from IssueRemarks where IssueRemarksUID=@IssueRemarksUID);
+
+
+insert into ActivityDeleteLogs(DeleteLog_UID,Activity_UID,Activity_UserUID,Activity_For)
+	values(NEWID(),@IssueRemarksUID,@UserUID,'Issue Status');
+end

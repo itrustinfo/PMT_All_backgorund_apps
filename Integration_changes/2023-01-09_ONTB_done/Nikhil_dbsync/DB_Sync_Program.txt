@@ -1,0 +1,210 @@
+private void Synchform_task_update()
+        {
+            try
+            {
+                // source
+                //string wkPkgUID = "28A6A63B-2573-40A8-BC89-E396C31CE516";
+                System.Data.SqlClient.SqlConnection MyConnection = new System.Data.SqlClient.SqlConnection();
+                MyConnection.ConnectionString = GetSourceConnectionString();
+                System.Data.SqlClient.SqlDataAdapter MyAdapter = new System.Data.SqlClient.SqlDataAdapter();
+                System.Data.DataSet MyDataset = new System.Data.DataSet();
+                System.Data.SqlClient.SqlCommand MyCommand = new System.Data.SqlClient.SqlCommand();
+                MyCommand.Connection = MyConnection;
+
+                // check the submittal table for any records to be added or updated.....
+                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From [form-task-update] where ServerCopiedAdd='N' and WorkpackageUID='" + wkPkgUID + "'", MyConnection);
+                //
+
+                MyDataset.Clear();
+                MyAdapter.Fill(MyDataset);
+                string postData = "";
+                string URL = serviceURL + "form_task_updateSync"; ;
+                var data = "";
+
+
+                Console.WriteLine("Started Synching for [form-task-update] Add : ");
+                if (MyDataset.Tables[0].Rows.Count == 0)
+                {
+                    Console.WriteLine("No Records found for [form-task-update] Add : ");
+                }
+                foreach (DataRow dr in MyDataset.Tables[0].Rows) // get each row form source db and update it to destination db
+                {
+                    try
+                    {
+                        postData = "Form_task_update_uid=" + dr["Form-task-update-uid"].ToString() + "&Taskuid=" + dr["Taskuid"].ToString() + "&TaskName=" + dr["TaskName"].ToString() +
+                            "&projectuid=" + dr["projectuid"].ToString() + "&workpackageuid=" + dr["workpackageuid"].ToString();
+
+
+
+                        data = webPostMethod(postData, URL);
+                        if (data.ToString().Contains("true"))
+                        {
+                            dbutility.updateAddFlag(new Guid(dr["Form-task-update-uid"].ToString()), "form-task-update", "Form-task-update-uid");
+                            dbutility.InsertintoDbsyncLogs(new Guid(dr["Form-task-update-uid"].ToString()), "form-task-update Add", "Success", "");
+                            Console.WriteLine("Synching for form-task-update Add : " + dr["Form-task-update-uid"].ToString() + " Done");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        dbutility.InsertintoDbsyncLogs(new Guid(dr["Form-task-update-uid"].ToString()), "[form-task-update] Add", "Error", ex.Message);
+                    }
+                }
+                //
+                //  MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From Tasks where ServerCopiedUpdate='N' and WorkPackageUID='" + wkPkgUID + "'", MyConnection);
+
+                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From [form-task-update] where ServerCopiedAdd='N' and WorkpackageUID='" + wkPkgUID + "'", MyConnection);
+
+
+
+                //
+                //if (MyConnection.State == System.Data.ConnectionState.Closed)
+                //{
+                //    MyConnection.Open();
+                //}
+                MyDataset.Clear();
+                MyAdapter.Fill(MyDataset);
+                Console.WriteLine("Started Synching for form-task-update Update : ");
+                if (MyDataset.Tables[0].Rows.Count == 0)
+                {
+                    Console.WriteLine("No Records found for form-task-update Update : ");
+                }
+                foreach (DataRow dr in MyDataset.Tables[0].Rows) // get each row form source db and update it to destination db
+                {
+                    try
+                    {
+                        postData = "Form_task_update_uid=" + dr["Form-task-update-uid"].ToString() + "&Taskuid=" + dr["Taskuid"].ToString() + "&TaskName=" + dr["TaskName"].ToString() +
+                            "&projectuid=" + dr["projectuid"].ToString() + "&workpackageuid=" + dr["workpackageuid"].ToString();
+
+
+                        data = webPostMethod(postData, URL);
+                        if (data.ToString().Contains("true"))
+                        {
+                            dbutility.updateUpdateFlag(new Guid(dr["Form-task-update-uid"].ToString()), "form-task-update", "Form-task-update-uid");
+                            dbutility.InsertintoDbsyncLogs(new Guid(dr["Form-task-update-uid"].ToString()), "form-task-update Update", "Success", "");
+                            Console.WriteLine("Synching for form-task-update Update : " + dr["Form-task-update-uid"].ToString() + " Done");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        dbutility.InsertintoDbsyncLogs(new Guid(dr["Form-task-update-uid"].ToString()), "form-task-update Update", "Error", ex.Message);
+                    }
+                }
+                Console.WriteLine("Synching for form-task-update Add Done : ");
+                // Console.ReadLine();
+            }
+            catch (Exception ex)
+            {
+                dbutility.InsertintoDbsyncLogs(Guid.NewGuid(), "form-task-update Add/Update", "Error", ex.Message);
+                Console.WriteLine(ex.Message);
+                //Console.ReadLine();
+
+            }
+        }
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+
+ private void SynchCorrespondenceCCToUsers()
+        {
+            try
+            {
+                // source
+                //string wkPkgUID = "28A6A63B-2573-40A8-BC89-E396C31CE516";
+                System.Data.SqlClient.SqlConnection MyConnection = new System.Data.SqlClient.SqlConnection();
+                MyConnection.ConnectionString = GetSourceConnectionString();
+                System.Data.SqlClient.SqlDataAdapter MyAdapter = new System.Data.SqlClient.SqlDataAdapter();
+                System.Data.DataSet MyDataset = new System.Data.DataSet();
+                System.Data.SqlClient.SqlCommand MyCommand = new System.Data.SqlClient.SqlCommand();
+                MyCommand.Connection = MyConnection;
+
+                // check the submittal table for any records to be added or updated.....
+                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From CorrespondenceCCToUsers where ServerCopiedAdd='N' and  ActualDocumentUID in (Select ActualDocumentUID From ActualDocuments Where WorkpackageUID='" + wkPkgUID + "')", MyConnection);
+                //
+
+                MyDataset.Clear();
+                MyAdapter.Fill(MyDataset);
+                string postData = "";
+                string URL = serviceURL + "CorrespondenceCCToUsersSync"; ;
+                var data = "";
+
+
+                Console.WriteLine("Started Synching for CorrespondenceCCToUsers Add : ");
+                if (MyDataset.Tables[0].Rows.Count == 0)
+                {
+                    Console.WriteLine("No Records found for CorrespondenceCCToUsers Add : ");
+                }
+                foreach (DataRow dr in MyDataset.Tables[0].Rows) // get each row form source db and update it to destination db
+                {
+                    try
+                    {
+                        postData = "UID=" + dr["UID"].ToString() + "&ActualDocumentUID=" + dr["ActualDocumentUID"].ToString() + "&StatusUID=" + dr["StatusUID"].ToString() +
+                            "&UserType=" + dr["UserType"].ToString() + "&CreatedDate=" + dr["CreatedDate"].ToString();
+
+
+                        data = webPostMethod(postData, URL);
+                        if (data.ToString().Contains("true"))
+                        {
+                            dbutility.updateAddFlag(new Guid(dr["UID"].ToString()), "CorrespondenceCCToUsers", "UID");
+                            dbutility.InsertintoDbsyncLogs(new Guid(dr["UID"].ToString()), "CorrespondenceCCToUsers Add", "Success", "");
+                            Console.WriteLine("Synching for CorrespondenceCCToUsers Add : " + dr["UID"].ToString() + " Done");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        dbutility.InsertintoDbsyncLogs(new Guid(dr["UID"].ToString()), "CorrespondenceCCToUsers Add", "Error", ex.Message);
+                    }
+                }
+                //
+                //  MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From Tasks where ServerCopiedUpdate='N' and WorkPackageUID='" + wkPkgUID + "'", MyConnection);
+
+                MyAdapter.SelectCommand = new System.Data.SqlClient.SqlCommand("Select * From CorrespondenceCCToUsers where ServerCopiedAdd='N' and  ActualDocumentUID in (Select ActualDocumentUID From ActualDocuments Where WorkpackageUID='" + wkPkgUID + "')", MyConnection);
+
+
+
+
+                //
+                //if (MyConnection.State == System.Data.ConnectionState.Closed)
+                //{
+                //    MyConnection.Open();
+                //}
+                MyDataset.Clear();
+                MyAdapter.Fill(MyDataset);
+                Console.WriteLine("Started Synching for CorrespondenceCCToUsers Update : ");
+                if (MyDataset.Tables[0].Rows.Count == 0)
+                {
+                    Console.WriteLine("No Records found for CorrespondenceCCToUsers Update : ");
+                }
+                foreach (DataRow dr in MyDataset.Tables[0].Rows) // get each row form source db and update it to destination db
+                {
+                    try
+                    {
+                        postData = "UID=" + dr["UID"].ToString() + "&ActualDocumentUID=" + dr["ActualDocumentUID"].ToString() + "&StatusUID=" + dr["StatusUID"].ToString() +
+                            "&UserType=" + dr["UserType"].ToString() + "&CreatedDate=" + dr["CreatedDate"].ToString();
+
+
+
+                        data = webPostMethod(postData, URL);
+                        if (data.ToString().Contains("true"))
+                        {
+                            dbutility.updateUpdateFlag(new Guid(dr["UID"].ToString()), "CorrespondenceCCToUsers", "UID");
+                            dbutility.InsertintoDbsyncLogs(new Guid(dr["UID"].ToString()), "CorrespondenceCCToUsers Update", "Success", "");
+                            Console.WriteLine("Synching for CorrespondenceCCToUsers Update : " + dr["UID"].ToString() + " Done");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        dbutility.InsertintoDbsyncLogs(new Guid(dr["UID"].ToString()), "CorrespondenceCCToUsers Update", "Error", ex.Message);
+                    }
+                }
+                Console.WriteLine("Synching for CorrespondenceCCToUsers Add Done : ");
+                // Console.ReadLine();
+            }
+            catch (Exception ex)
+            {
+                dbutility.InsertintoDbsyncLogs(Guid.NewGuid(), "CorrespondenceCCToUsers Add/Update", "Error", ex.Message);
+                Console.WriteLine(ex.Message);
+                //Console.ReadLine();
+
+            }
+        }

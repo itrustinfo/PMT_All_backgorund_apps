@@ -1,0 +1,234 @@
+    public int InsertMeasurementBookWithoutTaskGrouping_formUpdate(Guid UID, Guid TaskUID, string UnitforProgress, string Quantity, string Description, DateTime SelectedDate, string Upload_File, Guid CreatedByUID, string Remarks, DateTime CreatedDate)
+        {
+            int sresult = 0;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(db.GetConnectionString()))
+                {
+
+                    using (SqlCommand cmd = new SqlCommand("usp_InsertMeasurementBook_WithoutTaskgrouping_suez_form"))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Connection = con;
+                        con.Open();
+                        cmd.Parameters.AddWithValue("@UID", UID);
+                        cmd.Parameters.AddWithValue("@TaskUID", TaskUID);
+                        cmd.Parameters.AddWithValue("@UnitforProgress", UnitforProgress);
+                        cmd.Parameters.AddWithValue("@Quantity", Quantity);
+                        cmd.Parameters.AddWithValue("@Description", Description);
+                        cmd.Parameters.AddWithValue("@SelectedDate", SelectedDate);
+                        cmd.Parameters.AddWithValue("@CreatedDate", CreatedDate);
+                        cmd.Parameters.AddWithValue("@Upload_File", Upload_File);
+                        cmd.Parameters.AddWithValue("@CreatedByUID", CreatedByUID);
+                        cmd.Parameters.AddWithValue("@Remarks", Remarks);
+                        cmd.CommandTimeout = 900;
+                        sresult = cmd.ExecuteNonQuery();
+                        con.Close();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                sresult = 0;
+            }
+            return sresult;
+        }
+--------------------------------------------------------------------------------------------------------------------------------------------
+CREATE proc [dbo].[usp_InsertMeasurementBook_WithoutTaskgrouping_suez_form]  
+@UID as uniqueidentifier,  
+@TaskUID as uniqueidentifier,  
+@UnitforProgress as varchar(50),  
+@Quantity as varchar(50),  
+@Description as varchar(250),  
+@SelectedDate  as Datetime,  
+@CreatedDate  as Datetime,  
+@Upload_File as varchar(200),  
+@CreatedByUID as uniqueidentifier,  
+@Remarks varchar(max)  
+as  
+begin  
+ IF not EXISTS (SELECT * FROM MeasurementBook WHERE UID = @UID)  
+ BEGIN  
+ declare @UpdateQuantity decimal(18,4);  
+ set @UpdateQuantity=cast(@Quantity as decimal(18,4));  
+  
+ declare @Task_Weightage float;  
+ set @Task_Weightage=(select Task_Weightage from Tasks where TaskUID=@TaskUID and Delete_Flag='N');  
+  
+ declare @Version int;  
+ set @Version=(select max(TaskScheduleVersion) from TaskScheduleVesrion where TaskUID=@TaskUID and Delete_Flag='N');  
+  
+ declare @TaskScheduleUID uniqueidentifier;  
+ set @TaskScheduleUID=(select TaskScheduleUID from TaskSchedule where TaskUID=@TaskUID and TaskScheduleVersion=@Version and MONTH(StartDate)=MONTH(@SelectedDate) and Year(StartDate)=YEAR(@SelectedDate) and Delete_Flag='N');  
+  
+ -- Insert into Task Schedule Table  
+ if cast(@TaskScheduleUID as varchar(75)) is null  
+ begin  
+  set @TaskScheduleUID=NEWID();  
+  
+  declare @WorkpackageUID uniqueidentifier;  
+  set @WorkpackageUID=(select WorkPackageUID from Tasks where TaskUID=@TaskUID);  
+  
+  declare @ScheduleType varchar(30);  
+  set @ScheduleType=(select TaskScheduleType from TaskScheduleVesrion where TaskUID=@TaskUID and TaskScheduleVersion=@Version);  
+  
+  insert into TaskSchedule(TaskScheduleUID,WorkpacageUID,TaskUID,StartDate,EndDate,Schedule_Value,Schedule_Type,Created_Date,TaskScheduleVersion,Schedule_Per)  
+  values(@TaskScheduleUID,@WorkpackageUID,@TaskUID,DATEADD(m, DATEDIFF(m, 0, @SelectedDate), 0),DATEADD(MONTH, DATEDIFF(MONTH, -1, @SelectedDate)-0, -1),0,@ScheduleType,GETDATE(),@Version,0);  
+ end  
+  
+ --if cast(@TaskScheduleUID as varchar(75))!=''  
+ -- begin  
+  if exists(select * from [dbo].[MeasurementBook]  where TaskUID=@TaskUID and cast(Achieved_Date as date)=cast(@SelectedDate as date))
+  begin
+  update [dbo].[MeasurementBook] set Quantity=@Quantity where TaskUID=@TaskUID and cast(Achieved_Date as date)=cast(@SelectedDate as date)
+  end
+
+  else
+  begin
+  INSERT INTO [dbo].[MeasurementBook]  
+      ([UID]  
+      ,[TaskUID]  
+      ,[UnitforProgress]  
+      ,[Quantity]  
+      ,[Description]  
+      ,[CreatedDate]  
+      ,[Upload_File]  
+      ,[CreatedByUID]  
+      ,[Remarks]  
+      ,[Achieved_Date])  
+   VALUES  
+      (@UID  
+      ,@TaskUID  
+      ,@UnitforProgress  
+      ,@Quantity  
+      ,@Description  
+      ,@CreatedDate  
+      ,@Upload_File  
+      ,@CreatedByUID  
+      ,@Remarks,  
+      @SelectedDate)  
+  end
+  declare @MeasurementUID uniqueidentifier;  
+  declare @M_UnitforProgress varchar(50);  
+  declare @M_Quantity decimal(18,3);  
+  declare @M_Achieved_Date datetime;  
+  declare @M_CreatedDate datetime;  
+  declare @CumulativePercent decimal(18,2) =0;  
+  -- added by zuber for total quantity  
+  declare @TotalAchvQuantity as float;  
+  declare @TotalTaskQuantity as float;  
+  set @TotalTaskQuantity=(select UnitQuantity from Tasks where TaskUID=@TaskUID and Delete_Flag='N');  
+  
+  set @TotalAchvQuantity=(select Sum(cast(Quantity as decimal(18,3))) From MeasurementBook Where TaskUID=@TaskUID and Delete_Flag='N')  
+    
+  if @TotalTaskQuantity > 0  
+  Begin  
+   set @CumulativePercent=((@TotalAchvQuantity / @TotalTaskQuantity)*100) ;  
+  End  
+    update Tasks set Task_CulumativePercentage=@CumulativePercent,CumulativeAchvQuantity=@TotalAchvQuantity where TaskUID=@TaskUID;  
+   -----------------------------------  
+   
+  
+  --declare @TotalTargetQuantity float;  
+  --set @TotalTargetQuantity=(select UnitQuantity from Tasks where TaskUID=@TaskUID and Delete_Flag='N');  
+  
+  DECLARE cursor_db CURSOR  
+  FOR   
+  select UID as MeasurementUID,UnitforProgress as M_UnitforProgress,cast(Quantity as decimal(18,3)) as M_Quantity,  
+  Achieved_Date as M_Achieved_Date,CreatedDate as M_CreatedDate from MeasurementBook where TaskUID=@TaskUID and Delete_Flag='N' order by Achieved_Date asc;  
+   
+    --  
+    declare @TotQuantity decimal(18,4) =0;  
+ declare @NextUID as uniqueidentifier= NUll;  
+ declare @T_ScheduleUID uniqueidentifier = null;  
+ -------------------------  
+  
+  OPEN cursor_db;  
+  FETCH NEXT FROM cursor_db INTO   
+  @MeasurementUID,@M_UnitforProgress,@M_Quantity,@M_Achieved_Date,@M_CreatedDate;  
+  WHILE @@FETCH_STATUS = 0  
+  BEGIN  
+     
+   if cast(@M_Achieved_Date as varchar(50)) !=''  
+   begin  
+    set @T_ScheduleUID=(select TaskScheduleUID from TaskSchedule where TaskUID=@TaskUID and TaskScheduleVersion=@Version and MONTH(StartDate)=MONTH(@M_Achieved_Date) and Year(StartDate)=YEAR(@M_Achieved_Date) and Delete_Flag='N');  
+   end  
+   else  
+   begin  
+    set @T_ScheduleUID=(select TaskScheduleUID from TaskSchedule where TaskUID=@TaskUID and TaskScheduleVersion=@Version and MONTH(StartDate)=MONTH(@M_CreatedDate) and Year(StartDate)=YEAR(@M_CreatedDate) and Delete_Flag='N');  
+   end  
+  
+  -- declare @CurrentCumulativePercentage float;  
+   if @NextUID = @T_ScheduleUID   
+   Begin  
+   set @TotQuantity =@TotQuantity  
+   End  
+   else  
+   Begin  
+    set @NextUID =@T_ScheduleUID  
+    set @TotQuantity = 0;  
+   End  
+    
+     
+     
+   set @TotQuantity =@TotQuantity +  @M_Quantity;  
+   --set @CurrentCumulativePercentage=(select isnull(Task_CulumativePercentage,0) from Tasks where TaskUID=@TaskUID and Delete_Flag='N');  
+  
+     
+   --set @TotQuantity=(select isnull(Achieved_Value,0) from TaskSchedule where TaskScheduleUID=@T_ScheduleUID and Delete_Flag='N');  
+  
+   update TaskSchedule set Achieved_Value= @TotQuantity,Achieved_Date=@M_Achieved_Date where TaskScheduleUID=@T_ScheduleUID;  
+  
+   --if @UnitforProgress='PERCENTAGE' or @UnitforProgress='Percentage'  
+   --begin  
+   -- update Tasks set StatusPer=(@TotQuantity + @M_Quantity) where TaskUID=@TaskUID;  
+   --   if @Task_Weightage >0  
+   --    begin  
+   --   declare @PercentageCalculation decimal(18,4);  
+   --   set @PercentageCalculation=(@M_Quantity * @Task_Weightage);  
+  
+   --   update TaskSchedule set Achieved_Per=@PercentageCalculation where TaskScheduleUID=@T_ScheduleUID;  
+   --   update Tasks set Task_CulumativePercentage=(@CurrentCumulativePercentage + @PercentageCalculation) where TaskUID=@TaskUID;  
+   --    end  
+   --end  
+   --else  
+   --begin  
+   --  if @Task_Weightage >0  
+   --  begin  
+  
+   --   declare @CumulativePercent float;  
+   --   set @CumulativePercent=((@TotQuantity + @M_Quantity) / @TotalTargetQuantity) * @Task_Weightage;  
+  
+   --   update TaskSchedule set Achieved_Per=@CumulativePercent where TaskScheduleUID=@T_ScheduleUID;  
+  
+   --   update Tasks set Task_CulumativePercentage=(@CurrentCumulativePercentage + @CumulativePercent) where TaskUID=@TaskUID;  
+   --  end  
+     
+   --end  
+  FETCH NEXT FROM cursor_db INTO   
+        @MeasurementUID,@M_UnitforProgress,@M_Quantity,@M_Achieved_Date,@M_CreatedDate;  
+  END;  
+  
+  CLOSE cursor_db;  
+  DEALLOCATE cursor_db;  
+ end  
+ --END   
+END  
+-----------------------------------------------------------------------------------------------------------------------
+CREATE proc sp_get_Suez_Physical_progress          
+@projectuid nvarchar(250),          
+@achivedDate datetime          
+as          
+begin          
+select t.Taskname,T.TaskUID,Ts.Quantity from [form-task-update] T left  join MeasurementBook TS          
+on  T.TaskUID=ts.TaskUID  and cast( TS.Achieved_Date as date)=cast(@achivedDate    as date)      
+end 
+-------------------------------------------------------------------------------------
+CREATE proc sp_getTaskSchedule_Date      
+@taskuid nvarchar(250),      
+@achivedDate as datetime      
+as      
+begin      
+select sum(cast(isnull(Quantity,0) as float)) from MeasurementBook where TaskUID=@taskuid and cast(Achieved_Date as date)=cast(@achivedDate as date)       
+end

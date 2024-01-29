@@ -1,0 +1,77 @@
+/****** Object:  StoredProcedure [dbo].[usp_InsertorUpdateResourceDeploymentPlan]    Script Date: 3/15/2023 10:14:24 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER proc [dbo].[usp_InsertorUpdateResourceDeploymentPlan]
+@ReourceDeploymentUID uniqueidentifier,
+@WorkpackageUID uniqueidentifier,
+@ResourceUID uniqueidentifier,
+@StartDate datetime,
+@EndDate datetime,
+@DeploymentType varchar(50),
+@Planned decimal(18,3),
+@PlannedDate datetime
+as
+begin
+set nocount on;
+if not exists(select ReourceDeploymentUID from ResourceDeployment where ReourceDeploymentUID=@ReourceDeploymentUID)
+begin
+	if not exists (select ReourceDeploymentUID from ResourceDeployment where WorkpackageUID=@WorkpackageUID and ResourceUID=@ResourceUID and StartDate=@StartDate and EndDate=@EndDate and Delete_Flag = 'N' )
+	begin
+		insert into ResourceDeployment(ReourceDeploymentUID,WorkpackageUID,ResourceUID,StartDate,EndDate,DeploymentType,Planned,PlannedDate,Delete_Flag)
+		values(@ReourceDeploymentUID,@WorkpackageUID,@ResourceUID,@StartDate,@EndDate,@DeploymentType,@Planned,@PlannedDate,'N')
+	end
+end
+else
+begin
+	update ResourceDeployment set ResourceUID=@ResourceUID,StartDate=@StartDate,EndDate=@EndDate,DeploymentType=@DeploymentType,Planned=@Planned,PlannedDate=@PlannedDate where ReourceDeploymentUID=@ReourceDeploymentUID;
+end
+end
+
+---------------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[ResourceDeployment_Delete]    Script Date: 3/15/2023 12:24:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ResourceDeployment_Delete]
+@UID uniqueidentifier,
+@UserUID uniqueidentifier
+as
+begin
+set nocount on;
+declare @res_count as int;
+set @res_count =0;
+
+if ((select count(*) from ResourceDeployment A, ResourceDeploymentUpdate B where a.ReourceDeploymentUID = b.ReourceDeploymentUID and a.ReourceDeploymentUID = @UID) = 0)
+	begin
+	   update ResourceDeployment set Delete_Flag='Y' where ReourceDeploymentUID=@UID;
+		--update ResourceDeploymentUpdate set Delete_Flag='Y' where ReourceDeploymentUID=@UID;
+		insert into ActivityDeleteLogs(DeleteLog_UID,Activity_UID,Activity_UserUID,Activity_For)
+			values(NEWID(),@UID,@UserUID,'Resource Deployment');
+	end
+else
+	begin
+		set @res_count = (select count(*) as resource_count from ResourceDeployment A, ResourceDeploymentUpdate B where a.ReourceDeploymentUID = b.ReourceDeploymentUID and a.ReourceDeploymentUID = @UID)
+	end
+end
+
+select @res_count as r_count
+
+//
+/***** Object:  StoredProcedure [dbo].[usp_GetResourecDeployment_by_ResourceUID]    Script Date: 3/15/2023 5:16:36 PM *****/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER proc [dbo].[usp_GetResourecDeployment_by_ResourceUID]
+@ResourceUID uniqueidentifier
+as
+begin
+set nocount on;
+select ReourceDeploymentUID,FORMAT(StartDate,'MMM') as s_month,year(startdate) as s_year,Planned  from ResourceDeployment where ResourceUID=@ResourceUID and Delete_Flag='N' order by StartDate;
+end

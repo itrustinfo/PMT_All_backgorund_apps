@@ -1,0 +1,29 @@
+USE [iPIMS-DM-ONTB]
+GO
+/****** Object:  StoredProcedure [dbo].[Camera_InsertorUpdate]    Script Date: 2/17/2023 5:04:10 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[Camera_InsertorUpdate]
+@Camera_UID uniqueidentifier,
+@ProjectUID uniqueidentifier,
+@WorkpackageUID uniqueidentifier,
+@Camera_Name varchar(75),
+@Camera_IPAddress varchar(100),
+@Camera_Description varchar(500),
+@Camera_IPAddress_rtsp varchar(250)
+as
+begin
+if not exists(select Camera_UID from Cameras where Camera_UID=@Camera_UID)
+begin
+	insert into Cameras(Camera_UID,ProjectUID,WorkpackageUID,Camera_Name,Camera_IPAddress,Camera_Description,Camera_Delete,Camera_IPAddress_rtsp)
+	values(@Camera_UID,@ProjectUID,@WorkpackageUID,@Camera_Name,@Camera_IPAddress,@Camera_Description,'N',@Camera_IPAddress_rtsp)
+end
+else
+begin
+	update Cameras set ProjectUID=@ProjectUID,WorkpackageUID=@WorkpackageUID,Camera_Name=@Camera_Name,Camera_IPAddress=@Camera_IPAddress,Camera_Description=@Camera_Description,Camera_IPAddress_rtsp=@Camera_IPAddress_rtsp where Camera_UID=@Camera_UID;
+end
+end
+
+

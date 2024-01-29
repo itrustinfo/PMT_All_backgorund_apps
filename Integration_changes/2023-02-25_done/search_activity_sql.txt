@@ -1,0 +1,699 @@
+USE [Suez_Live]
+GO
+/****** Object:  StoredProcedure [dbo].[ActualDocuments_SelectBy_WorkpackageUID_Search1]    Script Date: 2/27/2023 12:19:02 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+alter proc [dbo].[ActualDocuments_SelectBy_WorkpackageUID_Search_Activity]
+@ProjectUID uniqueidentifier,
+@Status as varchar(100),
+@WorkPackageUID uniqueidentifier,
+@DocumentName as varchar(250),
+@Doctype as varchar(50),
+@SubmittalName as varchar(100),
+@Type as smallint,
+@DocDate as Datetime,
+@DocumentDate as Datetime,
+@DocDateTo as Datetime,
+@DocumentDateTo as Datetime,
+@OntbRefNumber varchar(100),
+@OriginatorRefNumber varchar(100),
+@FlowUID varchar(50),
+@TaskUIDs as varchar(max)
+as
+begin
+set nocount on;
+DECLARE @sql NVARCHAR(MAX) ;
+DEclare @docdater as nvarchar(Max);
+DEclare @documentdater as nvarchar(Max);
+DEclare @docdaterTo as nvarchar(Max);
+DEclare @documentdaterTo as nvarchar(Max);
+Declare @WkpgUID as nvarchar(max);
+Declare @PrjUID as nvarchar(max);
+set @docdater = CAST(@DocDate as DATE);
+set @documentdater = CAST(@DocumentDate as DATE);
+set @docdaterTo = CAST(@DocDateTo as DATE);
+set @documentdaterTo = CAST(@DocumentDateTo as DATE);
+set @WkpgUID = @WorkPackageUID;
+set @PrjUID=@ProjectUID;
+SET
+   @sql = N'SELECT ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName, DocumentFlowDisplayMaster.Flow_Name 
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+			left join DocumentFlowDisplayMaster on Documents.FlowUID = DocumentFlowDisplayMaster.FlowMasterUID '
+ 
+        
+            set
+               @sql = @sql + ' Where  ActualDocuments.Delete_Flag = ''N''' 
+			   set @sql =@sql + ' AND ActualDocuments.ProjectUID = ''' + @PrjUID + '''' 
+                set @sql =@sql + ' AND ActualDocuments.WorkPackageUID = ''' + @WkpgUID + '''' 
+               set @sql =@sql + ' AND (ActualDocuments.Doc_Type = ''Document'''
+               set @sql =@sql + ' OR ActualDocuments.Doc_Type = ''General Document'')'
+			      IF (@TaskUIDs != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.TaskUID in (SELECT convert(uniqueidentifier, value) FROM string_split(''' + @TaskUIDs  +''', '',''))'
+            end
+               IF (@Status != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_CurrentStatus =''' + @Status + '''' 
+            end
+             IF (@DocumentName != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_Name Like ''%' + @DocumentName + '%''' 
+            end
+            IF (@Doctype != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_Type Like ''%' + @Doctype + '%''' 
+            end
+             IF (@SubmittalName != '')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.DocName Like ''%' + @SubmittalName + '%''' 
+            end
+			IF (@OriginatorRefNumber != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.Ref_Number Like ''%' + @OriginatorRefNumber + '%'''  
+            end
+             IF (@OntbRefNumber != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ProjectRef_Number Like ''%' + @OntbRefNumber + '%''' 
+            end
+			  IF (@FlowUID != '')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.FlowUID Like ''%' + @FlowUID + '%''' 
+            end
+              IF (@Type = 1)
+               Begin
+                set
+            @sql = @sql + 'AND CAST(ActualDocuments.IncomingRec_Date as DATE) >= ''' + @docdater + '''' 
+			set @sql = @sql + ' AND CAST(ActualDocuments.IncomingRec_Date as DATE) <= ''' + @docdaterTo + '''' 
+            end
+			IF (@Type = 2)
+               Begin
+                set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) >= ''' + @documentdater + '''' 
+			 set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) <= ''' + @documentdaterTo + '''' 
+            end
+			IF (@Type = 3)
+               Begin
+			     set
+          @sql = @sql + 'AND CAST(ActualDocuments.IncomingRec_Date as DATE) >= ''' + @docdater + '''' 
+			set @sql = @sql + ' AND CAST(ActualDocuments.IncomingRec_Date as DATE) <= ''' + @docdaterTo + '''' 
+			 set @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) >= ''' + @documentdater + '''' 
+			 set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) <= ''' + @documentdaterTo + '''' 
+            end
+
+            set @sql = @sql + ' ORDER BY ActualDocuments.IncomingRec_Date DESC'
+               EXEC(@sql)
+end
+
+
+//
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [usp_GetSubTaskUIDForTask]
+	-- Add the parameters for the stored procedure here
+@TaskUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	select TaskUID From Tasks Where ParentTaskID=@TaskUID
+END
+GO
+
+//
+USE [iPIMS-DM-ONTB]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetAllTaskUIDsforParentTask]    Script Date: 2/28/2023 12:19:53 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetAllTaskUIDsforParentTask] 
+	-- Add the parameters for the stored procedure here
+@TaskUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	--select TaskUID From Tasks where ParentTaskID=@TaskUID
+	Declare @TaskUIDM as uniqueidentifier;
+	Declare @TaskUID2 as uniqueidentifier;
+	Declare @TaskUID3 as uniqueidentifier;
+	Declare @TaskUID4 as uniqueidentifier;
+	Declare @TaskUID5 as uniqueidentifier;
+	Declare @TaskUID6 as uniqueidentifier;
+	declare @FinalTaskUIDs as nvarchar(max) = '';
+	set @FinalTaskUIDs =@TaskUID
+	DECLARE cursor_db CURSOR
+	FOR 
+	select TaskUID From Tasks where ParentTaskID=@TaskUID
+	OPEN cursor_db;
+		FETCH NEXT FROM cursor_db INTO @TaskUIDM;
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+		
+		set @FinalTaskUIDs=@FinalTaskUIDs + ',' +  convert(varchar(50), @TaskUIDM);
+		DECLARE cursor_db_2 CURSOR
+	FOR 
+	select TaskUID From Tasks where ParentTaskID=@TaskUIDM
+	OPEN cursor_db_2;
+		FETCH NEXT FROM cursor_db_2 INTO @TaskUID2;
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+		
+		set @FinalTaskUIDs=@FinalTaskUIDs + ',' +  convert(varchar(50), @TaskUID2);
+		DECLARE cursor_db_3 CURSOR
+	FOR 
+	select TaskUID From Tasks where ParentTaskID=@TaskUID2
+	OPEN cursor_db_3;
+		FETCH NEXT FROM cursor_db_3 INTO @TaskUID3;
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+		
+		set @FinalTaskUIDs=@FinalTaskUIDs + ',' +  convert(varchar(50), @TaskUID3);
+		DECLARE cursor_db_4 CURSOR
+	FOR 
+	select TaskUID From Tasks where ParentTaskID=@TaskUID3
+	OPEN cursor_db_4;
+		FETCH NEXT FROM cursor_db_4 INTO @TaskUID4;
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+		
+		set @FinalTaskUIDs=@FinalTaskUIDs + ',' +  convert(varchar(50), @TaskUID4);
+		DECLARE cursor_db_5 CURSOR
+	FOR 
+	select TaskUID From Tasks where ParentTaskID=@TaskUID4
+	OPEN cursor_db_5;
+		FETCH NEXT FROM cursor_db_5 INTO @TaskUID5;
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+		
+		set @FinalTaskUIDs=@FinalTaskUIDs + ',' +  convert(varchar(50), @TaskUID5);
+		DECLARE cursor_db_6 CURSOR
+	FOR 
+	select TaskUID From Tasks where ParentTaskID=@TaskUID5
+	OPEN cursor_db_6;
+		FETCH NEXT FROM cursor_db_6 INTO @TaskUID6;
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+		
+		set @FinalTaskUIDs=@FinalTaskUIDs + ',' +  convert(varchar(50), @TaskUID6);
+		
+		FETCH NEXT FROM cursor_db_6 INTO 
+       @TaskUID6;
+		END;
+		
+		CLOSE cursor_db_6;
+		DEALLOCATE cursor_db_6;
+		
+		FETCH NEXT FROM cursor_db_5 INTO 
+       @TaskUID5;
+		END;
+		
+		CLOSE cursor_db_5;
+		DEALLOCATE cursor_db_5;
+		
+		FETCH NEXT FROM cursor_db_4 INTO 
+       @TaskUID4;
+		END;
+		
+		CLOSE cursor_db_4;
+		DEALLOCATE cursor_db_4;
+		
+		FETCH NEXT FROM cursor_db_3 INTO 
+       @TaskUID3;
+		END;
+		
+		CLOSE cursor_db_3;
+		DEALLOCATE cursor_db_3;
+		FETCH NEXT FROM cursor_db_2 INTO 
+       @TaskUID2;
+		END;
+		
+		CLOSE cursor_db_2;
+		DEALLOCATE cursor_db_2;
+		
+		FETCH NEXT FROM cursor_db INTO 
+       @TaskUIDM;
+		END;
+		
+		CLOSE cursor_db;
+		DEALLOCATE cursor_db;
+		
+		select @FinalTaskUIDs as TaskUIDs From Tasks Where TaskUID=@TaskUID;
+		
+END
+
+//added on 06/03/2023
+USE [ONTB_Server]
+GO
+/****** Object:  StoredProcedure [dbo].[ActualDocuments_SelectBy_WorkpackageUID_Search_Activity]    Script Date: 3/6/2023 5:52:08 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER proc [dbo].[ActualDocuments_SelectBy_WorkpackageUID_Search_Activity]
+@ProjectUID uniqueidentifier,
+@Status as varchar(100),
+@WorkPackageUID uniqueidentifier,
+@DocumentName as varchar(250),
+@Doctype as varchar(50),
+@SubmittalName as varchar(100),
+@Type as smallint,
+@DocDate as Datetime,
+@DocumentDate as Datetime,
+@DocDateTo as Datetime,
+@DocumentDateTo as Datetime,
+@OntbRefNumber varchar(100),
+@OriginatorRefNumber varchar(100),
+@FlowUID varchar(50),
+@TaskUIDs as varchar(max)
+as
+begin
+set nocount on;
+DECLARE @sql NVARCHAR(MAX) ;
+DEclare @docdater as nvarchar(Max);
+DEclare @documentdater as nvarchar(Max);
+DEclare @docdaterTo as nvarchar(Max);
+DEclare @documentdaterTo as nvarchar(Max);
+Declare @WkpgUID as nvarchar(max);
+Declare @PrjUID as nvarchar(max);
+set @docdater = CAST(@DocDate as DATE);
+set @documentdater = CAST(@DocumentDate as DATE);
+set @docdaterTo = CAST(@DocDateTo as DATE);
+set @documentdaterTo = CAST(@DocumentDateTo as DATE);
+set @WkpgUID = @WorkPackageUID;
+set @PrjUID=@ProjectUID;
+SET
+   @sql = N'SELECT ROW_NUMBER() OVER(ORDER BY ActualDocuments.IncomingRec_Date Desc) as SerialNo,ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName, DocumentFlowDisplayMaster.Flow_Name 
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+			left join DocumentFlowDisplayMaster on Documents.FlowUID = DocumentFlowDisplayMaster.FlowMasterUID '
+ 
+        
+            set
+               @sql = @sql + ' Where  ActualDocuments.Delete_Flag = ''N''' 
+			   set @sql =@sql + ' AND ActualDocuments.ProjectUID = ''' + @PrjUID + '''' 
+                set @sql =@sql + ' AND ActualDocuments.WorkPackageUID = ''' + @WkpgUID + '''' 
+               set @sql =@sql + ' AND (ActualDocuments.Doc_Type = ''Document'''
+               set @sql =@sql + ' OR ActualDocuments.Doc_Type = ''General Document'')'
+			      IF (@TaskUIDs != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.TaskUID in (SELECT convert(uniqueidentifier, value) FROM string_split(''' + @TaskUIDs  +''', '',''))'
+            end
+               IF (@Status != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_CurrentStatus =''' + @Status + '''' 
+            end
+             IF (@DocumentName != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_Name Like ''%' + @DocumentName + '%''' 
+            end
+            IF (@Doctype != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_Type Like ''%' + @Doctype + '%''' 
+            end
+             IF (@SubmittalName != '')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.DocName Like ''%' + @SubmittalName + '%''' 
+            end
+			IF (@OriginatorRefNumber != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.Ref_Number Like ''%' + @OriginatorRefNumber + '%'''  
+            end
+             IF (@OntbRefNumber != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ProjectRef_Number Like ''%' + @OntbRefNumber + '%''' 
+            end
+			  IF (@FlowUID != '')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.FlowUID Like ''%' + @FlowUID + '%''' 
+            end
+              IF (@Type = 1)
+               Begin
+                set
+            @sql = @sql + 'AND CAST(ActualDocuments.IncomingRec_Date as DATE) >= ''' + @docdater + '''' 
+			set @sql = @sql + ' AND CAST(ActualDocuments.IncomingRec_Date as DATE) <= ''' + @docdaterTo + '''' 
+            end
+			IF (@Type = 2)
+               Begin
+                set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) >= ''' + @documentdater + '''' 
+			 set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) <= ''' + @documentdaterTo + '''' 
+            end
+			IF (@Type = 3)
+               Begin
+			     set
+          @sql = @sql + 'AND CAST(ActualDocuments.IncomingRec_Date as DATE) >= ''' + @docdater + '''' 
+			set @sql = @sql + ' AND CAST(ActualDocuments.IncomingRec_Date as DATE) <= ''' + @docdaterTo + '''' 
+			 set @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) >= ''' + @documentdater + '''' 
+			 set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) <= ''' + @documentdaterTo + '''' 
+            end
+
+			set @sql = @sql + ' ORDER BY SerialNo'
+           -- set @sql = @sql + ' ORDER BY ActualDocuments.IncomingRec_Date DESC'
+               EXEC(@sql)
+end
+
+//added on 07/03/2023
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[usp_GetDocumentFlow1]
+@ProjectUID uniqueidentifier ,
+@WorkPackageUID uniqueidentifier
+as
+begin
+declare @yvalues table(flow_uid nvarchar(max), flow_name nvarchar(max))
+insert into @yvalues select distinct A.FlowMasterUID,A.Flow_Name  from DocumentFlowDisplayMaster A, ActualDocuments B where (A.FlowMasterUID = B.FlowUID) and B.ProjectUID = @ProjectUID and B.WorkPackageUID = @WorkPackageUID; 
+select flow_uid as FlowMasterUID,flow_name as Flow_Name from @yvalues
+end
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create PROCEDURE [dbo].[usp_GetStatusForSearch_flow] 
+	-- Add the parameters for the stored procedure here
+@WorkPackageUID as uniqueidentifier,
+@FlowUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	
+	select Distinct ActualDocuments.ActualDocument_CurrentStatus From dbo.ActualDocuments Inner Join Documents on ActualDocuments.DocumentUID =Documents.DocumentUID Where ActualDocuments.Delete_Flag ='N' and ActualDocuments.WorkPackageUID=@WorkPackageUID and (ActualDocuments.Doc_Type='Document' or ActualDocuments.Doc_Type='General Document')
+	and Documents.FlowUID=@FlowUID Order by ActualDocuments.ActualDocument_CurrentStatus Asc
+	
+	
+END
+
+//added on 07/03/2023
+USE [iPIMS-DM-ONTB]
+GO
+/****** Object:  StoredProcedure [dbo].[ActualDocuments_SelectBy_WorkpackageUID_Search1]    Script Date: 3/7/2023 2:49:40 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER proc [dbo].[ActualDocuments_SelectBy_WorkpackageUID_Search1]
+@ProjectUID uniqueidentifier,
+@Status as varchar(100),
+@WorkPackageUID uniqueidentifier,
+@DocumentName as varchar(250),
+@Doctype as varchar(50),
+@SubmittalName as varchar(100),
+@Type as smallint,
+@DocDate as Datetime,
+@DocumentDate as Datetime,
+@DocDateTo as Datetime,
+@DocumentDateTo as Datetime,
+@OntbRefNumber varchar(100),
+@OriginatorRefNumber varchar(100),
+@FlowUID varchar(50)
+as
+begin
+set nocount on;
+DECLARE @sql NVARCHAR(MAX) ;
+DEclare @docdater as nvarchar(Max);
+DEclare @documentdater as nvarchar(Max);
+DEclare @docdaterTo as nvarchar(Max);
+DEclare @documentdaterTo as nvarchar(Max);
+Declare @WkpgUID as nvarchar(max);
+Declare @PrjUID as nvarchar(max);
+set @docdater = CAST(@DocDate as DATE);
+set @documentdater = CAST(@DocumentDate as DATE);
+set @docdaterTo = CAST(@DocDateTo as DATE);
+set @documentdaterTo = CAST(@DocumentDateTo as DATE);
+set @WkpgUID = @WorkPackageUID;
+set @PrjUID=@ProjectUID;
+SET
+   @sql = N'SELECT ROW_NUMBER() OVER(ORDER BY ActualDocuments.IncomingRec_Date Desc) as SerialNo,ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName, DocumentFlowDisplayMaster.Flow_Name 
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+			left join DocumentFlowDisplayMaster on Documents.FlowUID = DocumentFlowDisplayMaster.FlowMasterUID '
+ 
+        
+            set
+               @sql = @sql + ' Where  ActualDocuments.Delete_Flag = ''N''' 
+			   set @sql =@sql + ' AND ActualDocuments.ProjectUID = ''' + @PrjUID + '''' 
+                set @sql =@sql + ' AND ActualDocuments.WorkPackageUID = ''' + @WkpgUID + '''' 
+               set @sql =@sql + ' AND (ActualDocuments.Doc_Type = ''Document'''
+               set @sql =@sql + ' OR ActualDocuments.Doc_Type = ''General Document'')'
+               IF (@Status != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_CurrentStatus =''' + @Status + '''' 
+            end
+             IF (@DocumentName != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_Name Like ''%' + @DocumentName + '%''' 
+            end
+            IF (@Doctype != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_Type Like ''%' + @Doctype + '%''' 
+            end
+             IF (@SubmittalName != '')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.DocName Like ''%' + @SubmittalName + '%''' 
+            end
+			IF (@OriginatorRefNumber != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.Ref_Number Like ''%' + @OriginatorRefNumber + '%'''  
+            end
+             IF (@OntbRefNumber != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ProjectRef_Number Like ''%' + @OntbRefNumber + '%''' 
+            end
+			  IF (@FlowUID != '')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.FlowUID Like ''%' + @FlowUID + '%''' 
+            end
+              IF (@Type = 1)
+               Begin
+                set
+            @sql = @sql + 'AND CAST(ActualDocuments.IncomingRec_Date as DATE) >= ''' + @docdater + '''' 
+			set @sql = @sql + ' AND CAST(ActualDocuments.IncomingRec_Date as DATE) <= ''' + @docdaterTo + '''' 
+            end
+			IF (@Type = 2)
+               Begin
+                set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) >= ''' + @documentdater + '''' 
+			 set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) <= ''' + @documentdaterTo + '''' 
+            end
+			IF (@Type = 3)
+               Begin
+			     set
+          @sql = @sql + 'AND CAST(ActualDocuments.IncomingRec_Date as DATE) >= ''' + @docdater + '''' 
+			set @sql = @sql + ' AND CAST(ActualDocuments.IncomingRec_Date as DATE) <= ''' + @docdaterTo + '''' 
+			 set @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) >= ''' + @documentdater + '''' 
+			 set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) <= ''' + @documentdaterTo + '''' 
+            end
+			set @sql = @sql + ' ORDER BY SerialNo'
+            --set @sql = @sql + ' ORDER BY ActualDocuments.IncomingRec_Date DESC'
+               EXEC(@sql)
+end
+
+
+//
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER proc [dbo].[ActualDocuments_SelectBy_WorkpackageUID_SearchPhase]
+@ProjectUID uniqueidentifier,
+@Phase as varchar(100),
+@WorkPackageUID uniqueidentifier,
+@DocumentName as varchar(250),
+@Doctype as varchar(50),
+@SubmittalName as varchar(100),
+@Type as smallint,
+@DocDate as Datetime,
+@DocumentDate as Datetime,
+@DocDateTo as Datetime,
+@DocumentDateTo as Datetime,
+@OntbRefNumber varchar(100),
+@OriginatorRefNumber varchar(100),
+@FlowUID varchar(50)
+as
+begin
+set nocount on;
+DECLARE @sql NVARCHAR(MAX) ;
+DEclare @docdater as nvarchar(Max);
+DEclare @documentdater as nvarchar(Max);
+DEclare @docdaterTo as nvarchar(Max);
+DEclare @documentdaterTo as nvarchar(Max);
+Declare @WkpgUID as nvarchar(max);
+Declare @PrjUID as nvarchar(max);
+set @docdater = CAST(@DocDate as DATE);
+set @documentdater = CAST(@DocumentDate as DATE);
+set @docdaterTo = CAST(@DocDateTo as DATE);
+set @documentdaterTo = CAST(@DocumentDateTo as DATE);
+set @WkpgUID = @WorkPackageUID;
+set @PrjUID=@ProjectUID;
+SET
+   @sql = N'
+SELECT     distinct SELECT ROW_NUMBER() OVER(ORDER BY ActualDocuments.IncomingRec_Date Desc) as SerialNo,ActualDocuments.ActualDocumentUID, ActualDocuments.ProjectUID, ActualDocuments.WorkPackageUID, ActualDocuments.DocumentUID, ActualDocuments.ProjectRef_Number, ActualDocuments.Ref_Number, 
+ ActualDocuments.Doc_Type, ActualDocuments.IncomingRec_Date, ActualDocuments.FlowUID, ActualDocuments.ActualDocument_Name, ActualDocuments.Description, ActualDocuments.ActualDocument_Version, ActualDocuments.ActualDocument_Type, ActualDocuments.ActualDocument_Originator, ActualDocuments.Media_HC, ActualDocuments.Media_SC, ActualDocuments.Media_SCEF, ActualDocuments.Media_HCR, ActualDocuments.Media_SCR, ActualDocuments.Media_NA, ActualDocuments.Document_Date, ActualDocuments.ActualDocument_Path, ActualDocuments.ActualDocument_RelativePath, ActualDocuments.ActualDocument_DirectoryName, ActualDocuments.Remarks, ActualDocuments.FileRef_Number, ActualDocuments.ActualDocument_CreatedDate, ActualDocuments.ActualDocument_CurrentStatus, ActualDocuments.Delete_Flag, ActualDocuments.FlowStep1_TargetDate, ActualDocuments.FlowStep2_TargetDate, ActualDocuments.FlowStep3_TargetDate, ActualDocuments.FlowStep4_TargetDate, ActualDocuments.FlowStep5_TargetDate, Documents.DocName, UserTypeStatus.Phase, DocumentFlowDisplayMaster.Flow_Name
+   FROM
+      ActualDocuments 
+      INNER JOIN
+         Documents 
+         ON ActualDocuments.DocumentUID = Documents.DocumentUID
+		 INNER JOIN
+			UserTypeStatus
+				ON Documents.FlowUID = UserTypeStatus.FlowUID
+				   INNER JOIN DocumentFlowDisplayMaster
+				       ON Documents.FlowUID = DocumentFlowDisplayMaster.FlowMasterUID'
+ 
+        
+            set
+               @sql = @sql + '  Where ActualDocuments.ActualDocument_CurrentStatus = UserTypeStatus.Current_Status AND  ActualDocuments.Delete_Flag = ''N''' 
+			   set @sql =@sql + ' AND ActualDocuments.ProjectUID = ''' + @PrjUID + '''' 
+                set @sql =@sql + ' AND ActualDocuments.WorkPackageUID = ''' + @WkpgUID + '''' 
+               set @sql =@sql + ' AND (ActualDocuments.Doc_Type = ''Document'''
+               set @sql =@sql + ' OR ActualDocuments.Doc_Type = ''General Document'')'
+               IF (@Phase != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND UserTypeStatus.Phase =''' + @Phase + '''' 
+            end
+             IF (@DocumentName != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_Name Like ''%' + @DocumentName + '%''' 
+            end
+            IF (@Doctype != 'All')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ActualDocument_Type Like ''%' + @Doctype + '%''' 
+            end
+             IF (@SubmittalName != '')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.DocName Like ''%' + @SubmittalName + '%''' 
+            end
+			IF (@OriginatorRefNumber != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.Ref_Number Like ''%' + @OriginatorRefNumber + '%'''  
+            end
+             IF (@OntbRefNumber != '')
+               Begin
+                set
+            @sql = @sql + ' AND ActualDocuments.ProjectRef_Number Like ''%' + @OntbRefNumber + '%''' 
+            end
+
+			IF (@FlowUID != '')
+               Begin
+                set
+            @sql = @sql + ' AND Documents.FlowUID Like ''%' + @FlowUID + '%''' 
+            end
+              IF (@Type = 1)
+               Begin
+                set
+            @sql = @sql + 'AND CAST(ActualDocuments.IncomingRec_Date as DATE) >= ''' + @docdater + '''' 
+			set @sql = @sql + ' AND CAST(ActualDocuments.IncomingRec_Date as DATE) <= ''' + @docdaterTo + '''' 
+            end
+			IF (@Type = 2)
+               Begin
+                set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) >= ''' + @documentdater + '''' 
+			 set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) <= ''' + @documentdaterTo + '''' 
+            end
+			IF (@Type = 3)
+               Begin
+			     set
+          @sql = @sql + 'AND CAST(ActualDocuments.IncomingRec_Date as DATE) >= ''' + @docdater + '''' 
+			set @sql = @sql + ' AND CAST(ActualDocuments.IncomingRec_Date as DATE) <= ''' + @docdaterTo + '''' 
+			 set @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) >= ''' + @documentdater + '''' 
+			 set
+            @sql = @sql + ' AND CAST(ActualDocuments.Document_Date as DATE) <= ''' + @documentdaterTo + '''' 
+            end
+			set @sql = @sql + ' ORDER BY SerialNo'
+            --set @sql = @sql + ' ORDER BY ActualDocuments.IncomingRec_Date DESC'
+               EXEC(@sql)
+end
+

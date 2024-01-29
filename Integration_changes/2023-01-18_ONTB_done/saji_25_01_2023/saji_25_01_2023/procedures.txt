@@ -1,0 +1,19 @@
+/****** Object:  StoredProcedure [dbo].[get_resource_deployment_graph_data_overall]    Script Date: 1/25/2023 9:00:40 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+Create proc [dbo].[get_resource_deployment_graph_data_overall]
+@WorkPackageUID uniqueidentifier,
+@ResourceUID uniqueidentifier
+as
+  begin
+	set nocount on;
+			
+	SELECT TRIM(STR(YEAR(ResourceDeploymentUpdate.DeployedDate))) + '/' + TRIM(FORMAT(Month(ResourceDeploymentUpdate.DeployedDate),'00')) AS DeployedYearMonth,sum(ResourceDeploymentUpdate.Deployed) AS Deployed FROM ResourceDeployment INNER JOIN
+                  ResourceDeploymentUpdate ON ResourceDeployment.ReourceDeploymentUID = ResourceDeploymentUpdate.ReourceDeploymentUID INNER JOIN
+                  ResourceMaster ON ResourceDeployment.ResourceUID = ResourceMaster.ResourceUID
+				  Where ResourceDeployment.WorkpackageUID=@WorkpackageUID and ResourceMaster.ResourceType_UID=@ResourceUID and ResourceDeploymentUpdate.Delete_Flag='N'
+				  group by TRIM(STR(YEAR(ResourceDeploymentUpdate.DeployedDate))) + '/' + TRIM(FORMAT(Month(ResourceDeploymentUpdate.DeployedDate),'00'))  Order by DeployedYearMonth
+	
+end

@@ -1,0 +1,50 @@
+public DataSet getIssuesList_by_WorkPackageUID_IssueStatus(Guid WorkPackagesUID, string Status,string i_user)
+        {
+            DataSet ds = new DataSet();
+
+            if (string.IsNullOrEmpty(Status))
+                Status = "";
+
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("ups_GetIssuesList_by_WorkPackageUID_IssueStatus", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@WorkPackagesUID", WorkPackagesUID);
+                cmd.SelectCommand.Parameters.AddWithValue("@Status", Status);
+                cmd.SelectCommand.Parameters.AddWithValue("@iUser", i_user);
+
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }
+
+--------------------------------------------------
+
+public DataSet getAllIssuedUsers(Guid WorkPackagesUID, string Status)
+        {
+            DataSet ds = new DataSet();
+
+            if (string.IsNullOrEmpty(Status))
+                Status = "";
+
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("GetAllIssuedUsers", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@WorkPackagesUID", WorkPackagesUID);
+                cmd.SelectCommand.Parameters.AddWithValue("@Status", Status);
+
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }

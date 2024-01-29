@@ -1,0 +1,30 @@
+ <asp:panel runat="server">
+                                                    <asp:GridView ID="GrdCorrespondence" runat="server" Width="100%" CssClass="table table-bordered" EmptyDataText="No Status Found" AutoGenerateColumns="false" >
+                                                        <Columns>
+                                                             <asp:BoundField DataField="ProjectUID" HeaderText="" ItemStyle-CssClass="hiddencol"  HeaderStyle-CssClass="hiddencol" >
+                                                            </asp:BoundField>
+                                                             <asp:BoundField DataField="StatusUID" HeaderText="" ItemStyle-CssClass="hiddencol"  HeaderStyle-CssClass="hiddencol">
+                                                            </asp:BoundField>
+                                                             <asp:BoundField DataField="DocumentUID" HeaderText="" ItemStyle-CssClass="hiddencol"  HeaderStyle-CssClass="hiddencol">
+                                                            </asp:BoundField>
+
+                                                            <asp:BoundField DataField="correspondence_name" HeaderText="Correspondence Type" >
+                                                            </asp:BoundField>
+
+                                                             <asp:BoundField DataField="correspondence_code" HeaderText=""  ItemStyle-CssClass="hiddencol"  HeaderStyle-CssClass="hiddencol">
+                                                            </asp:BoundField>
+
+                                                            <asp:TemplateField HeaderText="">
+                                                                <ItemTemplate>
+                                                                    <a ID="lnkadd" href='/_modal_pages/add-correspondence.aspx?ProjectUID=<%#Eval("ProjectUID")%>&StatusUID=<%#Eval("StatusUID")%>&DocID=<%#Eval("DocumentUID")%>&LetterType=<%#Eval("correspondence_code")%>' class="showCorrespondenceModal"><span title="Add">Add</span></a>
+                                                                </ItemTemplate>
+                                                             </asp:TemplateField>
+                                                             <asp:TemplateField HeaderText="">
+                                                                <ItemTemplate>
+                                                                    <a ID="lnkview" href='/_modal_pages/view-correspondence.aspx?StatusUID=<%#Eval("StatusUID")%>&LetterType=<%#Eval("correspondence_code")%>' class="showCorrespondenceViewModal"><span title="View">View</span></a>                                               
+                                                                </ItemTemplate>
+                                                             </asp:TemplateField>
+                                                        </Columns>
+                                                     </asp:GridView>
+                                                    </asp:panel>
+                                            </asp:Panel>

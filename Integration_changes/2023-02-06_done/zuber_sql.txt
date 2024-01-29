@@ -1,0 +1,16 @@
+USE [iPIMS-DM-ONTB]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_get_Suez_Physical_progress]    Script Date: 2/6/2023 1:06:11 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[sp_get_Suez_Physical_progress]          
+@projectuid nvarchar(250),          
+@achivedDate datetime          
+as          
+begin          
+select t.Taskname,T.TaskUID,Ts.Quantity,T.projectuid from [form-task-update] T left  join MeasurementBook TS          
+on  T.TaskUID=ts.TaskUID  and cast( TS.Achieved_Date as date)=cast(@achivedDate    as date)  
+
+end 

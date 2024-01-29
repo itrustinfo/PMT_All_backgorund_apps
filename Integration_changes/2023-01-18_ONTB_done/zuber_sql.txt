@@ -1,0 +1,12 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[sp_getTaskSchedule_Month]      
+@taskuid nvarchar(250),      
+@achivedDate as datetime      
+as      
+begin      
+select sum(cast(isnull(Quantity,0) as float)) from MeasurementBook where TaskUID=@taskuid and MONTH(Achieved_Date)=Month(@achivedDate)
+and YEAR(Achieved_Date)=YEAR(@achivedDate)
+end

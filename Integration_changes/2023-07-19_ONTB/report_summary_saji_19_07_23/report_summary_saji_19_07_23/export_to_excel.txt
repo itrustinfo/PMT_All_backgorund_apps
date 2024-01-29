@@ -1,0 +1,40 @@
+ private void ExportGridToExcel()
+        {
+            GrdDocuments.Columns[0].Visible = false;
+
+
+            Response.Clear();
+            Response.Buffer = true;
+            Response.ClearContent();
+            Response.ClearHeaders();
+            Response.Charset = "";
+            string FileName = "Report__mis_details" + DateTime.Now.Ticks + ".xls";
+
+            StringWriter strwritter = new StringWriter();
+            HtmlTextWriter htmltextwrtter = new HtmlTextWriter(strwritter);
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.ContentType = "application/vnd.ms-excel";
+            Response.AddHeader("Content-Disposition", "attachment;filename=" + FileName);
+            GrdDocuments.GridLines = GridLines.Both;
+            GrdDocuments.HeaderStyle.Font.Bold = true;
+            GrdDocuments.RenderControl(htmltextwrtter);
+
+            string s = htmltextwrtter.InnerWriter.ToString();
+
+            string x = WebConfigurationManager.AppSettings["Domain"];
+            string y = Session["Username"].ToString();
+            string z = Request.QueryString["ProjectName"];
+
+            string HTMLstring = "<html><body>" +
+                    "<div style='width:100%; margin:auto;'><div style='width:100%; float:left; line-height:25px; font-size:12pt;' align='center'>" +
+                    "<asp:Label ID='Lbl1' runat='server' Font-Bold='true'>" + x + " Report Name: MIS details for " + y + " </asp:Label><br />" +
+                    "<asp:Label ID='Lbl4' runat='server'>Project Name :" + z + "</asp:Label><br />" +
+                    "</div> <div style='width:100%; float:left; height:10px;'>&nbsp;&nbsp;&nbsp;</div>" +
+                    "<div style='width:100%;font-size:11pt float:left;' align='left'>" +
+                    s +
+                    "</div>" +
+                    "</div></body></html>";
+            Response.Write(HTMLstring);
+            Response.End();
+
+        }

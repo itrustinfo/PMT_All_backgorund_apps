@@ -1,0 +1,22 @@
+/****** Object:  StoredProcedure [dbo].[usp_ResourceDeploymentUpdate_Delete]    Script Date: 1/10/2023 10:04:51 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_ResourceDeploymentUpdate_Delete]
+@UID uniqueidentifier,
+@UserUID uniqueidentifier
+as
+begin
+set nocount on;
+declare @resource_deployment_uid as nvarchar(max);
+
+set @resource_deployment_uid = (select ReourceDeploymentUID from ResourceDeploymentUpdate where UID= @UID)
+
+update ResourceDeploymentUpdate set Delete_Flag='Y' where UID=@UID;
+
+update ResourceDeployment set Deployed = (select sum(Deployed) from ResourceDeploymentUpdate where ReourceDeploymentUID = @resource_deployment_uid and Delete_Flag = 'N') where ReourceDeploymentUID = @resource_deployment_uid 
+
+insert into ActivityDeleteLogs(DeleteLog_UID,Activity_UID,Activity_UserUID,Activity_For)
+	values(NEWID(),@UID,@UserUID,'Resource Deployment Update');
+end

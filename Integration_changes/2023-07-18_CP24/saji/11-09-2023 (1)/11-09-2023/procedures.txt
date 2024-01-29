@@ -1,0 +1,13 @@
+/****** Object:  StoredProcedure [dbo].[getActualDocumentStatusListNew]    Script Date: 9/11/2023 11:12:55 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ Create proc [dbo].[getActualDocumentStatusListNew]
+ @DocumentUID uniqueidentifier
+ as
+ begin
+ set nocount on;
+ --select * from DocumentStatus A, Documents B where A.DocumentUID=B.DocumentUID and A.DocumentUID=@DocumentUID and A.ActivityType<>'Registered' order by A.ActivityDate Asc
+ select * from DocumentStatus A, ActualDocuments B where A.DocumentUID=B.ActualDocumentUID and A.DocumentUID=@DocumentUID and ((A.LinkToReviewFile <> '' and A.LinkToReviewFile IS NOT Null) or (A.CoverLetterFile <> '' and A.CoverLetterFile IS NOT Null))  and A.ActivityType<>'Registered' and A.Delete_Flag='N' order by A.ActivityDate Asc,A.CreatedDate Asc
+ end

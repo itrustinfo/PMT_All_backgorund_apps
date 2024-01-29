@@ -1,0 +1,38 @@
+USE [Suez_Live]
+GO
+/****** Object:  StoredProcedure [dbo].[Sp_GetCategoryName_Statuscount]    Script Date: 2/22/2023 11:30:29 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER Proc [dbo].[Sp_GetCategoryName_Statuscount]
+@projectuid nvarchar(250)
+as
+begin
+
+Declare @User as varchar(max);
+Declare @ProjectName as varchar(max);
+set  @ProjectName = (select ProjectName From ProjectDetails Where ProjectUID=@ProjectUID);
+if @ProjectName = 'CP-02'
+	Begin
+select wfN1 as [Item Description], [Code A],[Code B],[Code C],[Code D],[Submitted] as [Pending Approval],[Client Approved] as [Total No. Of Client approval] from (select
+WC.WorkPackageCategory_Name as wfN,WC.WorkPackageCategory_Name as wfN1,ASD.ActualDocument_CurrentStatus  from documents ds
+ inner join ActualDocuments ASD
+on ds.DocumentUID=ASD.DocumentUID
+ inner join [dbo].[Workpackage_Categories] WC on ds.Doc_Category=WC.WorkPackageCategory_UID
+where ds.ProjectUID=@projectuid and ASD.Doc_Type!='Cover Letter' and ds.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='stanley.sebastian@toshiba-water.com' or Username='arun.kumar@toshiba-water.com' or Username='Shivam.arora@suez.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and ASD.Delete_Flag='N'
+) as A
+pivot(count(wfn)   for ActualDocument_CurrentStatus in ([Code D],[Code C],[Code A],[Code B],[Submitted],[Client Approved])) as B
+end
+else if @ProjectName = 'CP-03'
+	Begin
+select wfN1 as [Item Description], [Code A],[Code B],[Code C],[Code D],[Submitted] as [Pending Approval],[Client Approved] as [Total No. Of Client approval] from (select
+WC.WorkPackageCategory_Name as wfN,WC.WorkPackageCategory_Name as wfN1,ASD.ActualDocument_CurrentStatus  from documents ds
+ inner join ActualDocuments ASD
+on ds.DocumentUID=ASD.DocumentUID
+ inner join [dbo].[Workpackage_Categories] WC on ds.Doc_Category=WC.WorkPackageCategory_UID
+where ds.ProjectUID=@projectuid and ASD.Doc_Type!='Cover Letter' and ds.FlowStep1_UserUID in (select UserUID From UserDetails Where (Username='vikash.sharma.ext@suez.com' Or Username='vshrinivas.udupi@suez.com' or Username='Shivam.arora@suez.com' or Username='Kiran.gangaraju.ext@se-india.com' or Username='David.kumar@se-india.com' or Username='ankit.aggarwal@suez.com') and DeletedFlag='N') and ASD.Delete_Flag='N'
+) as A
+pivot(count(wfn)   for ActualDocument_CurrentStatus in ([Code D],[Code C],[Code A],[Code B],[Submitted],[Client Approved])) as B
+end
+end

@@ -1,0 +1,647 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+create PROCEDURE [dbo].[usp_GetAllUsersforPMC]
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID uniqueidentifier,
+@step as int	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	declare @DocUID uniqueidentifier;
+declare @IsMUSer varchar(1);
+set @DocUID=(select DocumentUID from ActualDocuments where ActualDocumentUID=@ActualDocumentUID);
+    -- Insert statements for procedure here
+	if @step = 4
+begin
+set @IsMUSer = (select FlowStep4_IsMUser From Documents where DocumentUID=@DocUID)
+if @IsMUSer ='Y'
+Begin
+  SELECT DISTINCT Submittal_MultipleUsers.UserUID AS Approver, (UserDetails.FirstName + ' ' + UserDetails.LastName) as Name
+FROM     Submittal_MultipleUsers INNER JOIN
+                  UserDetails ON Submittal_MultipleUsers.UserUID = UserDetails.UserUID  Where SubmittalUID=@DocUID and Step=@step
+End
+else
+Begin 
+SELECT Documents.FlowStep4_UserUID AS Approver,(UserDetails.FirstName + ' ' + UserDetails.LastName) as Name
+FROM     Documents INNER JOIN
+                  UserDetails ON Documents.FlowStep4_UserUID = UserDetails.UserUID where DocumentUID=@DocUID;
+End
+end
+END
+
+
+//
+/****** Object:  Table [dbo].[Back_To_PMC_Users]    Script Date: 7/18/2023 1:51:17 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Sent_To_PMC_Users](
+	[UID] [uniqueidentifier] NOT NULL,
+	[ActualDocumentUID] [uniqueidentifier] NULL,
+	[PMCUser] [uniqueidentifier] NULL,
+	[CreatedDate] [datetime] NULL,
+	[DeletedFlag] [varchar](1) NULL,
+	[ServerCopiedAdd] [varchar](1) NULL,
+	[CopiedAddDate] [datetime] NULL,
+	[ServerCopiedUpdate] [varchar](1) NULL,
+	[CopiedUpdateDate] [datetime] NULL,
+ CONSTRAINT [PK_Sent_To_PMC_Users] PRIMARY KEY CLUSTERED 
+(
+	[UID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+//
+create PROCEDURE [dbo].[usp_InsertSent_To_PMC_Users] 
+	-- Add the parameters for the stored procedure here
+@UID as uniqueidentifier,
+@ActualDocumentUID as uniqueidentifier,
+@PMCUser as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	INSERT INTO [dbo].[Sent_To_PMC_Users]
+           ([UID]
+           ,[ActualDocumentUID]
+           ,[PMCUser]
+           ,[CreatedDate]
+           ,[DeletedFlag]
+           )
+     VALUES
+           (@UID
+           ,@ActualDocumentUID
+           ,@PMCUser
+           ,GETDATE()
+           ,'N'
+           )
+
+END
+
+//
+/****** Object:  StoredProcedure [dbo].[usp_GetBacktoPMCUsers]    Script Date: 7/18/2023 4:58:17 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+alter PROCEDURE [dbo].[usp_GetSenttoPMCUsers] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	select * From  [dbo].[Sent_To_PMC_Users] Where ActualDocumentUID=@ActualDocumentUID and DeletedFlag='N'
+END
+
+//
+USE [ONTB_CP24]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetFlowMasterUsers_ForStep]    Script Date: 7/20/2023 11:31:29 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetFlowMasterUsers_ForStep] 
+@WorkPackageUID uniqueidentifier,
+@Step int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SET ANSI_NULLS ON
+
+
+
+select distinct u.UserUID
+from Flow_Master_Users f, UserDetails u where f.UserUID = u.UserUID and f.FlowUID ='95AF4084-3F07-4184-8E3F-1CA3A916EE59' and f.WorkpackageUID = @WorkPackageUID
+and f.Step = @Step and f.DeletedFlag = 'N'
+
+END
+
+//added on 20/07/2023
+for_Commentssheet	varchar(3000)	Checked  to DocumentStatus Table
+
+
+//added on 24/07/2023 for commensheet DTL
+USE [ONTB_CP24]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetCommentSheetForDTL]    Script Date: 8/24/2023 12:42:27 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetCommentSheetForDTL] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@Version as int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as Id,for_Commentssheet as Comment,ActivityType as Status,AcivityUserUID as FullName  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Sent to PMC' or Current_Status='Accepted-PMC' or Current_Status='Review by PC') and AcivityUserUID not in (Select UserUID From UserDetails Where Discipline='PC') and Version=@Version and Delete_Flag='N' order by CreatedDate asc
+END
+
+
+
+
+
+//
+USE [ONTB_CP24]
+GO
+/****** Object:  StoredProcedure [dbo].[ups_DocumentStatus_Insert_Update]    Script Date: 7/24/2023 12:33:50 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_DocumentStatus_Insert_Update]
+@StatusUID uniqueidentifier,
+@DocumentUID uniqueidentifier,
+@Version float,
+@ActivityType varchar(100),
+@Activity_Budget float,
+@ActivityDate datetime,
+@LinkToReviewFile varchar(max),
+@AcivityUserUID uniqueidentifier,
+@Status_Comments varchar(3000),
+@Current_Status varchar(50),
+@Ref_Number varchar(100),
+@DocumentDate datetime,
+@CoverLetterFile varchar(max),
+@UpdateStatusto varchar(50),
+@Origin varchar(50),
+@For_Commensheet varchar(3000)
+as
+begin
+if not exists(select StatusUID from DocumentStatus where StatusUID=@StatusUID)
+	begin
+		if @UpdateStatusto<>'All'
+		begin
+			insert into DocumentStatus(StatusUID,DocumentUID,Version,ActivityType,Activity_Budget,ActivityDate,LinkToReviewFile,
+			AcivityUserUID,Status_Comments,Current_Status,Ref_Number,DocumentDate,CoverLetterFile,Origin,for_Commentssheet) 
+			values(@StatusUID,@DocumentUID,@Version,@ActivityType,@Activity_Budget,@ActivityDate,@LinkToReviewFile,
+			@AcivityUserUID,@Status_Comments,@Current_Status,@Ref_Number,@DocumentDate,@CoverLetterFile,@Origin,@For_Commensheet)
+		end
+		
+
+		-- Update Document current Status
+		declare @FlowUID uniqueidentifier;
+		set @FlowUID=(select FlowUID from ActualDocuments where ActualDocumentUID=@DocumentUID);
+		if @Current_Status='Code B' OR @Current_Status='Code H' OR @Current_Status='Code C' OR @Current_Status='Code E'
+		begin
+			declare @ReviewTargetDate datetime;
+			set @ReviewTargetDate=(select FlowStep2_TargetDate from ActualDocuments where ActualDocumentUID=@DocumentUID);
+			if(GETDATE() > @ReviewTargetDate)
+			begin
+				declare @Step3Days int;
+				set @Step3Days=(select FlowStep3_Duration from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+				update ActualDocuments set FlowStep2_TargetDate=GETDATE(),FlowStep3_TargetDate=DATEADD(DAY, @Step3Days, GETDATE()) where ActualDocumentUID=@DocumentUID;
+			end
+		end
+		else if @Current_Status='Code A'
+		begin
+			declare @ApproveTargetDate datetime;
+			set @ApproveTargetDate=(select FlowStep3_TargetDate from ActualDocuments where ActualDocumentUID=@DocumentUID);
+			if(GETDATE() > @ApproveTargetDate)
+			begin
+				declare @Step4Days int;
+				set @Step4Days=(select FlowStep4_Duration from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+				if @Step4Days is not null
+				begin
+					update ActualDocuments set FlowStep3_TargetDate=GETDATE(),FlowStep4_TargetDate=DATEADD(DAY, @Step4Days, GETDATE()) where ActualDocumentUID=@DocumentUID;
+				end
+			end
+		end
+		else
+		begin
+			declare @ClientApproveTargetDate datetime;
+			set @ClientApproveTargetDate=(select FlowStep4_TargetDate from ActualDocuments where ActualDocumentUID=@DocumentUID);
+			if(GETDATE() > @ClientApproveTargetDate)
+			begin
+				update ActualDocuments set FlowStep4_TargetDate=GETDATE() where ActualDocumentUID=@DocumentUID;
+			end
+		end
+
+		update ActualDocuments set ActualDocument_CurrentStatus=@Current_Status where ActualDocumentUID=@DocumentUID;
+		--insert into DocumentVesrion(DocVersion_UID,DocStatus_UID,DocumentUID,Doc_Version,Doc_Type,Doc_FileName,Doc_Status,Doc_StatusDate)
+		--values(NEWID(),@StatusUID,@DocumentUID,@Version,'docx',@LinkToReviewFile,'Checked In',getdate())
+		declare @SubmiitalUID as varchar(50);
+		
+		if @Current_Status = 'Sent To Contractor'
+		Begin
+		set @SubmiitalUID= (select DocumentUID From ActualDocuments Where ActualDocumentUID=@DocumentUID)
+		Update Documents set IsSync='Y' Where DocumentUID=@SubmiitalUID
+
+		End
+
+		if @UpdateStatusto='All'
+		begin
+			Declare @SubmittalUID uniqueidentifier;
+			set @SubmittalUID=(select DocumentUID from ActualDocuments where ActualDocumentUID=@DocumentUID);
+
+			Declare @OriginatorRefNumber varchar(75);
+			set @OriginatorRefNumber=(select Ref_Number from ActualDocuments where ActualDocumentUID=@DocumentUID);
+
+			--declare @CoverLetterUID uniqueidentifier;
+			--set @CoverLetterUID=(select CoverLetterUID from ActualDocuments where ActualDocumentUID=@DocumentUID);
+
+			if @OriginatorRefNumber !=''
+			begin
+				Declare @ActualDocumentUID uniqueidentifier;
+				DECLARE cursor_db CURSOR
+				FOR
+				select ActualDocumentUID from ActualDocuments where DocumentUID=@SubmittalUID and Ref_Number=@OriginatorRefNumber;
+				OPEN cursor_db;
+				FETCH NEXT FROM cursor_db INTO 
+				@ActualDocumentUID;
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					insert into DocumentStatus(StatusUID,DocumentUID,Version,ActivityType,Activity_Budget,ActivityDate,LinkToReviewFile,
+					AcivityUserUID,Status_Comments,Current_Status,Ref_Number,DocumentDate,CoverLetterFile,Origin,for_Commentssheet) 
+					values(NEWID(),@ActualDocumentUID,@Version,@ActivityType,@Activity_Budget,@ActivityDate,@LinkToReviewFile,
+					@AcivityUserUID,@Status_Comments,@Current_Status,@Ref_Number,@DocumentDate,@CoverLetterFile,@Origin,@For_Commensheet)
+
+					-- Update Document current Status
+					update ActualDocuments set ActualDocument_CurrentStatus=@Current_Status where ActualDocumentUID=@ActualDocumentUID;
+
+					if @Current_Status='Code B' OR @Current_Status='Code H' OR @Current_Status='Code C' OR @Current_Status='Code E'
+					begin
+						declare @ReviewTargetDate1 datetime;
+						set @ReviewTargetDate1=(select FlowStep2_TargetDate from ActualDocuments where ActualDocumentUID=@ActualDocumentUID);
+						if(GETDATE() > @ReviewTargetDate1)
+						begin
+							declare @Step3Days1 int;
+							set @Step3Days1=(select FlowStep3_Duration from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+							update ActualDocuments set FlowStep2_TargetDate=GETDATE(),FlowStep3_TargetDate=DATEADD(DAY, @Step3Days1, GETDATE()) where ActualDocumentUID=@ActualDocumentUID;
+						end
+					end
+					else if @Current_Status='Code A'
+					begin
+						declare @ApproveTargetDate1 datetime;
+						set @ApproveTargetDate1=(select FlowStep3_TargetDate from ActualDocuments where ActualDocumentUID=@ActualDocumentUID);
+						if(GETDATE() > @ApproveTargetDate1)
+						begin
+							declare @Step4Days1 int;
+							set @Step4Days1=(select FlowStep4_Duration from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+							if @Step4Days1 is not null
+							begin
+								update ActualDocuments set FlowStep3_TargetDate=GETDATE(),FlowStep4_TargetDate=DATEADD(DAY, @Step4Days1, GETDATE()) where ActualDocumentUID=@ActualDocumentUID;
+							end
+						end
+					end
+					else
+					begin
+						declare @ClientApproveTargetDate1 datetime;
+						set @ClientApproveTargetDate1=(select FlowStep4_TargetDate from ActualDocuments where ActualDocumentUID=@ActualDocumentUID);
+						if(GETDATE() > @ClientApproveTargetDate1)
+						begin
+							update ActualDocuments set FlowStep4_TargetDate=GETDATE() where ActualDocumentUID=@ActualDocumentUID;
+						end
+					end
+
+
+					FETCH NEXT FROM cursor_db INTO 
+					@ActualDocumentUID;
+				END;
+				CLOSE cursor_db;
+				DEALLOCATE cursor_db;
+			end
+		end
+	end
+else
+begin
+	--declare @DocFile VARCHAR(max);
+	--set @DocFile=(select Doc_FileName from DocumentVesrion where DocStatus_UID=@StatusUID);
+	--if @DocFile =''
+	--begin
+	--	update DocumentVesrion set Doc_FileName=@LinkToReviewFile where DocStatus_UID=@StatusUID;
+	--end
+	if @LinkToReviewFile !=''
+	begin
+		update DocumentStatus set ActivityType=@ActivityType,Activity_Budget=@Activity_Budget,ActivityDate=@ActivityDate,LinkToReviewFile=@LinkToReviewFile,AcivityUserUID=@AcivityUserUID,Status_Comments=@Status_Comments,Ref_Number=@Ref_Number,DocumentDate=@DocumentDate,Origin=@Origin where StatusUID=@StatusUID
+	end
+	else
+	begin
+		update DocumentStatus set ActivityType=@ActivityType,Activity_Budget=@Activity_Budget,ActivityDate=@ActivityDate,AcivityUserUID=@AcivityUserUID,Status_Comments=@Status_Comments,Ref_Number=@Ref_Number,DocumentDate=@DocumentDate,Origin=@Origin where StatusUID=@StatusUID
+	end
+end
+end
+
+
+//
+USE [ONTB_CP24]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetCommentSheetForDTL_Complete]    Script Date: 7/25/2023 7:25:13 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetCommentSheetForDTL_Complete] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@Version as int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as Id,for_Commentssheet as Comment,Current_Status as Status,AcivityUserUID as FullName  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D' or Current_Status='Code A by TL' or Current_Status='Code B by TL' or Current_Status='Code A with letter withdrawn' or Current_Status='Code B with letter withdrawn') and Version=@Version  and Delete_Flag='N' order by CreatedDate asc
+END
+
+//
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [usp_GetCRSSheetMainData] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	--select Revision, ROW_NUMBER() OVER(partition by revision order by revision) as SerialNo,Comment1,Reply1 from ONTBComments1  order by revision
+
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as SerialNo,Version,for_Commentssheet as Comment,'' as Status,AcivityUserUID as FullName,'' as Reply  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D' or Current_Status='Code A by TL' or Current_Status='Code B by TL')  and Delete_Flag='N' order by CreatedDate asc
+
+END
+GO
+
+
+//
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [usp_GetContractorCommentsforREsubmission] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@Version as int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT * From DocumentVesrion Where DocumentUID=@ActualDocumentUID and Doc_Version=@Version
+END
+GO
+
+
+//added on 26/07/2023
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+alter PROCEDURE [dbo].[usp_GetCommentSheetForTL] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@Version as int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as Id,for_Commentssheet as Comment,ActivityType as Status,AcivityUserUID as FullName  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D' or Current_Status='Code A with letter withdrawn' or Current_Status='Code B with letter withdrawn') and Version=@Version and Delete_Flag='N' order by CreatedDate desc
+END
+
+//
+USE [ONTB_CP24]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetCommentSheetForDTL]    Script Date: 8/24/2023 12:42:27 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+create PROCEDURE [dbo].[usp_GetCommentSheetForPC] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@Version as int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as Id,for_Commentssheet as Comment,ActivityType as Status,AcivityUserUID as FullName  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Sent to PMC' or Current_Status='Accepted-PMC') and AcivityUserUID not in (Select UserUID From UserDetails Where Discipline='PC') and Version=@Version and Delete_Flag='N' order by CreatedDate asc
+END
+
+
+//added on 04/09/2023
+USE [ONTB_CP24]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetCommentSheetForTL]    Script Date: 9/4/2023 1:07:26 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetCommentSheetForTL] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@Version as int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	declare @Sdate as Datetime =null;
+	set @Sdate =(select top(1) CreatedDate From DocumentStatus Where (Current_Status='Code A with letter withdrawn' or Current_Status='Code B with letter withdrawn') and DocumentUID=@ActualDocumentUID order by CreatedDate desc)
+
+	if @Sdate is not null
+	Begin
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate desc) as Id,for_Commentssheet as Comment,ActivityType as Status,AcivityUserUID as FullName  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D') and Version=@Version and Delete_Flag='N' and CreatedDate > @Sdate order by CreatedDate desc
+	End
+	else
+	Begin
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate desc) as Id,for_Commentssheet as Comment,ActivityType as Status,AcivityUserUID as FullName  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D' or Current_Status='Code A with letter withdrawn' or Current_Status='Code B with letter withdrawn') and Version=@Version and Delete_Flag='N' order by CreatedDate desc
+	End
+
+END
+
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetCommentSheetForDTL_Complete] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@Version as int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	declare @Sdate as Datetime =null;
+	set @Sdate =(select top(1) CreatedDate From DocumentStatus Where (Current_Status='Code A with letter withdrawn' or Current_Status='Code B with letter withdrawn') and DocumentUID=@ActualDocumentUID order by CreatedDate desc)
+
+    -- Insert statements for procedure here
+	if @Sdate is not null
+	Begin
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as Id,for_Commentssheet as Comment,Current_Status as Status,AcivityUserUID as FullName  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D' or Current_Status='Code A by TL' or Current_Status='Code B by TL') and Version=@Version  and Delete_Flag='N' and CreatedDate > @Sdate order by CreatedDate asc
+	end
+	else
+	Begin
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as Id,for_Commentssheet as Comment,Current_Status as Status,AcivityUserUID as FullName  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D' or Current_Status='Code A by TL' or Current_Status='Code B by TL') and Version=@Version  and Delete_Flag='N' order by CreatedDate asc
+	end
+END
+
+
+//
+USE [ONTB_CP24]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetCRSSheetMainData]    Script Date: 9/4/2023 2:02:22 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetCRSSheetMainData] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	--select Revision, ROW_NUMBER() OVER(partition by revision order by revision) as SerialNo,Comment1,Reply1 from ONTBComments1  order by revision
+	declare @Sdate as Datetime =null;
+	set @Sdate =(select top(1) CreatedDate From DocumentStatus Where (Current_Status='Code A with letter withdrawn' or Current_Status='Code B with letter withdrawn') and DocumentUID=@ActualDocumentUID order by CreatedDate desc)
+
+	if @Sdate is not null
+	Begin
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as SerialNo,Version,for_Commentssheet as Comment,Current_Status as Status,AcivityUserUID as FullName,'' as Reply  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D' or Current_Status='Code A by TL' or Current_Status='Code B by TL')  and Delete_Flag='N' and CreatedDate > @Sdate order by CreatedDate asc
+	end
+	else
+	Begin
+
+	select ROW_NUMBER() OVER(ORDER BY CreatedDate asc) as SerialNo,Version,for_Commentssheet as Comment,Current_Status as Status,AcivityUserUID as FullName,'' as Reply  FRom DocumentStatus Where DocumentUID=@ActualDocumentUID
+	and (Current_Status='Code A' or Current_Status='Code B' or Current_Status='Code C' or Current_Status='Code D' or Current_Status='Code A by TL' or Current_Status='Code B by TL')  and Delete_Flag='N' order by CreatedDate asc
+
+	end
+END

@@ -1,0 +1,122 @@
+
+<ItemTemplate>
+        <%# DataBinder.Eval(Container.DataItem, "created_date", "{0:dd MMM yyyy}") %>
+    </ItemTemplate>
+
+
+
+ if (ds.Tables[0].Rows[0]["DocumentDate"].ToString() != null && ds.Tables[0].Rows[0]["DocumentDate"].ToString() != "")
+                {
+                    dtDocumentDate.Text = Convert.ToDateTime(ds.Tables[0].Rows[0]["DocumentDate"].ToString()).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+                }
+
+The specified path, file name, or both are too long. The fully qualified file name must be less than 260 characters, and the directory name must be less than 248 characters.
+---------------------------------------------------------------------
+<ItemTemplate>
+        <%# DataBinder.Eval(Container.DataItem, "created_date", "{0:dd MMM yyyy}") %>
+    </ItemTemplate>
+----------------------------------------------------------------------------
+
+***** Object:  StoredProcedure [dbo].[ups_DocumentVesrion_Insert]    Script Date: 9/14/2023 4:39:37 PM *****/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER proc [dbo].[ups_DocumentVesrion_Insert]
+@DocVersion_UID uniqueidentifier,
+@DocStatus_UID uniqueidentifier,
+@DocumentUID uniqueidentifier,
+@Doc_Type nvarchar(20),
+@Doc_FileName varchar(max),
+@Doc_Comments varchar(1000),
+@Doc_CoverLetter varchar(350),
+@Doc_StatusDate datetime
+as
+begin
+declare @Ver int;
+--set @Ver=(select max(Doc_Version) from DocumentVesrion where DocStatus_UID=@DocStatus_UID and DocumentUID=@DocumentUID);
+
+set @Ver=(select max(Doc_Version) from DocumentVesrion where DocumentUID=@DocumentUID);
+
+if @Ver > 0
+begin
+	set @Ver= @Ver + 1;
+end
+else
+begin
+	set @Ver=2;
+end
+	insert into DocumentVesrion(DocVersion_UID,DocStatus_UID,DocumentUID,Doc_Version,Doc_Type,Doc_FileName,Doc_Status,Doc_StatusDate,Doc_Comments,Doc_CoverLetter)
+	values(@DocVersion_UID,@DocStatus_UID,@DocumentUID,@Ver,@Doc_Type,@Doc_FileName,'Checked In',@Doc_StatusDate,@Doc_Comments,@Doc_CoverLetter)
+end
+
+
+-----------------------------
+ public int InsertDocumentVersion(Guid DocVersion_UID, Guid DocStatus_UID, Guid DocumentUID, string Doc_Type, string Doc_FileName,string Doc_Comments, DateTime Doc_StatusDate, string Doc_CoverLetter)
+        {
+            int sresult = 0;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(db.GetConnectionString()))
+                {
+
+                    using (SqlCommand cmd = new SqlCommand("ups_DocumentVesrion_Insert"))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Connection = con;
+                        cmd.Parameters.AddWithValue("@DocVersion_UID", DocVersion_UID);
+                        cmd.Parameters.AddWithValue("@DocStatus_UID", DocStatus_UID);
+                        cmd.Parameters.AddWithValue("@DocumentUID", DocumentUID);
+                        cmd.Parameters.AddWithValue("@Doc_Type", Doc_Type);
+                        cmd.Parameters.AddWithValue("@Doc_FileName", Doc_FileName);
+                        cmd.Parameters.AddWithValue("@Doc_Comments", Doc_Comments);
+                        cmd.Parameters.AddWithValue("@Doc_StatusDate", Doc_StatusDate);
+
+                        cmd.Parameters.AddWithValue("@Doc_CoverLetter", Doc_CoverLetter);
+
+                        con.Open();
+                        sresult = (int)cmd.ExecuteNonQuery();
+                        con.Close();
+
+                    }
+                }
+                return sresult;
+            }
+            catch (Exception ex)
+            {
+                return sresult = 0;
+            }
+        }
+----------------------------------------------
+ $(function () {
+            $("input[id$='dtDocumentDate']").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy'
+            });
+        });
+---------------------------------------------------
+else if (dtDocumentDate.Text == "" || dtDocumentDate.Text == "dd/MM/YYYY")
+            {
+                Page.ClientScript.RegisterStartupScript(Page.GetType(), "Warning", "<script language='javascript'>alert('Please Choose a Resubmission Date.');</script>");
+                return;
+            }
+------------------------------------------
+string DocumentDate = string.Empty;
+                    if (dtDocumentDate.Text != "")
+                    {
+                        DocumentDate = dtDocumentDate.Text;
+                    }
+                    else
+                    {
+                        DocumentDate = DateTime.MinValue.ToString("MM/dd/yyyy");
+                    }
+
+                    DocumentDate = getdata.ConvertDateFormat(DocumentDate);
+                    DateTime Document_Date = Convert.ToDateTime(DocumentDate);
+
+-----------------------------------------
+                            int cnt = getdata.InsertDocumentVersion(DocVersion_UID, new Guid(Request.QueryString["StatusUID"]), new Guid(Request.QueryString["DocumentUID"]), Extn, DocPath, txtcomments.Text, Document_Date,ConverLetterFilepath);
+---------------------------------------------------

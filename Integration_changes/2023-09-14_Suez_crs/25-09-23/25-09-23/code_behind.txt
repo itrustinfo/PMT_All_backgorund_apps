@@ -1,0 +1,13 @@
+  
+ GridView grdCorrespondence = row.FindControl("GrdCorrespondence") as GridView;
+                BindCorrespondence(orderId, grdCorrespondence);
+
+
+private void BindCorrespondence(string DocStatus_UID, GridView GrdCorrespondence)
+{
+            List<tClass4> correspondences = new List<tClass4>() { new tClass4() { correspondence_name = "Client to Consultant", correspondence_code = "1", ProjectUID = Request.QueryString["ProjectUID"].ToString(), StatusUID = DocStatus_UID, DocumentUID = Request.QueryString["DocID"].ToString() }, new tClass4() { correspondence_name = "Consultant to Client", correspondence_code = "2", ProjectUID = Request.QueryString["ProjectUID"].ToString(), StatusUID= DocStatus_UID, DocumentUID= Request.QueryString["DocID"].ToString() }, new tClass4() { correspondence_name = "Client Internal", correspondence_code = "3", ProjectUID = Request.QueryString["ProjectUID"].ToString(), StatusUID = DocStatus_UID, DocumentUID = Request.QueryString["DocID"].ToString() } };
+
+            GrdCorrespondence.ToolTip = DocStatus_UID.ToString();
+            GrdCorrespondence.DataSource = correspondences;
+            GrdCorrespondence.DataBind();
+}

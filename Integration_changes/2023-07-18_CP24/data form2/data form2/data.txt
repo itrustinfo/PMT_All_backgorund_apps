@@ -1,0 +1,18 @@
+USE [ONTB_Server_Blob]
+GO
+SET IDENTITY_INSERT [dbo].[ONTBComments1] ON 
+GO
+INSERT [dbo].[ONTBComments1] ([Id], [Comment1], [Reply1], [Revision], [RevisionItemCount]) VALUES (1, N'No Comment1', N'No Reply1', N'Revision-1', 1)
+GO
+INSERT [dbo].[ONTBComments1] ([Id], [Comment1], [Reply1], [Revision], [RevisionItemCount]) VALUES (2, N'No Comment2', N'No Reply2', N'Revision-1', 2)
+GO
+INSERT [dbo].[ONTBComments1] ([Id], [Comment1], [Reply1], [Revision], [RevisionItemCount]) VALUES (3, N'No Comment3', N'No Reply3', N'Revision-1', 3)
+GO
+INSERT [dbo].[ONTBComments1] ([Id], [Comment1], [Reply1], [Revision], [RevisionItemCount]) VALUES (4, N'Comment1', N'Reply1', N'Revision-2', 1)
+GO
+INSERT [dbo].[ONTBComments1] ([Id], [Comment1], [Reply1], [Revision], [RevisionItemCount]) VALUES (5, N'Comment2', N'Reply2', N'Revision-2', 2)
+GO
+INSERT [dbo].[ONTBComments1] ([Id], [Comment1], [Reply1], [Revision], [RevisionItemCount]) VALUES (6, N'Comment3', N'Reply3', N'Revision-2', 3)
+GO
+SET IDENTITY_INSERT [dbo].[ONTBComments1] OFF
+GO

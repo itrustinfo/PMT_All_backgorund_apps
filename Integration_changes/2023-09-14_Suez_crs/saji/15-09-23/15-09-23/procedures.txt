@@ -1,0 +1,112 @@
+
+/****** Object:  Table [dbo].[DocumentStatusCorrespondence]    Script Date: 9/15/2023 5:37:51 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[DocumentStatusCorrespondence](
+	[CorrespondenceUID] [uniqueidentifier] NOT NULL,
+	[ActualDocumentUID] [uniqueidentifier] NOT NULL,
+	[StatusUID] [uniqueidentifier] NULL,
+	[RefNumber] [nvarchar](100) NULL,
+	[Status] [varchar](100) NULL,
+	[CoverletterDate] [datetime] NULL,
+	[UserUID] [uniqueidentifier] NULL,
+	[CoverLetterFile] [varchar](max) NULL,
+	[LinkToReviewFile] [varchar](max) NULL,
+	[Status_Comments] [varchar](3000) NULL,
+	[Delete_Flag] [varchar](1) NULL,
+	[CreatedDate] [datetime] NULL,
+	[DeletedBy] [uniqueidentifier] NULL,
+	[DeletedDate] [datetime] NULL,
+ CONSTRAINT [PK_DocumentStatusCorrespondence] PRIMARY KEY CLUSTERED 
+(
+	[CorrespondenceUID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[DocumentStatusCorrespondence] ADD  CONSTRAINT [DF_DocumentStatusCorrespondence_Delete_Flag]  DEFAULT ('N') FOR [Delete_Flag]
+GO
+
+ALTER TABLE [dbo].[DocumentStatusCorrespondence] ADD  CONSTRAINT [DF_DocumentStatusCorrespondence_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+
+
+
+
+
+
+/****** Object:  StoredProcedure [dbo].[InsertCorrespondenceFile]    Script Date: 9/15/2023 5:13:20 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[InsertCorrespondenceFile]
+	-- Add the parameters for the stored procedure here
+@UID as uniqueidentifier,
+@ActualDocumentUID as uniqueidentifier,
+@RefNumber as nvarchar(max),
+@StatusUID as uniqueidentifier,
+@Status as nvarchar(max),
+@CLDate as datetime,
+@UserUID as uniqueidentifier,
+@CLFile as nvarchar(max),
+@LRFile as nvarchar(max),
+@StatusComment as nvarchar(max)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	INSERT INTO [dbo].[DocumentStatusCorrespondence]
+           ([CorrespondenceUID]
+           ,[ActualDocumentUID]
+           ,[RefNumber]
+		   ,[StatusUID]
+           ,[Status]
+           ,[CoverletterDate]
+		   ,[UserUID]
+		   ,[CoverLetterFile]
+		   ,[LinkToReviewFile]
+		   ,[Status_Comments]
+		   ,[CreatedDate])
+     VALUES
+           (@UID
+           ,@ActualDocumentUID
+           ,@RefNumber
+		   ,@StatusUID
+		   ,@Status
+		   ,@CLDate
+		   ,@UserUID
+		   ,@CLFile
+		   ,@LRFile
+		   ,@StatusComment
+           ,GETDATE())
+END
+
+----------------------------------------------
+
+/****** Object:  StoredProcedure [dbo].[getCorrespondenceData]    Script Date: 9/15/2023 5:15:31 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ ALTER proc [dbo].[getCorrespondenceData]
+ @statusUID uniqueidentifier
+ as
+ begin
+   set nocount on;
+   select * from DocumentStatusCorrespondence where StatusUID = @statusUID
+ end
+
+-------------------------------------------

@@ -1,0 +1,65 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Saji Augustin
+-- Create date: 12th May 2022
+-- Description:	Procedure to draw Cost Chart
+-- =============================================
+ALTER PROC [dbo].[GetCostGraphData] 
+@WorkPackageUID nvarchar(max)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	declare @planned as float;
+	declare @actual as float;
+	declare @budget as float;
+
+	declare @Currency varchar(50);
+	declare @Currency_CultureInfo varchar(50);
+
+
+	set @planned =0;
+	set @actual =0;
+	set @budget =0;
+
+	set @budget = (select Budget from WorkPackages where WorkPackageUID = @WorkPackageUID);
+	--set @budget = ROUND((@budget/10000000),2);
+
+	set @planned = (SELECT sum(FinanceMileStoneMonth.AllowedPayment) FROM FinanceMileStones INNER JOIN
+    FinanceMileStoneMonth ON FinanceMileStones.Finance_MileStoneUID = FinanceMileStoneMonth.Finance_MileStoneUID Where TaskUID = @WorkPackageUID and FinanceMileStones.Delete_Flag ='N' and FinanceMileStoneMonth.DeletedFlag='N'); 
+	
+	--set @planned = (select sum(AllowedPayment) from FinanceMileStoneMonth A ,RABillPayments B where a.FinMileStoneMonthUID = b.FinMileStoneMonthUID and a.WorkPackageUID = @WorkPackageUID);
+	
+	set @actual = (select sum(b.Amount) from FinanceMileStoneMonth A ,RABillPayments B where a.FinMileStoneMonthUID = b.FinMileStoneMonthUID and a.WorkPackageUID = @WorkPackageUID and B.DeletedFlag='N' and A.DeletedFlag='N');
+
+	set @actual = ROUND((@actual/10000000),2);
+
+	set @Currency=(select Currency from WorkPackages where WorkPackageUID=@WorkPackageUID);
+	set @Currency_CultureInfo=(select Currency_CultureInfo from WorkPackages where WorkPackageUID=@WorkPackageUID);
+
+	select @budget as Budget,@planned as Planned, @actual as Actual,@Currency as Currency,@Currency_CultureInfo as Currency_CultureInfo;
+END
+
+
+//
+USE [iPIMS-DM-SuezCP02-03]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GeFinMonthsPaymentTotal]    Script Date: 8/29/2023 5:19:35 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[usp_GeFinMonthsPaymentTotal] 
+	-- Add the parameters for the stored procedure here
+@FinMileStoneMonthUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	select SUM(TotalDeductions) as TotalDeduc,Sum(Amount) as TotalAmnt,SUM(NetAmount) as TotalNetAmnt From RABillPayments Where FinMileStoneMonthUID =@FinMileStoneMonthUID and DeletedFlag='N'
+END

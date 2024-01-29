@@ -1,0 +1,40 @@
+ public DataSet GetInspection_Type(String sTaskUID)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                SqlConnection con = new SqlConnection(db.GetConnectionString());
+                SqlDataAdapter cmd = new SqlDataAdapter("usp_GetInspection_Type", con);
+                cmd.SelectCommand.CommandType = CommandType.StoredProcedure;
+                cmd.SelectCommand.Parameters.AddWithValue("@TaskUID", sTaskUID);
+                cmd.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                ds = null;
+            }
+            return ds;
+        }
+
+------------------------
+USE [VVSTP_Server_New]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetInspection_Type]    Script Date: 1/19/2024 11:59:53 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[usp_GetInspection_Type] 
+	-- Add the parameters for the stored procedure here
+@TaskUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT BOQDetails.Inspection_Type 
+FROM Tasks
+INNER JOIN BOQDetails ON Tasks.BOQDetailsUID=BOQDetails.BOQDetailsUID where Tasks.TaskUID=@TaskUID
+END

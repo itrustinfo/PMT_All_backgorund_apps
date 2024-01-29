@@ -1,0 +1,23 @@
+ public int ResourceDeployment_Delete(Guid resourcedeployment_id,Guid user_id)
+        {
+            int cnt = 0;
+
+            SqlConnection con = new SqlConnection(db.GetConnectionString());
+            try
+            {
+                if (con.State == ConnectionState.Closed) con.Open();
+                SqlCommand cmd = new SqlCommand("ResourceDeployment_Delete", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@UID", resourcedeployment_id);
+                cmd.Parameters.AddWithValue("@UserUID", user_id);
+                cnt = (Int32)cmd.ExecuteScalar();
+                con.Close();
+            }
+            catch (Exception ex)
+            {
+                if (con.State == ConnectionState.Open) con.Close();
+                return -1;
+            }
+
+            return cnt;
+        }

@@ -1,0 +1,22 @@
+<div id="ModDocumentMailNew" class="modal it-modal fade">
+	    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+		    <div class="modal-content">
+			    <div class="modal-header">
+				    <h5 class="modal-title">Documents with Cover Letter Or Preview</h5>
+                    <button aria-label="Close" class="close" data-dismiss="modal" type="button" onclick="javascript:closepopup();"><span aria-hidden="true">&times;</span></button>
+			    </div>
+			    <div class="modal-body">
+                    <iframe class="border-0 w-100" style="height:500px;" loading="lazy"></iframe>
+			    </div>
+              
+		    </div>
+	    </div>
+    </div>
+
+  $(".showModalDocumentMailNew").click(function (e) {
+                jQuery.noConflict();
+                e.preventDefault();
+                var url = $(this).attr("href");
+                $("#ModDocumentMailNew iframe").attr("src", url);
+                $("#ModDocumentMailNew").modal("show");
+            });

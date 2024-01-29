@@ -1,0 +1,59 @@
+[HttpPost] // for dbsync form_task_update Sync
+        public IHttpActionResult form_task_updateSync()
+        {
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                dbsync.InsertorUpdate_form_task_update(new Guid(httpRequest.Params["Form_task_update_uid"].ToString()),
+                    new Guid(httpRequest.Params["Taskuid"].ToString()),
+                    httpRequest.Params["TaskName"].ToString(),
+                    new Guid(httpRequest.Params["projectuid"].ToString()),
+                    new Guid(httpRequest.Params["workpackageuid"].ToString()));
+
+
+
+                return Json(new
+                {
+                    Success = true
+
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    Success = false,
+                    Message = "Error" + ex.Message
+                });
+            }
+        }
+
+-----------------------------------------------------------------------------
+
+
+ public IHttpActionResult CorrespondenceCCToUsersSync()
+        {
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                dbsync.InsertorUpdate_CorrespondenceCCToUsers(new Guid(httpRequest.Params["UID"].ToString()),
+                    new Guid(httpRequest.Params["ActualDocumentUID"].ToString()),
+                    new Guid(httpRequest.Params["StatusUID"].ToString()),
+                    httpRequest.Params["UserType"].ToString(),
+                    httpRequest.Params["CreatedDate"].ToString());
+
+                return Json(new
+                {
+                    Success = true
+
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    Success = false,
+                    Message = "Error" + ex.Message
+                });
+            }
+        }

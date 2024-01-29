@@ -1,0 +1,68 @@
+OriginatorReferenceNo	varchar(75)	Checked
+ONTBRefNo	varchar(75)	Checked
+
+added to DocVersion table
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create PROCEDURE [dbo].[usp_UpdateDocsVersionRefNo] 
+	-- Add the parameters for the stored procedure here
+@DocumentVersionUID as uniqueidentifier,
+@ONTBRefNo as varchar(50),
+@OriginRefNo as varchar(75)
+
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	
+	Update DocumentVesrion set OriginatorReferenceNo=@OriginRefNo,ONTBRefNo=@ONTBRefNo Where DocVersion_UID=@DocumentVersionUID
+
+END
+
+
+//
+create PROCEDURE [dbo].[usp_InsertorUpdateRefNoHistory_old] 
+	-- Add the parameters for the stored procedure here
+@UID as uniqueidentifier,
+@ActualDocumentUID as uniqueidentifier
+
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	declare @OriginatorReferenceNo as varchar(75);
+	declare @ONTBRefNo as varchar(75);
+	set @OriginatorReferenceNo =(select Ref_Number From ActualDocuments where ActualDocumentUID=@ActualDocumentUID);
+	set @ONTBRefNo =(select ProjectRef_Number From ActualDocuments where ActualDocumentUID=@ActualDocumentUID)
+	if Not exists(Select * From ReferencNoHistory Where UID=@UID)
+	Begin
+    -- Insert statements for procedure here
+	INSERT INTO [dbo].[ReferencNoHistory]
+           ([UID]
+           ,[ActualDocumentUID]
+           ,[OriginatorReferenceNo]
+           ,[ONTBRefNo]
+           ,[CreatedDate])
+     VALUES
+           (@UID
+           ,@ActualDocumentUID
+           ,@OriginatorReferenceNo
+           ,@ONTBRefNo
+           ,GETDATE())
+		 END
+ELSE
+ Begin
+     Update [dbo].[ReferencNoHistory] set OriginatorReferenceNo=@OriginatorReferenceNo ,ONTBRefNo=@ONTBRefNo
+	Where UID=@UID
+ END
+END
+
+//
+Alter table [dbo].[Cameras] add [Camera_IPAddress_rtsp] varchar(250) null
