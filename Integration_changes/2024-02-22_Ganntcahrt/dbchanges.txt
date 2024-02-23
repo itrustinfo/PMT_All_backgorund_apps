@@ -1,0 +1,41 @@
+USE [VVSTP_Server_New]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GetTasksForWorkPackage]    Script Date: 2/22/2024 12:42:49 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_GetTasksForWorkPackage] 
+	-- Add the parameters for the stored procedure here
+@WorkPackagesUID as uniqueidentifier
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT     Tasks.TaskUID, Tasks.WorkPackageUID, Tasks.ProjectUID, Tasks.Owner, Tasks.Name, Tasks.Description, Tasks.RFPReference, Tasks.POReference, Tasks.StartDate, Tasks.PlannedEndDate, Tasks.StatusPer,
+                      Tasks.ProjectedEndDate, Tasks.Total_Budget, Tasks.ActualExpenditure, Tasks.RFPDocument, Tasks.NoOfDocuments, StatusMaster.Value as Status, Tasks.ParentTaskID,Tasks.PlannedStartDate,Tasks.Task_CulumativePercentage
+FROM         Tasks INNER JOIN
+                      StatusMaster ON Tasks.Status = StatusMaster.Status
+Where Tasks.WorkPackageUID = @WorkPackagesUID and Tasks.TaskLevel = 1 and Tasks.Delete_Flag='N' order by Tasks.Task_Order,Tasks.StartDate,Tasks.Name ASC
+END
+
+
+//
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc [dbo].[Check_Task_is_Delayed_NotStarted]
+@TaskUID uniqueidentifier
+as
+begin
+select count(TaskUID) from Tasks where TaskUID=@TaskUID  and Cast(StartDate as date) < Cast(Getdate() as date)
+end
