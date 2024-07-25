@@ -1,0 +1,1349 @@
+/****** Object:  StoredProcedure [dbo].[USP_GetAllRequiredDataForDocumentFlowAutomationPMC]    Script Date: 11/28/2023 4:59:10 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER procedure [dbo].[USP_GetAllRequiredDataForDocumentFlowAutomationPMC]
+as
+begin
+select * From ActualDocuments where Doc_Type != 'Cover Letter' and DocumentUID in 
+(select distinct DocumentUID From Documents Where FlowUID in (select FlowMasterUID From [dbo].[DocumentFlowDisplayMaster] Where Type='STP'))
+
+
+;WITH cte AS
+(
+   SELECT *,
+         ROW_NUMBER() OVER (PARTITION BY DocumentUID ORDER BY CreatedDate DESC) AS rn
+    from DocumentStatus where Delete_Flag = 'N' and DocumentUID in (
+select ActualDocumentUID From ActualDocuments where Doc_Type != 'Cover Letter' and DocumentUID in 
+(select distinct DocumentUID From Documents Where FlowUID in (select FlowMasterUID From [dbo].[DocumentFlowDisplayMaster] Where Type='STP'))
+)
+)
+SELECT StatusUID, DocumentUID, Current_Status
+FROM cte
+WHERE rn = 1
+
+
+select distinct UserType, UID, FlowUID, Current_Status, Update_Status, ForFlow_Step, d.Flow_Name from UserTypeStatus u, DocumentFlowDisplayMaster d 
+where u.FlowUID = d.FlowMasterUID and d.Type = 'STP' and (u.Current_Status = 'Accepted' OR u.Current_Status='Accepted 9 Copies') and
+(d.Flow_Name like '%Works A%' or d.Flow_Name like '%Works B%' or d.Flow_Name like '%Vendor Approval%')
+
+end
+
+//--------------
+/****** Object:  StoredProcedure [dbo].[USP_GetAllRequiredDataForDocumentFlowAutomation]    Script Date: 11/28/2023 5:00:41 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER procedure [dbo].[USP_GetAllRequiredDataForDocumentFlowAutomation]
+as
+begin
+select * From ActualDocuments where Doc_Type != 'Cover Letter' and DocumentUID in 
+(select distinct DocumentUID From Documents Where FlowUID in 
+(select FlowMasterUID From [dbo].[DocumentFlowDisplayMaster] Where Type='STP'))
+
+
+;WITH cte AS
+(
+   SELECT *,
+         ROW_NUMBER() OVER (PARTITION BY DocumentUID ORDER BY CreatedDate DESC) AS rn
+    from DocumentStatus where Delete_Flag = 'N' and DocumentUID in (
+select ActualDocumentUID From ActualDocuments where Doc_Type != 'Cover Letter' and DocumentUID in 
+(select distinct DocumentUID From Documents Where FlowUID in (select FlowMasterUID From [dbo].[DocumentFlowDisplayMaster] Where Type='STP'))
+)
+)
+SELECT StatusUID, DocumentUID, Current_Status
+FROM cte
+WHERE rn = 1
+
+select distinct  FlowUID, Current_Status, Update_Status, ForFlow_Step From UserTypeStatus where 
+FlowUID in (select FlowUID From [dbo].[DocumentFlowDisplayMaster] Where Type='STP') and
+(
+Current_Status like '%Network Design DTL Reviewed%' or
+Current_Status like '%ONTB DTL Verified%' or
+Current_Status = 'Code A' or
+Current_Status = 'Code B' or
+Current_Status like '%AE Approval' or 
+Current_Status like '%AEE Approval' or
+Current_Status like '%EE Approval' or
+Current_Status like '%ACE Approval'
+)
+end
+
+//-------------
+/****** Object:  StoredProcedure [dbo].[USP_GetAllRequiredDataForDocumentFlowAutomationAllSTP]    Script Date: 11/28/2023 5:00:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER procedure [dbo].[USP_GetAllRequiredDataForDocumentFlowAutomationAllSTP]
+as
+begin
+select * From ActualDocuments where Doc_Type != 'Cover Letter' and DocumentUID in 
+(select distinct DocumentUID From Documents Where FlowUID in 
+(select FlowMasterUID From [dbo].[DocumentFlowDisplayMaster] Where Type='STP'))
+
+
+;WITH cte AS
+(
+   SELECT *,
+         ROW_NUMBER() OVER (PARTITION BY DocumentUID ORDER BY CreatedDate DESC) AS rn
+    from DocumentStatus where Delete_Flag = 'N' and DocumentUID in (
+select ActualDocumentUID From ActualDocuments where Doc_Type != 'Cover Letter' and DocumentUID in 
+(select distinct DocumentUID From Documents Where FlowUID in (select FlowMasterUID From [dbo].[DocumentFlowDisplayMaster] Where Type='STP'))
+)
+)
+SELECT StatusUID, DocumentUID, Current_Status
+FROM cte
+WHERE rn = 1
+
+
+select distinct UserType, UID, FlowUID, Current_Status, Update_Status, ForFlow_Step, d.Flow_Name from UserTypeStatus u, DocumentFlowDisplayMaster d 
+where u.FlowUID = d.FlowMasterUID and d.Type = 'STP'
+end
+--
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER procedure [dbo].[USP_GetDocumentStatus]
+(
+@DocumentUID uniqueidentifier
+)
+as begin
+select * from DocumentStatus where DocumentUID = @DocumentUID order by CreatedDate desc
+end
+--
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER procedure [dbo].[USP_GetFlowMasterUser]
+(
+@FlowUID uniqueidentifier,
+@Step int
+)
+as
+Begin
+select f.FlowUID, f.ProjectUID, f.WorkpackageUID, f.step, u.UserUID, u.FirstName, u.LastName, u.EmailID, p.ProjectName, w.Name as WorkpackageName
+from Flow_Master_Users f, UserDetails u, ProjectDetails p, WorkPackages w where
+f.UserUID = u.UserUID and f.ProjectUID = p.ProjectUID and f.WorkpackageUID = w.WorkPackageUID and
+f.FlowUID = @FlowUID and f.step = @Step
+end
+
+--
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER procedure [dbo].[USP_GetSubmittedMiltipleUser]
+(
+@DocumentUID uniqueidentifier,
+@ActualDocumentUID uniqueidentifier,
+@Step int,
+@Current_Status varchar(50)
+)
+as
+begin
+select distinct s.Step, s.UserUID, u.FirstName, u.LastName from Submittal_MultipleUsers s, UserDetails u 
+where s.UserUID = u.UserUID and s.SubmittalUID = @DocumentUID and Step = @Step
+and s.UserUID not in (select AcivityUserUID from DocumentStatus where DocumentUID = @ActualDocumentUID and Current_Status = @Current_Status
+)
+end
+--
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER procedure [dbo].[USP_GetWorkFlowPackageCategory]
+(
+@FlowUID uniqueidentifier
+)
+as
+begin
+select distinct c.WorkPackageCategory_Name from Flow_Master_Users f, Workpackage_Categories c 
+where f.WorkpackagecategoryUID = c.WorkPackageCategory_UID and f.FlowUID = @FlowUID
+end
+---
+/****** Object:  UserDefinedTableType [dbo].[TT_DocumentStatusType]    Script Date: 07/02/2022 15:43:44 ******/
+CREATE TYPE [dbo].[TT_DocumentStatusType] AS TABLE(
+	[StatusUID] [uniqueidentifier] NULL,
+	[DocumentUID] [uniqueidentifier] NULL,
+	[ActivityType] [varchar](50) NULL,
+	[ActivityDate] [date] NULL,
+	[DocumentDate] [date] NULL,
+	[Status_Comments] [varchar](750) NULL
+)
+GO
+
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER procedure [dbo].[USP_InsertDocumentStatusTable]
+(
+@DocumentStatus TT_DocumentStatusType readonly 
+)
+as
+begin
+insert into DocumentStatus(StatusUID, DocumentUID, ActivityType, Current_Status, ActivityDate, DocumentDate, Status_Comments, Delete_Flag, Origin, Forwarded, Version, AcivityUserUID)
+select StatusUID, DocumentUID, ActivityType, ActivityType, ActivityDate, DocumentDate,Status_Comments, 'N', 'BWSSB', 'Y', '1','419D71BD-FDD4-4A92-898C-A044BFA7803D' from @DocumentStatus
+end
+
+----
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER procedure [dbo].[USP_UpdateActualDocumentStatus]
+@ActualDocumentUID uniqueidentifier,
+@UpdateStatus varchar(100)
+as
+begin
+update ActualDocuments set ActualDocument_CurrentStatus = @UpdateStatus where ActualDocumentUID = @ActualDocumentUID
+end
+
+
+--
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[ups_Insert_Mails]
+@MailUID uniqueidentifier,
+@UserUID uniqueidentifier,
+@ToEmailID varchar(100),
+@FromEmailID varchar(100),
+@Subject varchar(100),
+@Body varchar(Max),
+@CCTo varchar(Max),
+@Attachment varchar(max),
+@MailSentDate datetime,
+@MailSent varchar(1)
+as
+begin
+insert into MailQueue(MailUID,UserUID,ToEmailID,FromEmailID,Subject,Body,CCTo,Attachment,MailSentDate,MailSent)
+values(@MailUID,@UserUID,@ToEmailID,@FromEmailID,@Subject,@Body,@CCTo,@Attachment,@MailSentDate,@MailSent)
+end
+
+--
+/****** Object:  StoredProcedure [dbo].[usp_StoreFreshTargetDatesforStatusChange]    Script Date: 11/28/2023 5:07:09 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_StoreFreshTargetDatesforStatusChange] 
+	-- Add the parameters for the stored procedure here
+@ActualDocumentUID as uniqueidentifier,
+@CurrentStatus as varchar(75)
+
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	declare @FlowUID as uniqueidentifier;
+	declare @DocUID as uniqueidentifier;
+	declare @Steps as smallint;
+	set @DocUID =(select DocumentUID  From ActualDocuments Where ActualDocumentUID=@ActualDocumentUID);
+	set @FlowUID = (Select FlowUID From Documents Where DocumentUID=@DocUID)
+
+set @Steps =(select Top 1 ForFlow_Step from UserTypeStatus Where Current_Status=@CurrentStatus and FlowUID=@FlowUID Order by ForFlow_Step)
+			declare @Step2Days int=0;
+			declare @Step3Days int=0;
+			declare @Step4Days int=0;
+			declare @Step5Days int=0;
+			declare @Step6Days int=0;
+			declare @Step7Days int=0;
+			declare @Step8Days int=0;
+			declare @Step9Days int=0;
+			declare @Step10Days int=0;
+			declare @Step11Days int=0;
+			declare @Step12Days int=0;
+			declare @Step13Days int=0;
+			declare @Step14Days int=0;
+			declare @Step15Days int=0;
+			declare @Step16Days int=0;
+			declare @Step17Days int=0;
+			declare @Step18Days int=0;
+			declare @Step19Days int=0;
+			declare @Step20Days int=0;
+
+			declare @Step2Date datetime
+			declare @Step3Date datetime;
+			declare @Step4Date datetime;
+			declare @Step5Date datetime;
+			declare @Step6Date datetime;
+			declare @Step7Date datetime;
+			declare @Step8Date datetime;
+			declare @Step9Date datetime;
+			declare @Step10Date datetime;
+			declare @Step11Date datetime;
+			declare @Step12Date datetime;
+			declare @Step13Date datetime;
+			declare @Step14Date datetime;
+			declare @Step15Date datetime;
+			declare @Step16Date datetime;
+			declare @Step17Date datetime;
+			declare @Step18Date datetime;
+			declare @Step19Date datetime;
+			declare @Step20Date datetime;
+    -- Insert statements for procedure here
+	
+      set @Step2Days=(select (FlowStep2_Duration - FlowStep1_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	 
+
+      set @Step3Days=(select (FlowStep3_Duration - FlowStep2_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+
+	
+      set @Step4Days=(select (FlowStep4_Duration - FlowStep3_Duration)  from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	
+      set @Step5Days=(select (FlowStep5_Duration - FlowStep4_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	
+      set @Step6Days=(select (FlowStep6_Duration - FlowStep5_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	
+	
+	
+			  set @Step7Days=(select (FlowStep7_Duration -FlowStep6_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		
+
+		
+			  set @Step8Days=(select (FlowStep8_Duration - FlowStep7_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		
+
+		  
+			  set @Step9Days=(select (FlowStep9_Duration - FlowStep8_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			
+
+			-- update actual documents table
+			if @Steps = 2
+			Begin
+			update ActualDocuments set FlowStep2_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step2Days)),
+			FlowStep3_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step3Days)),FlowStep4_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step4Days)),FlowStep5_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step5Days)),
+			FlowStep6_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step6Days)),
+			FlowStep7_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step7Days)),
+			FlowStep8_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step8Days)),
+			FlowStep9_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step9Days)),
+			FlowStep10_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step10Days)),
+			FlowStep11_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step11Days)),
+			FlowStep12_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step12Days)),
+			FlowStep13_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step13Days)),
+			FlowStep14_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step14Days)),
+			FlowStep15_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step15Days)),
+			FlowStep16_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step16Days)),
+			FlowStep17_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step17Days)),
+			FlowStep18_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step18Days)),
+			FlowStep19_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step19Days)),
+			FlowStep20_TargetDate=(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step20Days))
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 3
+			Begin
+			  set @Step3Days=(select (FlowStep3_Duration - FlowStep2_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			  set @Step3Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step3Days));
+	
+      set @Step4Days=(select (FlowStep4_Duration - FlowStep3_Duration)  from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	 set @Step4Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step3Date,@Step4Days));
+
+      set @Step5Days=(select (FlowStep5_Duration - FlowStep4_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	  set @Step5Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step4Date,@Step5Days));
+
+      set @Step6Days=(select (FlowStep6_Duration - FlowStep5_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	   set @Step6Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step5Date,@Step6Days));
+	
+	
+			  set @Step7Days=(select (FlowStep7_Duration -FlowStep6_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		       set @Step7Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step6Date,@Step7Days));
+
+		
+			  set @Step8Days=(select (FlowStep8_Duration - FlowStep7_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step8Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step7Date,@Step8Days));
+
+		  
+			  set @Step9Days=(select (FlowStep9_Duration - FlowStep8_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	           set @Step9Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step8Date,@Step9Days));
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step10Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step9Date,@Step10Days));
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step10Date,@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set FlowStep3_TargetDate= @Step3Date,FlowStep4_TargetDate= @Step4Date,
+			FlowStep5_TargetDate=@Step5Date,
+			FlowStep6_TargetDate=@Step6Date,
+			FlowStep7_TargetDate=@Step7Date,
+			FlowStep8_TargetDate=@Step8Date,
+			FlowStep9_TargetDate=@Step9Date,
+			FlowStep10_TargetDate=@Step10Date,
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 4
+			Begin
+		
+      set @Step4Days=(select (FlowStep4_Duration - FlowStep3_Duration)  from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	 set @Step4Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step4Days));
+
+      set @Step5Days=(select (FlowStep5_Duration - FlowStep4_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	  set @Step5Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step4Date,@Step5Days));
+
+      set @Step6Days=(select (FlowStep6_Duration - FlowStep5_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	   set @Step6Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step5Date,@Step6Days));
+	
+	
+			  set @Step7Days=(select (FlowStep7_Duration -FlowStep6_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		       set @Step7Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step6Date,@Step7Days));
+
+		
+			  set @Step8Days=(select (FlowStep8_Duration - FlowStep7_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step8Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step7Date,@Step8Days));
+
+		  
+			  set @Step9Days=(select (FlowStep9_Duration - FlowStep8_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	           set @Step9Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step8Date,@Step9Days));
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step10Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step9Date,@Step10Days));
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step10Date,@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set FlowStep4_TargetDate= @Step4Date,
+			FlowStep5_TargetDate=@Step5Date,
+			FlowStep6_TargetDate=@Step6Date,
+			FlowStep7_TargetDate=@Step7Date,
+			FlowStep8_TargetDate=@Step8Date,
+			FlowStep9_TargetDate=@Step9Date,
+			FlowStep10_TargetDate=@Step10Date,
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 5
+			Begin
+			
+
+      set @Step5Days=(select (FlowStep5_Duration - FlowStep4_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	  set @Step5Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step5Days));
+
+      set @Step6Days=(select (FlowStep6_Duration - FlowStep5_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	   set @Step6Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step5Date,@Step6Days));
+	
+	
+			  set @Step7Days=(select (FlowStep7_Duration -FlowStep6_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		       set @Step7Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step6Date,@Step7Days));
+
+		
+			  set @Step8Days=(select (FlowStep8_Duration - FlowStep7_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step8Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step7Date,@Step8Days));
+
+		  
+			  set @Step9Days=(select (FlowStep9_Duration - FlowStep8_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	           set @Step9Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step8Date,@Step9Days));
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step10Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step9Date,@Step10Days));
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step10Date,@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep5_TargetDate=@Step5Date,
+			FlowStep6_TargetDate=@Step6Date,
+			FlowStep7_TargetDate=@Step7Date,
+			FlowStep8_TargetDate=@Step8Date,
+			FlowStep9_TargetDate=@Step9Date,
+			FlowStep10_TargetDate=@Step10Date,
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 6
+			Begin
+			 
+
+      set @Step6Days=(select (FlowStep6_Duration - FlowStep5_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	   set @Step6Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step6Days));
+	
+	
+			  set @Step7Days=(select (FlowStep7_Duration -FlowStep6_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		       set @Step7Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step6Date,@Step7Days));
+
+		
+			  set @Step8Days=(select (FlowStep8_Duration - FlowStep7_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step8Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step7Date,@Step8Days));
+
+		  
+			  set @Step9Days=(select (FlowStep9_Duration - FlowStep8_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	           set @Step9Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step8Date,@Step9Days));
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step10Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step9Date,@Step10Days));
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step10Date,@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+		
+			FlowStep6_TargetDate=@Step6Date,
+			FlowStep7_TargetDate=@Step7Date,
+			FlowStep8_TargetDate=@Step8Date,
+			FlowStep9_TargetDate=@Step9Date,
+			FlowStep10_TargetDate=@Step10Date,
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 7
+			Begin
+			  set @Step7Days=(select (FlowStep7_Duration -FlowStep6_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		       set @Step7Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step7Days));
+
+		
+			  set @Step8Days=(select (FlowStep8_Duration - FlowStep7_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step8Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step7Date,@Step8Days));
+
+		  
+			  set @Step9Days=(select (FlowStep9_Duration - FlowStep8_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	           set @Step9Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step8Date,@Step9Days));
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step10Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step9Date,@Step10Days));
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step10Date,@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep7_TargetDate=@Step7Date,
+			FlowStep8_TargetDate=@Step8Date,
+			FlowStep9_TargetDate=@Step9Date,
+			FlowStep10_TargetDate=@Step10Date,
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 8
+			Begin
+			
+		
+			  set @Step8Days=(select (FlowStep8_Duration - FlowStep7_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step8Date =  (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step8Days));
+
+		  
+			  set @Step9Days=(select (FlowStep9_Duration - FlowStep8_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	           set @Step9Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step8Date,@Step9Days));
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step10Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step9Date,@Step10Days));
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step10Date,@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			
+			FlowStep8_TargetDate=@Step8Date,
+			FlowStep9_TargetDate=@Step9Date,
+			FlowStep10_TargetDate=@Step10Date,
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 9
+			Begin
+			
+			
+		  
+			  set @Step9Days=(select (FlowStep9_Duration - FlowStep8_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+	           set @Step9Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step9Days));
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step10Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step9Date,@Step10Days));
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step10Date,@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep9_TargetDate=@Step9Date,
+			FlowStep10_TargetDate=@Step10Date,
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 10
+			Begin
+			
+			  set @Step10Days=(select (FlowStep10_Duration - FlowStep9_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step10Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step10Days));
+
+		
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step10Date,@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep10_TargetDate=@Step10Date,
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 11
+			Begin
+			 
+			  set @Step11Days=(select (FlowStep11_Duration - FlowStep10_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step11Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step11Days));
+
+			
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step11Date,@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep11_TargetDate=@Step11Date,
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 12
+			Begin
+		
+			  set @Step12Days=(select (FlowStep12_Duration - FlowStep11_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step12Date =  (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step12Days));
+
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step12Date,@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep12_TargetDate=@Step12Date,
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 13
+			Begin
+			
+		
+			  set @Step13Days=(select (FlowStep13_Duration - FlowStep12_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+		      set @Step13Date =(select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step13Days));
+
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step13Date,@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep13_TargetDate=@Step13Date,
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 14
+			Begin
+			
+			  set @Step14Days=(select (FlowStep14_Duration - FlowStep13_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			   set @Step14Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step14Days));
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step14Date,@Step14Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep14_TargetDate=@Step14Date,
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 15
+			Begin
+			
+			  set @Step15Days=(select (FlowStep15_Duration -FlowStep14_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step15Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step15Days));
+
+				
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step15Date,@Step16Days));
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep15_TargetDate=@Step15Date,
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 16
+			Begin
+			
+			  set @Step16Days=(select (FlowStep16_Duration -FlowStep15_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step16Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step16Days));;
+
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step16Date,@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep16_TargetDate=@Step16Date,
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 17
+			Begin
+			
+			
+			  set @Step17Days=(select (FlowStep17_Duration - FlowStep16_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step17Date =  (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step17Days));
+
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step17Date,@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep17_TargetDate=@Step17Date,
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 18
+			Begin
+			
+			  set @Step18Days=(select (FlowStep18_Duration - FlowStep17_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step18Date = (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step18Days));
+			
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step18Date,@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			FlowStep18_TargetDate=@Step18Date,
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			else if @Steps = 19
+			Begin
+		
+			  set @Step19Days=(select (FlowStep19_Duration - FlowStep18_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step19Date =  (select [dbo].[Fun_CalculateHolidayOffset] (GETDATE(),@Step19Days));
+
+				
+			  set @Step20Days=(select (FlowStep20_Duration -FlowStep19_Duration) from DocumentFlowDisplayMaster where FlowMasterUID=@FlowUID);
+			 set @Step20Date = (select [dbo].[Fun_CalculateHolidayOffset] (@Step19Date,@Step20Days));
+
+
+
+			update ActualDocuments 
+			set 
+			
+			FlowStep19_TargetDate=@Step19Date,
+			FlowStep20_TargetDate=@Step20Date
+			where ActualDocumentUID=@ActualDocumentUID;
+			ENd
+			
+END

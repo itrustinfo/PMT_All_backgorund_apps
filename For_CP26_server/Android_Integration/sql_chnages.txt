@@ -1,0 +1,11 @@
+CREATE proc [dbo].[GetAssignedProject_by_UserUID2]  
+@UserUID uniqueidentifier  
+as  
+begin  
+set nocount on;  
+select A.ProjectUID as ProjectUID,A.ProjectName as ProjectName,C.Name as workpackage from 
+ProjectDetails A, UserProjects B ,WorkPackages C
+where A.ProjectUID=B.ProjectUID and B.UserUID=@UserUID and A.ProjectUID=c.ProjectUID
+and A.Delete_Flag='N' and B.Delete_Flag='N' order by A.CreatedDate ASC  
+end
+

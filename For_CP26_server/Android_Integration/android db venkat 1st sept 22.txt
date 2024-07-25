@@ -1,0 +1,57 @@
+CREATE TABLE [dbo].[AndrioidApiSettings](
+	[Srno] [smallint] IDENTITY(1,1) NOT NULL,
+	[Username] [varchar](100) NULL,
+	[Ipaddress] [nvarchar](50) NULL,
+	[IsGrant] [varchar](1) NULL,
+	[ServerCopiedAdd] [varchar](1) NULL,
+	[CopiedAddDate] [datetime] NULL,
+	[ServerCopiedUpdate] [varchar](1) NULL,
+	[CopiedUpdateDate] [datetime] NULL,
+	[Password] [varchar](150) NULL,
+ CONSTRAINT [PK_AndrioidApiSettings] PRIMARY KEY CLUSTERED 
+(
+	[Srno] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[AndrioidApiSettings] ADD  CONSTRAINT [DF_AndrioidApiSettings_ServerCopiedAdd]  DEFAULT ('N') FOR [ServerCopiedAdd]
+GO
+
+
+----------------------------------------------------------------------------------------------------
+insert into [dbo].[AndrioidApiSettings]
+
+select Username,'','Y','N',null,null,null,password from UserDetails
+
+-------------------------------------------------------------------------------------------------
+CREATE PROCEDURE [usp_checkAndriodAPIUser]   
+ -- Add the parameters for the stored procedure here  
+@Username as varchar(100),  
+@Password as varchar(150)   
+AS  
+BEGIN  
+ -- SET NOCOUNT ON added to prevent extra result sets from  
+ -- interfering with SELECT statements.  
+ SET NOCOUNT ON;  
+  
+    -- Insert statements for procedure here  
+ select Count(*)  
+ From [AndrioidApiSettings] Where Username=@Username and Password=@Password  
+END  
+
+------------------------------------------------------------------------------------------
+
+CREATE PROCEDURE [dbo].[usp_GetWebAndriodSettings]       
+ -- Add the parameters for the stored procedure here      
+@Username as varchar(100),      
+@Ipaddress as nvarchar(50)       
+AS      
+BEGIN      
+ -- SET NOCOUNT ON added to prevent extra result sets from      
+ -- interfering with SELECT statements.      
+ SET NOCOUNT ON;      
+      
+    -- Insert statements for procedure here      
+ select Count(*) From [AndrioidApiSettings] Where Username=@Username  and IsGrant='Y'      
+END 

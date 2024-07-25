@@ -1,0 +1,21 @@
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.exe.config
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.exe
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.pdb
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.exe
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.pdb
+D:\Projects\NJS_Prj_New\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.csprojAssemblyReference.cache
+D:\Migration\Others\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.exe.config
+D:\Migration\Others\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.exe
+D:\Migration\Others\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.pdb
+D:\Migration\Others\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.csprojAssemblyReference.cache
+D:\Migration\Others\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.csproj.CoreCompileInputs.cache
+D:\Migration\Others\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.exe
+D:\Migration\Others\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.pdb
+D:\NJS Projects\For_CP26_server\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.exe.config
+D:\NJS Projects\For_CP26_server\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.exe
+D:\NJS Projects\For_CP26_server\WordReadPrg\WordReadPrg\bin\Release\WordReadPrg.pdb
+D:\NJS Projects\For_CP26_server\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.csprojAssemblyReference.cache
+D:\NJS Projects\For_CP26_server\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.csproj.CoreCompileInputs.cache
+D:\NJS Projects\For_CP26_server\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.exe
+D:\NJS Projects\For_CP26_server\WordReadPrg\WordReadPrg\obj\Release\WordReadPrg.pdb

@@ -75,6 +75,7 @@ namespace Autosendmail
                             Console.WriteLine("Sending mail " + count.ToString() + " of " + MyDataset.Tables[0].Rows.Count.ToString());
                             bool MailReSend = false;
                             System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+
                             if (!string.IsNullOrWhiteSpace(MyRow["ToEmailID"].ToString()))
                             {
                                 message.From = new System.Net.Mail.MailAddress(MyRow["FromEmailID"].ToString());
@@ -119,7 +120,9 @@ namespace Autosendmail
                                 }
 
                                 //for attachments
-                                if (MyRow["Attachment"] != DBNull.Value)
+                                try
+                                {
+                                    if (MyRow["Attachment"] != DBNull.Value)
                                 {
                                     string[] CCId = MyRow["Attachment"].ToString().Split(',');
                                     if (CCId.Length > 0)
@@ -182,14 +185,13 @@ namespace Autosendmail
                                 client.UseDefaultCredentials = false;
                                 myCredential = new System.Net.NetworkCredential(username, password);
                                 client.Port = 587;
-                                client.Host = "smtp.gmail.com";
-                                //client.Host = "smtp.office365.com";
+                                //client.Host = "smtp.gmail.com";
+                                client.Host = "smtp.office365.com";
                                 client.Credentials = myCredential;
                                 client.DeliveryMethod = SmtpDeliveryMethod.Network;
                                 client.EnableSsl = true;
 
-                                try
-                                {
+                                
                                     client.Send(message);
 
                                     MyCommand.CommandText = "DELETE FROM MailQueue Where MailUID= '" + MyRow["MailUID"].ToString() + "'";
@@ -242,7 +244,7 @@ namespace Autosendmail
                                 {
                                     if (MyRow["MailSent"].ToString() == "N")
                                     {
-                                        MyCommand.CommandText = "UPDATE MailQueue SET MailSent = '1' WHERE UID = '" + MyRow["MailUID"].ToString() + "'";
+                                        MyCommand.CommandText = "UPDATE MailQueue SET MailSent = '1' WHERE MailUID = '" + MyRow["MailUID"].ToString() + "'";
                                         if (MyConnection.State == System.Data.ConnectionState.Closed)
                                         {
                                             MyConnection.Open();
@@ -253,7 +255,7 @@ namespace Autosendmail
                                     }
                                     else if (MyRow["MailSent"].ToString() == "1")
                                     {
-                                        MyCommand.CommandText = "UPDATE MailQueue SET MailSent = 'F' WHERE UID = '" + MyRow["MailUID"].ToString() + "'";
+                                        MyCommand.CommandText = "UPDATE MailQueue SET MailSent = 'F' WHERE MailUID = '" + MyRow["MailUID"].ToString() + "'";
                                         if (MyConnection.State == System.Data.ConnectionState.Closed)
                                         {
                                             MyConnection.Open();
@@ -279,7 +281,7 @@ namespace Autosendmail
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                Console.ReadLine();
+                //Console.ReadLine();
             }
             finally
             {

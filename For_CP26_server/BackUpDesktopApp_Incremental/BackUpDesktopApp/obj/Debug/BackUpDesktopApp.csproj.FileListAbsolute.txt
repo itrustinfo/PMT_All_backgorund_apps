@@ -1,0 +1,90 @@
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe.config
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.pdb
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfo.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfoExtended.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Management.Sdk.Sfc.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Smo.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SmoExtended.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlClrProvider.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlEnum.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Form1.resources
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Properties.Resources.resources
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.GenerateResource.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CopyComplete
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.exe
+D:\Projects\NJS_Prj_New\BackUpDesktopApp\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.pdb
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe.config
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.pdb
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfo.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfoExtended.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Management.Sdk.Sfc.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Smo.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SmoExtended.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlClrProvider.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlEnum.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Form1.resources
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Properties.Resources.resources
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.GenerateResource.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CopyComplete
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.exe
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_New\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.pdb
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csprojAssemblyReference.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Form1.resources
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Properties.Resources.resources
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.GenerateResource.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CoreCompileInputs.cache
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe.config
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.pdb
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfo.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfoExtended.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Management.Sdk.Sfc.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Smo.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SmoExtended.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlClrProvider.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlEnum.dll
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CopyComplete
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.exe
+D:\Projects\NJS_Prj_New\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.pdb
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe.config
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.pdb
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfo.dll
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfoExtended.dll
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Management.Sdk.Sfc.dll
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Smo.dll
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SmoExtended.dll
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlClrProvider.dll
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlEnum.dll
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csprojAssemblyReference.cache
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Form1.resources
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Properties.Resources.resources
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.GenerateResource.cache
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CoreCompileInputs.cache
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CopyComplete
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.exe
+D:\Migration\Others\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.pdb
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe.config
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.exe
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\BackUpDesktopApp.pdb
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfo.dll
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.ConnectionInfoExtended.dll
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Management.Sdk.Sfc.dll
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.Smo.dll
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SmoExtended.dll
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlClrProvider.dll
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\bin\Debug\Microsoft.SqlServer.SqlEnum.dll
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csprojAssemblyReference.cache
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Form1.resources
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.Properties.Resources.resources
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.GenerateResource.cache
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CoreCompileInputs.cache
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.csproj.CopyComplete
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.exe
+D:\NJS Projects\For_CP26_server\BackUpDesktopApp_Incremental\BackUpDesktopApp\obj\Debug\BackUpDesktopApp.pdb

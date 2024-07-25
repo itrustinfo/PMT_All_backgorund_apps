@@ -1,0 +1,57 @@
+update WorkPackages set Delete_Flag='Y' where ProjectUID='7B0C39CE-F72C-4064-A879-609671F5BA27'
+and WorkPackageUID='50B3176B-D23F-4043-BE54-F40F5B7445E5'
+
+//------Need to check if this will harm something........
+I've logged in to local site all project/workpackages load 
+Or should we delete entire row?
+----------//
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+USE [ONTB_TestSite]
+GO
+/****** Object:  StoredProcedure [dbo].[GetAssignedProject_by_UserUID2]    Script Date: 12/21/2022 11:48:14 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[GetAssignedProject_by_UserUID2]  
+@UserUID uniqueidentifier  
+as  
+begin  
+set nocount on;  
+select A.ProjectUID as ProjectUID,A.ProjectName as ProjectName,C.Name as workpackage from 
+ProjectDetails A, UserProjects B ,WorkPackages C
+where A.ProjectUID=B.ProjectUID and B.UserUID=@UserUID and A.ProjectUID=C.ProjectUID
+and A.Delete_Flag='N' and B.Delete_Flag='N' and C.Delete_Flag='N' order by A.CreatedDate ASC  
+end
+
+-----------------------------------------------------------------------------------------------
+
+Create PROCEDURE [dbo].[usp_ReplaceDocsFlow2old_API]   
+ -- Add the parameters for the stored procedure here  
+@ActualDocument_Name as varchar(500),  
+@ActualDocument_Path as varchar(500),  
+@CoverLetter_Name as varchar(500),  
+@CoverLetter_Path as varchar(500),  
+@ActualDocumentUID as uniqueidentifier,  
+@DocumentDate as Datetime,  
+@OriginatorRefNo as varchar(75)   
+AS  
+BEGIN  
+ -- SET NOCOUNT ON added to prevent extra result sets from  
+ -- interfering with SELECT statements.  
+ SET NOCOUNT ON;  
+ declare @CoverLetterUID as uniqueidentifier  
+ set @CoverLetterUID =(select CoverLetterUID from ActualDocuments Where ActualDocumentUID=@ActualDocumentUID)  
+    -- Insert statements for procedure here  
+ Update ActualDocuments set ActualDocument_Name=@ActualDocument_Name,ActualDocument_Path=@ActualDocument_Path,Document_Date=@DocumentDate,Ref_Number=@OriginatorRefNo  
+ Where ActualDocumentUID=@ActualDocumentUID  
+  
+ Update ActualDocuments set ActualDocument_Name=@CoverLetter_Name,ActualDocument_Path=@CoverLetter_Path,Document_Date=@DocumentDate,Ref_Number=@OriginatorRefNo   Where ActualDocumentUID=@CoverLetterUID  
+  
+ --- update document status table  
+ Update DocumentStatus set CoverLetterFile=@CoverLetter_Path,Ref_Number=@OriginatorRefNo Where DocumentUID=@ActualDocumentUID and ActivityType='Submitted'  
+  
+ ---- update document Version table  
+ Update DocumentVesrion set Doc_FileName = @ActualDocument_Path Where DocumentUID=@ActualDocumentUID and Doc_Version=1  
+END  

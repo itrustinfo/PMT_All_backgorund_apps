@@ -55,7 +55,6 @@ D:\Projects\NJS_Prj_New\Mail_Prg\Autosendmail\Autosendmail\bin\Debug\Autosendmai
 D:\Migration\Others\Mail_Prg\Autosendmail\Autosendmail\bin\Debug\Autosendmail.exe.config
 D:\Migration\Others\Mail_Prg\Autosendmail\Autosendmail\bin\Debug\Autosendmail.exe
 D:\Migration\Others\Mail_Prg\Autosendmail\Autosendmail\bin\Debug\Autosendmail.pdb
-D:\Migration\Others\Mail_Prg\Autosendmail\Autosendmail\obj\x86\Debug\Autosendmail.csprojAssemblyReference.cache
 D:\Migration\Others\Mail_Prg\Autosendmail\Autosendmail\obj\x86\Debug\Autosendmail.csproj.CoreCompileInputs.cache
 D:\Migration\Others\Mail_Prg\Autosendmail\Autosendmail\obj\x86\Debug\Autosendmail.exe
 D:\Migration\Others\Mail_Prg\Autosendmail\Autosendmail\obj\x86\Debug\Autosendmail.pdb

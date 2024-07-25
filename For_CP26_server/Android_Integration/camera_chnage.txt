@@ -1,0 +1,12 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[usp_GetAndriodCameraDetails]
+@ProjectUID nvarchar(250)
+as
+begin
+select [Camera_UID],ProjectUID, WorkpackageUID,[Camera_Name],[Camera_IPAddress],[Camera_Description],[Camera_IPAddress_rtsp]
+
+from [dbo].[Cameras] where Projectuid=@ProjectUID and Camera_Delete='N' and (Camera_IPAddress_rtsp is not NULL or Camera_IPAddress_rtsp ='')
+end
